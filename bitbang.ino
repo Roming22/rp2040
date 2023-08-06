@@ -1,12 +1,11 @@
 #include <Adafruit_NeoPixel.h>
 #include "mymk/mymk.hpp"
 
-#define PIN       0
-#define NUMPIXELS 4
+#define PIXELS_PIN   0
+#define PIXELS_COUNT 4
 
 int loopIndex = 0;
 int isLeft = 0;
-Adafruit_NeoPixel pixels(NUMPIXELS, PIN);
 
 
 void setup() {
@@ -30,9 +29,7 @@ void setup() {
 
   BitBang::initialize(0, 4);
 
-  pixels.begin();
-  pixels.clear();
-  pixels.setBrightness(100);
+  Pixels::initialize(PIXELS_PIN, PIXELS_COUNT);
 
   Serial.println("# Looping");
 }
@@ -48,11 +45,12 @@ void loop() {
     Serial.print("Right");
   }
   Serial.println("] Hello World!!!");
-  
-  pixels.fill(pixels.Color(0, 0 ,0));
-  pixels.show();
+
+  auto pixels = Pixels::get();
+  pixels->fill(pixels->Color(0, 0 ,0));
+  pixels->show();
   delay(300);
-  pixels.fill(pixels.Color(255*isLeft, 255*(1-isLeft) ,0));
-  pixels.show();
+  pixels->fill(pixels->Color(255*isLeft, 255*(1-isLeft) ,0));
+  pixels->show();
   delay(700);
 }
