@@ -57,12 +57,15 @@ class BitBang {
         static const BitBang& instance = getInstance();
         Serial.print("Send value: ");
         Serial.println(0);
-        Serial.print("Send bits: ");
-        Serial.print(0, BIN);
-        Serial.println();
     
         // Send bits, LSB first.
+        noInterrupts();
         sendBit(false, instance);
+        interrupts();
+
+        Serial.print("Sent bits: ");
+        Serial.print(0, BIN);
+        Serial.println();
     }
 
     static unsigned int receive() {
