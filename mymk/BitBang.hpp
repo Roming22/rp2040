@@ -64,6 +64,9 @@ public:
   inline unsigned int receivePulse(unsigned int wait = 1E6) const {
     unsigned int duration = 0;
 
+    static int min = 1000;
+    static int max = 0;
+
     // Wait for REST state
     while (gpio_get(_pin) == _active_state) {
     }
@@ -80,91 +83,50 @@ public:
       ++duration;
       busy_wait_us_32(1);
     }
+    if (duration > 0) {
+      if (duration < min) {
+        min = duration;
+      }
+      if (duration > max) {
+        max = duration;
+      }
+      Serial.print("Received pulse length: ");
+      Serial.print(duration);
+      Serial.print(" (");
+      Serial.print(min);
+      Serial.print(",");
+      Serial.print(max);
+      Serial.println(")");
+    }
 
     return duration;
   }
 
-  int decodePulses(std::vector<unsigned int> &pulses) const {
-    static unsigned int threshold = _tick * 3 / 2;
-    unsigned int pulse;
-    unsigned int value = 0;
-
-    static unsigned int min = 1000;
-    static unsigned int max = 0;
-
-    Serial.print("Pulses: ");
-    for (int i = pulses.size() - 1; i >= 0; --i) {
-      pulse = pulses.back();
-      if (pulse > threshold) {
-        bitSet(value, i);
-      }
-      pulses.pop_back();
-      Serial.print(pulse);
-      Serial.print(", ");
-      if (pulse > 0) {
-        if (pulse < min) {
-          min = pulse;
-        }
-        if (pulse > max) {
-          max = pulse;
-        }
-      }
-    }
-    Serial.print(" (");
-    Serial.print(min);
-    Serial.print(",");
-    Serial.print(max);
-    Serial.println(")");
-
-    return value;
-  }
-
-  static void send(const unsigned int &value, const unsigned int &length) {
+  static void send() {
     static const BitBang &instance = getInstance();
     Serial.print("Send value: ");
-    Serial.println(value);
-
-    // Send GO
-    noInterrupts();
-    instance.sendBit(!instance._active_state);
+    Serial.println(0);
 
     // Send bits, LSB first.
-    for (int i = 0; i < length; ++i) {
-      instance.sendBit(bitRead(value, i));
-    }
+    noInterrupts();
+    instance.sendBit(!instance._active_state);
     interrupts();
 
     Serial.print("Sent bits: ");
-    Serial.print(value, BIN);
+    Serial.print(0, BIN);
     Serial.println();
   }
 
-  static unsigned int receive(const unsigned int &length) {
+  static unsigned int receive() {
     static const BitBang &instance = getInstance();
-    std::vector<unsigned int> pulses;
-    pulses.reserve(length);
-
+    // Set pin
     instance.inputPin();
 
-    // Wait for GO
-    while (instance.receivePulse() == 0) {
-    }
-
     // Read bits
-    for (int i = length; i > 0; --i) {
-      pulses.push_back(instance.receivePulse());
-    }
+    int value = instance.receivePulse();
+
+    // Reset pin
     instance.resetPin();
-
-    // Decode pulse
-    int value = instance.decodePulses(pulses);
-
-    if (value > 0) {
-      Serial.print("Received bits: ");
-      Serial.println(value, BIN);
-      Serial.print("Received value: ");
-      Serial.println(value);
-    }
 
     return value;
   }
