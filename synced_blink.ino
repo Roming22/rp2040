@@ -21,6 +21,8 @@ void set_board() {
   } else {
     Serial.println(": Extension");
   }
+
+  randomSeed(isLeft * 42);
 }
 
 void set_pixels() {
@@ -41,12 +43,12 @@ void set_bitbang() { BitBang::initialize(DATA_PIN, 1 << 13); }
 
 void setup() {
   Serial.begin(9600);
-  delay(1300);
+  delay(5000);
 
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[ECHO BLINK]");
+  Serial.println("[SYNC BLINK]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
@@ -69,57 +71,33 @@ void blinkLeds() {
 
   pixels.fill(pixels.Color(red, green, blue));
   pixels.show();
-  delay(25);
+  delay(2000);
   pixels.fill(pixels.Color(0, 0, 0));
   pixels.show();
-  delay(25);
-
   color = ++color % 6;
 }
 
 void loop() {
   static unsigned int loopIndex = 0;
-  static unsigned int msgLen = 32;
-  static unsigned int msg = 1;
-  static unsigned int badValues = 0;
-  Pixels &pixels = *Pixels::get();
+  static Pixels &pixels = *Pixels::get();
 
   Serial.println("");
   Serial.print("## Loop ");
   Serial.print(++loopIndex);
   if (isLeft) {
     Serial.println(" [Controller]");
+    // Send GO
+    BitBang::getInstance().sendSync();
   } else {
     Serial.println(" [Extension]");
+    // Receive GO
+    BitBang::getInstance().receiveSync();
   }
 
-  // Receive GO
-  if (!isLeft || loopIndex > 1) {
-    Serial.println("GET");
-    msg = BitBang::receive(msgLen) + isLeft;
-  }
+  delayMicroseconds(50 + 100 * random(10));
 
-  if (loopIndex != msg) {
-    Serial.println("");
-    Serial.println("");
-    Serial.print("!!! Bad value: ");
-    Serial.print(++badValues);
-    Serial.println(" !!!");
-    delay(2000);
+  if (loopIndex % 5000 == 1) {
+    Serial.print("Value check: ");
+    blinkLeds();
   }
-  Serial.println("");
-  Serial.println("BLINK");
-  if (loopIndex % 500 == 0) {
-    Serial.print("Bad value check: ");
-    Serial.print(badValues);
-    pixels.fill(pixels.Color(255 * (badValues > 0), 255 * (badValues == 0), 0));
-    pixels.show();
-    delay(2000);
-  }
-  blinkLeds();
-
-  // Send GO
-  Serial.println("");
-  Serial.println("POST");
-  BitBang::send(loopIndex, msgLen);
 }
