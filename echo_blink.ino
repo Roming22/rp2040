@@ -46,7 +46,7 @@ void setup() {
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[RELAY BLINK]");
+  Serial.println("[ECHO BLINK]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
@@ -79,6 +79,10 @@ void blinkLeds() {
 
 void loop() {
   static unsigned int loopIndex = 0;
+  static unsigned int msgLen = 32;
+  static unsigned int msg = 1;
+  static unsigned int badValues = 0;
+  Pixels &pixels = *Pixels::get();
 
   Serial.println("");
   Serial.print("## Loop ");
@@ -89,17 +93,33 @@ void loop() {
     Serial.println(" [Extension]");
   }
 
-  // Wait for go
+  // Receive GO
   if (!isLeft || loopIndex > 1) {
-    while (BitBang::receive() == 0) {
-    }
+    Serial.println("GET");
+    msg = BitBang::receive(msgLen) + isLeft;
   }
-  if (loopIndex % 500 == 0) {
+
+  if (loopIndex != msg) {
+    Serial.println("");
+    Serial.println("");
+    Serial.print("!!! Bad value: ");
+    Serial.print(++badValues);
+    Serial.println(" !!!");
     delay(2000);
   }
-
+  Serial.println("");
+  Serial.println("BLINK");
+  if (loopIndex % 500 == 0) {
+    Serial.print("Bad value check: ");
+    Serial.print(badValues);
+    pixels.fill(pixels.Color(255 * (badValues > 0), 255 * (badValues == 0), 0));
+    pixels.show();
+    delay(2000);
+  }
   blinkLeds();
 
-  // Send go
-  BitBang::send();
+  // Send GO
+  Serial.println("");
+  Serial.println("POST");
+  BitBang::send(loopIndex, msgLen);
 }
