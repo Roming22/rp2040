@@ -71,7 +71,7 @@ void blinkLeds() {
 
   pixels.fill(pixels.Color(red, green, blue));
   pixels.show();
-  delay(2000);
+  delay(3000);
   pixels.fill(pixels.Color(0, 0, 0));
   pixels.show();
   color = ++color % 6;
@@ -88,15 +88,17 @@ void loop() {
     Serial.println(" [Controller]");
     // Send GO
     BitBang::getInstance().sendSync();
+    Serial.println("Sent Go");
   } else {
     Serial.println(" [Extension]");
     // Receive GO
     BitBang::getInstance().receiveSync();
+    Serial.println("Got Go");
   }
 
   delayMicroseconds(50 + 100 * random(10));
 
-  if (loopIndex % 5000 == 1) {
+  if (loopIndex % 5000 == 42) {
     Serial.print("Value check: ");
     blinkLeds();
   }
