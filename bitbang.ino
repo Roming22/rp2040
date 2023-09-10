@@ -48,7 +48,7 @@ void setup() {
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[SYNC BLINK]");
+  Serial.println("[BITBANG]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
@@ -77,29 +77,68 @@ void blinkLeds() {
   color = ++color % 6;
 }
 
+void error(unsigned int duration) {
+  static Pixels &pixels = *Pixels::get();
+
+  pixels.fill(pixels.Color(255, 255, 255));
+  pixels.show();
+  delay(duration);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+}
+
 void loop() {
   static unsigned int loopIndex = 0;
-  static Pixels &pixels = *Pixels::get();
+  static unsigned int msgLen = 32;
+  static unsigned int msg = 0;
+  static unsigned int inError = 0;
 
   Serial.println("");
   Serial.print("## Loop ");
   Serial.print(++loopIndex);
+
   if (isLeft) {
     Serial.println(" [Controller]");
-    // Send GO
-    BitBang::getInstance().sendSync();
-    Serial.println("Sent Go");
+    Serial.println("POST Value");
+    BitBang::send(loopIndex, msgLen);
   } else {
     Serial.println(" [Extension]");
-    // Receive GO
-    BitBang::getInstance().receiveSync();
-    Serial.println("Got Go");
+    Serial.println("GET Value");
+    msg = BitBang::receive(msgLen);
   }
 
-  delayMicroseconds(50 + 100 * random(10));
-
   if (loopIndex % 5000 == 42) {
-    Serial.print("Value check: ");
     blinkLeds();
+    Serial.print("Error count: ");
+    Serial.println(inError);
+    if (inError) {
+      error(5000);
+    }
+  }
+
+  // Send GO
+  Serial.println("");
+  if (isLeft) {
+    Serial.println("GET Value");
+    msg = BitBang::receive(msgLen);
+  } else {
+    Serial.println("POST Value");
+    BitBang::send(loopIndex, msgLen);
+  }
+
+  if (msg != loopIndex) {
+    ++inError;
+    Serial.println("");
+    Serial.println("");
+    Serial.println("!!! Bad value !!!");
+    Serial.print(msg);
+    Serial.print("!=");
+    Serial.println(loopIndex);
+    Serial.print("Error count: ");
+    Serial.println(inError);
+    error(10000);
+    if (!isLeft) {
+      loopIndex = msg;
+    }
   }
 }

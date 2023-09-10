@@ -164,6 +164,7 @@ public:
     // SYNC
     noInterrupts();
     instance._sendSync();
+    busy_wait_us_32(instance._tick + 12);
 
     // Send bits, LSB first.
     for (int i = 0; i < length; ++i) {
@@ -187,7 +188,7 @@ public:
     // Read bits
     instance.inputPin();
     for (int i = length; i > 0; --i) {
-      pulses.push_back(instance.receivePulse());
+      pulses.push_back(instance.receivePulse(1E6));
     }
     interrupts();
     instance.resetPin();
