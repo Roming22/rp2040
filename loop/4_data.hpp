@@ -12,38 +12,31 @@ void loop_4_data() {
   if (isLeft) {
     Serial.println(" [Controller]");
     Serial.println("POST Value");
-    BitBang::sendSync();
-    BitBang::sendData(loopIndex, msgLen);
-    // BitBang::send(loopIndex, msgLen);
+    BitBang::send(loopIndex, msgLen);
   } else {
     Serial.println(" [Extension]");
     Serial.println("GET Value");
-    BitBang::receiveSync();
-    BitBang::receiveData(msgLen);
-    // msg = BitBang::receive(msgLen);
+    msg = BitBang::receive(msgLen);
   }
 
   if (loopIndex % 5000 == 42) {
-    blinkLeds(3000);
     Serial.print("Error count: ");
     Serial.println(inError);
+
     if (inError) {
       error(5000);
     }
+    blinkLeds(3000);
   }
 
   // Send GO
   Serial.println("");
   if (isLeft) {
     Serial.println("GET Value");
-    BitBang::receiveSync();
-    BitBang::receiveData(msgLen);
-    // msg = BitBang::receive(msgLen);
+    msg = BitBang::receive(msgLen);
   } else {
     Serial.println("POST Value");
-    BitBang::sendSync();
-    BitBang::sendData(loopIndex, msgLen);
-    // BitBang::send(loopIndex, msgLen);
+    BitBang::send(loopIndex, msgLen);
   }
 
   if (msg != loopIndex) {
