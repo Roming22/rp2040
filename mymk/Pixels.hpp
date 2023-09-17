@@ -27,4 +27,18 @@ public:
   }
 };
 
+void set_pixels(const bool &isLeft) {
+  Pixels::initialize(PIXELS_PIN, PIXELS_COUNT);
+  Pixels &pixels = *Pixels::get();
+
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+  delay(200);
+  pixels.fill(pixels.Color(255 * isLeft, 255 * (1 - isLeft), 0));
+  pixels.show();
+  delay(1000);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+}
+
 #endif

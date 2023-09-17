@@ -29,7 +29,7 @@ public:
     instance._pin = pin;
     instance._input_mode = input_mode;
     instance._active_state = (instance._input_mode == INPUT);
-    instance.resetPin();
+    instance._resetPin();
 
     instance._tick = 1E6 / frequency / 4;
 
@@ -46,14 +46,14 @@ public:
     Serial.println(int(1E6 / (instance._tick * 4)));
   }
 
-  inline void resetPin() const {
+  inline void _resetPin() const {
     pinMode(_pin, OUTPUT);
     gpio_put(_pin, !_active_state);
   }
 
-  inline void inputPin() const { pinMode(_pin, _input_mode); }
+  inline void _inputPin() const { pinMode(_pin, _input_mode); }
 
-  inline void sendBit(const bool &bit) const {
+  inline void _sendBit(const bool &bit) const {
     gpio_put(_pin, _active_state);
     busy_wait_us_32(_tick);
     gpio_put(_pin, bit);
@@ -64,7 +64,7 @@ public:
   }
 
   inline unsigned int
-  receivePulse(unsigned int wait = DEFAULT_INPUT_TIMEOUT_US) const {
+  _receivePulse(unsigned int wait = DEFAULT_INPUT_TIMEOUT_US) const {
     unsigned int duration = 0;
 
     // Wait for REST state
@@ -87,7 +87,7 @@ public:
     return duration;
   }
 
-  int decodePulses(std::vector<unsigned int> &pulses) const {
+  unsigned int _decodePulses(std::vector<unsigned int> &pulses) const {
     static unsigned int threshold = _tick * 3 / 2;
     unsigned int pulse;
     unsigned int value = 0;
@@ -104,23 +104,24 @@ public:
   }
 
   inline void _sendSync() const {
-    bool ready = false;
     std::vector<unsigned int> pulses(1);
-    while (!ready) {
+    while (true) {
       pulses.clear();
 
       // Send REQUEST
-      resetPin();
-      sendBit(_active_state);
+      _resetPin();
+      _sendBit(_active_state);
 
       // Wait for READY
-      inputPin();
-      pulses.push_back(receivePulse());
+      _inputPin();
+      pulses.push_back(_receivePulse());
       if (pulses.back() != 0) {
-        ready = decodePulses(pulses) != _active_state;
+        if (_decodePulses(pulses) != _active_state) {
+          _resetPin();
+          return;
+        }
       }
     }
-    resetPin();
   }
 
   inline void _receiveSync() const {
@@ -129,31 +130,99 @@ public:
     std::vector<unsigned int> pulses(1);
 
     // Wait for REQUEST
-    inputPin();
+    _inputPin();
     while (!request) {
       pulses.clear();
-      pulses.push_back(receivePulse());
+      pulses.push_back(_receivePulse());
       if (pulses.back() != 0) {
-        request = decodePulses(pulses) == _active_state;
+        request = _decodePulses(pulses) == _active_state;
       }
     }
     busy_wait_us_32(_tick + 12);
 
     // Send READY
-    resetPin();
-    sendBit(!_active_state);
+    _resetPin();
+    _sendBit(!_active_state);
   }
 
-  void sendSync() const {
+  static void sendSync() {
+    static const BitBang &instance = getInstance();
+
     noInterrupts();
-    _sendSync();
+    instance._sendSync();
     interrupts();
   }
 
-  void receiveSync() const {
+  static void receiveSync() {
+    static const BitBang &instance = getInstance();
+
     noInterrupts();
-    _receiveSync();
+    instance._receiveSync();
     interrupts();
+  }
+
+  inline void _sendData(const unsigned &value,
+                        const unsigned int &length) const {
+    // Send bits, LSB first.
+    for (int i = 0; i < length; ++i) {
+      _sendBit(bitRead(value, i));
+    }
+  }
+
+  inline void _receiveData(std::vector<unsigned int> &pulses,
+                           const unsigned int &length) const {
+    // Read bits
+    _inputPin();
+    for (int i = length; i > 0; --i) {
+      pulses.push_back(_receivePulse(1E6));
+    }
+    _resetPin();
+  }
+
+  static void sendData(const unsigned int &value, const unsigned int &length) {
+    static const BitBang &instance = getInstance();
+    Serial.print("Send value: ");
+    Serial.println(value);
+
+    // Send GO
+    noInterrupts();
+    instance._sendBit(!instance._active_state);
+
+    // Send bits, LSB first.
+    instance._sendData(value, length);
+    interrupts();
+
+    Serial.print("Sent bits: ");
+    Serial.print(value, BIN);
+    Serial.println();
+  }
+
+  static unsigned int receiveData(const unsigned int &length) {
+    static const BitBang &instance = getInstance();
+    std::vector<unsigned int> pulses;
+    pulses.reserve(length);
+    unsigned int value;
+
+    noInterrupts();
+    instance._inputPin();
+
+    // Wait for GO
+    while (instance._receivePulse() == 0) {
+    }
+
+    // Read bits
+    instance._receiveData(pulses, length);
+    interrupts();
+
+    // Decode pulse
+    value = instance._decodePulses(pulses);
+
+    Serial.print("Received bits: ");
+    Serial.println(value, BIN);
+    Serial.print("Received value: ");
+    Serial.println(value);
+
+    return value;
   }
 
   static void send(const int &value, const unsigned int &length) {
@@ -161,40 +230,31 @@ public:
     Serial.print("Send value: ");
     Serial.println(value);
 
-    // SYNC
     noInterrupts();
     instance._sendSync();
     busy_wait_us_32(instance._tick + 12);
-
-    // Send bits, LSB first.
-    for (int i = 0; i < length; ++i) {
-      instance.sendBit(bitRead(value, i));
-    }
+    instance._sendData(value, length);
     interrupts();
 
     Serial.print("Sent bits: ");
-    Serial.println(value, BIN);
+    Serial.print(value, BIN);
+    Serial.println();
   }
 
   static unsigned int receive(const unsigned int &length) {
     static const BitBang &instance = getInstance();
     std::vector<unsigned int> pulses;
     pulses.reserve(length);
+    unsigned int value;
 
-    // SYNC
     noInterrupts();
-    instance.receiveSync();
-
-    // Read bits
-    instance.inputPin();
-    for (int i = length; i > 0; --i) {
-      pulses.push_back(instance.receivePulse(1E6));
-    }
+    instance._receiveSync();
+    instance._inputPin();
+    instance._receiveData(pulses, length);
     interrupts();
-    instance.resetPin();
 
     // Decode pulse
-    int value = instance.decodePulses(pulses);
+    value = instance._decodePulses(pulses);
 
     Serial.print("Received bits: ");
     Serial.println(value, BIN);
@@ -204,5 +264,7 @@ public:
     return value;
   }
 };
+
+void set_bitbang() { BitBang::initialize(DATA_PIN, 1 << 13); }
 
 #endif
