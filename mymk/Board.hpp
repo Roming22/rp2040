@@ -1,6 +1,8 @@
 #ifndef MYMK_BOARD
 #define MYMK_BOARD
 
+#include "config/Loader.hpp"
+
 void set_board() {
   int len = 2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1;
   char board_uid[len] = "";
@@ -16,6 +18,8 @@ void set_board() {
   }
 
   randomSeed(isLeft * 42);
+
+  load();
 }
 
 #endif
