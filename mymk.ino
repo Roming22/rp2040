@@ -17,7 +17,7 @@ void setup() {
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[BITBANG]");
+  Serial.println("[KEYMATRIX]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
@@ -34,5 +34,6 @@ void loop() {
   // loop_1_relay();
   // loop_2_echo();
   // loop_3_sync();
-  loop_4_data();
+  // loop_4_data();
+  loop_5_keymatrix();
 }

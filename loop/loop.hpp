@@ -28,3 +28,4 @@ void error(unsigned int duration) {
 #include "2_echo.hpp"
 #include "3_sync.hpp"
 #include "4_data.hpp"
+#include "5_keymatrix.hpp"
