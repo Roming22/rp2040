@@ -10,12 +10,14 @@ private:
   std::vector<bool> key_states;
 
 public:
+  unsigned int size;
   KeyMatrix(){};
   KeyMatrix(const std::vector<unsigned int> &i_col_pins,
             const std::vector<unsigned int> &i_row_pins) {
     col_pins = std::vector(i_col_pins);
     row_pins = std::vector(i_row_pins);
-    key_states = std::vector<bool>(col_pins.size() * row_pins.size(), HIGH);
+    size = (unsigned int)(col_pins.size() * row_pins.size());
+    key_states = std::vector<bool>(size, HIGH);
 
     // Set col pins
     for (unsigned int col = 0; col < col_pins.size(); ++col) {
@@ -28,7 +30,7 @@ public:
   }
 
   void poll_switch_events(std::vector<int> &events) {
-    Serial.println("Polling switch events");
+    // Serial.println("Polling switch events");
     bool state;
     int key_index = 0;
 
