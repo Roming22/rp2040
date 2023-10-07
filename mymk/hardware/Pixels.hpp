@@ -1,12 +1,13 @@
-#ifndef MYMK_PIXELS
-#define MYMK_PIXELS
+#ifndef MYMK_HARDWARE_PIXELS
+#define MYMK_HARDWARE_PIXELS
 
 #include <Adafruit_NeoPixel.h>
 
 class Pixels : public Adafruit_NeoPixel {
 private:
   // Singleton
-  Pixels(const int pin, const int count) : Adafruit_NeoPixel(count, pin) {}
+  Pixels(const unsigned int pin, const unsigned int count)
+      : Adafruit_NeoPixel(count, pin) {}
 
 public:
   // Singleton
@@ -17,7 +18,7 @@ public:
     return instance;
   }
 
-  static void initialize(const int pin, const int count) {
+  static void initialize(const unsigned int pin, const unsigned int count) {
     Pixels *_pixels = get(pin, count);
     _pixels->begin();
     _pixels->clear();
@@ -27,8 +28,9 @@ public:
   }
 };
 
-void set_pixels(const bool &isLeft) {
-  Pixels::initialize(PIXELS_PIN, PIXELS_COUNT);
+void set_pixels(const unsigned int pin, const unsigned int count,
+                const bool &isLeft) {
+  Pixels::initialize(pin, count);
   Pixels &pixels = *Pixels::get();
 
   pixels.fill(pixels.Color(0, 0, 0));

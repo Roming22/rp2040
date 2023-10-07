@@ -1,5 +1,5 @@
-#ifndef MYMK_KEYMATRIX
-#define MYMK_KEYMATRIX
+#ifndef MYMK_HARDWARE_KEYMATRIX
+#define MYMK_HARDWARE_KEYMATRIX
 
 #include <vector>
 
@@ -20,13 +20,26 @@ public:
     key_states = std::vector<bool>(size, HIGH);
 
     // Set col pins
+    // Serial.print("Col pin: ");
     for (unsigned int col = 0; col < col_pins.size(); ++col) {
+      // if (col != 0) {
+      //   Serial.print(", ");
+      // }
+      // Serial.print(col_pins[col]);
       pinMode(col_pins[col], INPUT_PULLUP);
     }
+    // Serial.println("");
+
     // Set row pins
-    for (unsigned int row; row < row_pins.size(); ++row) {
+    // Serial.print("Row pin: ");
+    for (unsigned int row = 0; row < row_pins.size(); ++row) {
+      // if (row != 0) {
+      //   Serial.print(", ");
+      // }
+      // Serial.print(row_pins[row]);
       pinMode(row_pins[row], INPUT);
     }
+    // Serial.println("");
   }
 
   void poll_switch_events(std::vector<int> &events) {
@@ -41,10 +54,12 @@ public:
         state = digitalRead(col_pins[col]);
         if (state != key_states[key_index]) {
           if (state == LOW) {
-            // Serial.println("Pressed");
+            // Serial.print("Switch pressed: ");
+            // Serial.println(key_index + 1);
             events.push_back(1 + key_index);
           } else {
-            // Serial.println("Released");
+            // Serial.print("Switch released: ");
+            // Serial.println(key_index + 1);
             events.push_back(-1 - key_index);
           }
           key_states[key_index] = state;

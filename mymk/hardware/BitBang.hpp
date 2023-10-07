@@ -1,7 +1,7 @@
 // Max frequency on an RP2040: 31250Hz (8us tick)
 
-#ifndef MYMK_BITBANG
-#define MYMK_BITBANG
+#ifndef MYMK_HARDWARE_BITBANG
+#define MYMK_HARDWARE_BITBANG
 
 #define DEFAULT_INPUT_TIMEOUT_US 2000
 
@@ -258,7 +258,4 @@ public:
     return value;
   }
 };
-
-void set_bitbang() { BitBang::initialize(DATA_PIN, 31250); }
-
 #endif

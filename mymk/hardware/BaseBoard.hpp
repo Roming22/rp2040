@@ -1,23 +1,51 @@
-#ifndef MYMK_BASEBOARD
-#define MYMK_BASEBOARD
+#ifndef MYMK_HARDWARE_BASEBOARD
+#define MYMK_HARDWARE_BASEBOARD
 
 #include "BitBang.hpp"
 #include "KeyMatrix.hpp"
+#include "Pixels.hpp"
 #include <vector>
+
+void blinkLeds(unsigned int duration) {
+  static int color = 0;
+  static Pixels &pixels = *Pixels::get();
+
+  int red = 255 * (color == 0 || color == 1 || color == 5);
+  int green = 255 * (color == 1 || color == 2 || color == 3);
+  int blue = 255 * (color == 3 || color == 4 || color == 5);
+
+  pixels.fill(pixels.Color(red, green, blue));
+  pixels.show();
+  delay(duration);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+  color = ++color % 6;
+}
+
+void error(unsigned int duration) {
+  static Pixels &pixels = *Pixels::get();
+
+  pixels.fill(pixels.Color(255, 255, 255));
+  pixels.show();
+  delay(duration);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+}
 
 class BaseBoard {
 protected:
+  static BaseBoard *instance;
   KeyMatrix keymatrix;
   unsigned int msg_len;
   bool is_connected;
+  bool is_motherboard;
 
 public:
-  BaseBoard(const unsigned int &i_msg_len, const unsigned int i_col_pins[],
-            const unsigned int i_row_pins[])
+  BaseBoard(const unsigned int &i_msg_len,
+            const std::vector<unsigned int> &i_col_pins,
+            const std::vector<unsigned int> &i_row_pins)
       : msg_len(i_msg_len), is_connected(true) {
-    std::vector<unsigned int> col_pins({26, 22, 20, 23});
-    std::vector<unsigned int> row_pins({6, 7, 9});
-    keymatrix = KeyMatrix(col_pins, row_pins);
+    keymatrix = KeyMatrix(i_col_pins, i_row_pins);
   }
 
   void send_switch_events(const std::vector<int> &events) {
@@ -57,6 +85,13 @@ public:
       blinkLeds(100);
     }
   }
-};
 
+  virtual void loop() {
+    Serial.println("[ERROR] Unimplemented");
+    delay(3600000);
+  }
+
+  static void Loop() { instance->loop(); };
+};
+BaseBoard *BaseBoard::instance = nullptr;
 #endif

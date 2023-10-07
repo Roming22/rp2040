@@ -59,6 +59,7 @@ void load_board() {
   }
   Serial.print("[INFO] Board chirality is on the left side: ");
   Serial.println(isLeft);
+  randomSeed(isLeft * 42);
 
   if (config.containsKey("leds")) {
     if (config["leds"].containsKey("count") &&
