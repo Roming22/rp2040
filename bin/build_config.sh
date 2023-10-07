@@ -48,7 +48,6 @@ parse_args(){
 }
 
 generate_hpp() {
-    set -x
     cat << EOF
 #ifndef BOARD_CONFIG_JSON
 #define BOARD_CONFIG_JSON "$(jq -c -M "." "$BOARD_PATH" | sed 's:":\\":g')"

@@ -1,9 +1,10 @@
 #ifndef MYMK_CONFIG_LOADER
 #define MYMK_CONFIG_LOADER
 #include "../hardware/BitBang.hpp"
-#include "../hardware/DaughterBoard.hpp"
-#include "../hardware/MotherBoard.hpp"
 #include "../hardware/Pixels.hpp"
+#include "../hardware/board/DaughterBoard.hpp"
+#include "../hardware/board/MotherBoard.hpp"
+
 #include <ArduinoJson.h>
 #include <vector>
 
@@ -50,7 +51,7 @@ void load_board() {
     isLeft =
         (!config["data"].containsKey("isLeft") || config["data"]["isLeft"]);
     if (config["data"].containsKey("pin")) {
-      BitBang::initialize((int)config["data"]["pin"], 31250);
+      BitBang::initialize((int)config["data"]["pin"], 25000);
     } else {
       Serial.println("[ERROR] Not connection between boards: "
                      "'.{board_uid}.data.pin' not found");
@@ -68,7 +69,7 @@ void load_board() {
                  isLeft);
     } else {
       Serial.println(
-          "[ERROR] CAnnot configure leds: '.{board_uid}.leds.count' or "
+          "[ERROR] Cannot configure leds: '.{board_uid}.leds.count' or "
           "'.{board_uid}.leds.pin' not found");
       delay(3600000);
     }
@@ -96,8 +97,8 @@ void load_board() {
       }
     } else {
       Serial.println(
-          "[ERROR] CAnnot configure leds: '.{board_uid}.leds.count' or "
-          "'.{board_uid}.leds.pin' not found");
+          "[ERROR] Cannot configure switches: '.{board_uid}.matrix.cols' or "
+          "'.{board_uid}.matrix.rows' not found");
       delay(3600000);
     }
   } else {

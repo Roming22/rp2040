@@ -1,22 +1,25 @@
 #ifndef MYMK_HARDWARE_KEYMATRIX
 #define MYMK_HARDWARE_KEYMATRIX
 
+#include "Key.hpp"
+#include <queue>
 #include <vector>
 
-class KeyMatrix {
+class KeyMatrix : public Key {
 private:
   std::vector<unsigned int> col_pins;
   std::vector<unsigned int> row_pins;
   std::vector<bool> key_states;
 
 public:
-  unsigned int size;
-  KeyMatrix(){};
   KeyMatrix(const std::vector<unsigned int> &i_col_pins,
             const std::vector<unsigned int> &i_row_pins) {
     col_pins = std::vector(i_col_pins);
     row_pins = std::vector(i_row_pins);
-    size = (unsigned int)(col_pins.size() * row_pins.size());
+    size = col_pins.size() * row_pins.size();
+    Serial.println("KeyMatrix size:");
+    Serial.println(size);
+    delay(2000);
     key_states = std::vector<bool>(size, HIGH);
 
     // Set col pins
@@ -42,10 +45,15 @@ public:
     // Serial.println("");
   }
 
-  void poll_switch_events(std::vector<int> &events) {
-    // Serial.println("Polling switch events");
+  void poll_events(std::vector<int> &events) {
+    Serial.println("KeyMatrix.poll_events");
     bool state;
     int key_index = 0;
+
+    if (!events.empty()) {
+      Serial.println("[ERROR] Switch events is not empty");
+      delay(3000);
+    }
 
     for (unsigned int row = 0; row < row_pins.size(); ++row) {
       pinMode(row_pins[row], OUTPUT);
@@ -53,16 +61,24 @@ public:
       for (unsigned int col = 0; col < col_pins.size(); col++) {
         state = digitalRead(col_pins[col]);
         if (state != key_states[key_index]) {
+          Serial.print("COL pin: ");
+          Serial.print(col_pins[col]);
+          Serial.print("    ROW pin: ");
+          Serial.print(row_pins[row]);
+          Serial.print("    Before: ");
+          Serial.print(key_states[key_index]);
           if (state == LOW) {
-            // Serial.print("Switch pressed: ");
-            // Serial.println(key_index + 1);
+            Serial.print("    Switch pressed: ");
+            Serial.print(key_index + 1);
             events.push_back(1 + key_index);
           } else {
-            // Serial.print("Switch released: ");
-            // Serial.println(key_index + 1);
+            Serial.print("    Switch released: ");
+            Serial.print(key_index + 1);
             events.push_back(-1 - key_index);
           }
           key_states[key_index] = state;
+          Serial.print("    After: ");
+          Serial.println(key_states[key_index]);
         }
         ++key_index;
       }

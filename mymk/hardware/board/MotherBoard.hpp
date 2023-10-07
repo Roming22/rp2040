@@ -1,6 +1,7 @@
-#ifndef MYMK_HARDWARE_MOTHERBOARD
-#define MYMK_HARDWARE_MOTHERBOARD
+#ifndef MYMK_HARDWARE_BOARD_MOTHERBOARD
+#define MYMK_HARDWARE_BOARD_MOTHERBOARD
 
+#include "../BitBang.hpp"
 #include "BaseBoard.hpp"
 #include <vector>
 
@@ -10,15 +11,6 @@ public:
               const std::vector<unsigned int> i_col_pins,
               const std::vector<unsigned int> i_row_pins)
       : BaseBoard(i_msg_len, i_col_pins, i_row_pins) {}
-  void load_switch_events(std::vector<int> &events) {
-    events.clear();
-
-    // Get events on the motherboard
-    keymatrix.poll_switch_events(events);
-
-    // Get events on the daughterboard
-    receive_switch_events(events);
-  }
 
   static void Setup(const unsigned int &i_msg_len,
                     const std::vector<unsigned int> &i_col_pins,
@@ -27,10 +19,10 @@ public:
   }
 
   void loop() {
-    static std::vector<int> events(2, 0);
-    load_switch_events(events);
-    process_switch_events(events);
-    send_switch_events(events);
+    load_switch_events();
+    receive_switch_events();
+    process_switch_events();
+    BitBang::SendSync();
   }
 };
 #endif

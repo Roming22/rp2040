@@ -5,20 +5,23 @@
 
 class Keyboard {
 private:
+  static Keyboard *instance;
   // Singleton
-  Keyboard() { load_config(); };
+  Keyboard(){};
 
 public:
   // Singleton
   Keyboard(const Keyboard &obj) = delete;
   Keyboard &operator=(const Keyboard &obj) = delete;
-  static Keyboard *Get(const int pin = 0, const int count = 0) {
-    static Keyboard *instance = new Keyboard();
-    return instance;
+
+  static void Setup() {
+    if (instance == nullptr) {
+      instance = new Keyboard();
+      load_config();
+      delay(1000);
+    }
   }
-
-  static void Setup() { Get(); }
-
   static void Loop() { BaseBoard::Loop(); }
 };
+Keyboard *Keyboard::instance = nullptr;
 #endif

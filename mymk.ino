@@ -3,6 +3,7 @@
 #include "mymk/Keyboard.hpp"
 
 void setup() {
+  interrupts();
   Serial.begin(9600);
   delay(5000);
 
