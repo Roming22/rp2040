@@ -1,0 +1,34 @@
+E461508723193526:
+  data:
+    pin: 1
+    isLeft: true
+  leds:
+    count: 4
+    pin: 0
+  matrix:
+    cols:
+      - 26
+      - 22
+      - 20
+      - 23
+    rows:
+      - 6
+      - 7
+      - 9
+E4613462C7374D37:
+  data:
+    pin: 1
+    isLeft: false
+  leds:
+    count: 4
+    pin: 0
+  matrix:
+    cols:
+      - 26
+      - 22
+      - 20
+      - 23
+    rows:
+      - 6
+      - 7
+      - 9

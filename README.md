@@ -2,7 +2,7 @@
 Custom keyboard firmware generator, in the vein of QMK and KMK.
 
 ## Features
-* Full configuration through JSON files
+* Full configuration through YAML files
 * Split keyboard
 
 ## Differences with QMK
@@ -16,6 +16,10 @@ Boards managers:
 Libraries:
 * [Adafruit NeoPixels](https://adafruit.github.io/Adafruit_NeoPixel/html/index.html)
 * [ArduinoJson](https://arduinojson.org/v6/doc/)
+
+## Other dependencies
+* [jq](https://github.com/jqlang/jq#readme)
+* [yq](https://github.com/mikefarah/yq#readme)
 
 ## Controller support
 * [Sea-Picro](https://github.com/joshajohnson/sea-picro/blob/master/README.md)

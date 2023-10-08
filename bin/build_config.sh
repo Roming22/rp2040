@@ -50,10 +50,10 @@ parse_args(){
 generate_hpp() {
     cat << EOF
 #ifndef BOARD_CONFIG_JSON
-#define BOARD_CONFIG_JSON "$(jq -c -M "." "$BOARD_PATH" | sed 's:":\\":g')"
+#define BOARD_CONFIG_JSON "$(yq --no-colors --output-format json "$BOARD_PATH" | jq -c -M | sed 's:":\\":g')"
 #endif
 #ifndef LAYOUT_CONFIG_JSON
-#define LAYOUT_CONFIG_JSON "$(jq -c -M "." "$LAYOUT_PATH" | sed 's:":\\":g')"
+#define LAYOUT_CONFIG_JSON "$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M | sed 's:":\\":g')"
 #endif
 EOF
 }
