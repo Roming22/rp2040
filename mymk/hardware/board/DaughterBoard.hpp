@@ -61,6 +61,8 @@ public:
       unsigned int red = (data >> 16) & 255;
       unsigned int address = data >> 24;
       Pixels::Set(address, red, green, blue);
+      Timer::Start("revertPixel#1ToWhite", 1000,
+                   []() { Pixels::Set(1, 255, 255, 255); });
     }
   }
 

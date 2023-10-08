@@ -7,7 +7,7 @@ void setup() {
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[LED EVENTS]");
+  Serial.println("[TIMER]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");

@@ -2,6 +2,8 @@
 #define MYMK_KEYBOARD
 
 #include "config/Loader.hpp"
+#include "hardware/board/BaseBoard.hpp"
+#include "logic/Timer.hpp"
 #include "utils/Fps.hpp"
 #include "utils/Time.hpp"
 
@@ -25,8 +27,9 @@ public:
   static void Tick() {
     // Serial.println("Keyboard::Tick");
     Time::Tick();
-    FPS::Tick();
+    Timer::Tick();
     BaseBoard::Tick();
+    FPS::Tick();
   }
 };
 Keyboard *Keyboard::instance = nullptr;

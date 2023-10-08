@@ -1,6 +1,7 @@
 #ifndef MYMK_HARDWARE_BOARD_BASEBOARD
 #define MYMK_HARDWARE_BOARD_BASEBOARD
 
+#include "../../logic/Timer.hpp"
 #include "../BitBang.hpp"
 #include "../switch/Key.hpp"
 #include "../switch/KeyMatrix.hpp"

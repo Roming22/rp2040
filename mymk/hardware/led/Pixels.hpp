@@ -36,7 +36,11 @@ public:
     Adafruit_NeoPixel &pixels = instance->pixels;
     if (address == 0) {
       pixels.fill(pixels.Color(red, green, blue));
+    } else {
+      pixels.setPixelColor(address - 1, red, green, blue);
     }
+    while (!pixels.canShow()) {
+    };
     pixels.show();
   }
 

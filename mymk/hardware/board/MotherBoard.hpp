@@ -19,6 +19,17 @@ public:
     instance = new MotherBoard(i_msg_len, i_col_pins, i_row_pins);
   }
 
+  void process_timer_events(std::vector<std::string> timer_events) {
+    // Serial.println("MotherBoard::process_timer_events");
+    std::string event;
+    for (int i = 0; i < timer_events.size(); ++i) {
+      event = timer_events[i];
+      Serial.print("Timer Event: ");
+      Serial.println(event.c_str());
+    }
+    timer_events.clear();
+  }
+
   void receive_switch_events(std::vector<int> &switch_events) {
     // Serial.println("MotherBoard::receive_switch_events");
     int event = 1;
@@ -36,7 +47,8 @@ public:
   }
 
   void process_switch_events(const std::vector<int> &switch_events,
-                             std::vector<unsigned int> &messages) {
+                             std::vector<unsigned int> &messages,
+                             std::vector<std::string> timer_events) {
     // Serial.println("MotherBoard::process_switch_events");
     messages.clear();
     int event;
@@ -68,10 +80,12 @@ public:
 
   void loop() {
     static std::vector<int> switch_events(2, 0);
+    static std::vector<std::string> timer_events;
     static std::vector<unsigned int> messages(2, 0);
+    process_timer_events(timer_events);
     load_switch_events(switch_events);
     receive_switch_events(switch_events);
-    process_switch_events(switch_events, messages);
+    process_switch_events(switch_events, messages, timer_events);
     send_messages(messages);
   }
 };
