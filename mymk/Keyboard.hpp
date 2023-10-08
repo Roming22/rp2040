@@ -2,6 +2,8 @@
 #define MYMK_KEYBOARD
 
 #include "config/Loader.hpp"
+#include "utils/Fps.hpp"
+#include "utils/Time.hpp"
 
 class Keyboard {
 private:
@@ -22,6 +24,8 @@ public:
   }
   static void Tick() {
     // Serial.println("Keyboard::Tick");
+    Time::Tick();
+    FPS::Tick();
     BaseBoard::Tick();
   }
 };
