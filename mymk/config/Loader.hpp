@@ -1,9 +1,9 @@
 #ifndef MYMK_CONFIG_LOADER
 #define MYMK_CONFIG_LOADER
 #include "../hardware/BitBang.hpp"
-#include "../hardware/Pixels.hpp"
 #include "../hardware/board/DaughterBoard.hpp"
 #include "../hardware/board/MotherBoard.hpp"
+#include "../hardware/led/Pixels.hpp"
 
 #include <ArduinoJson.h>
 #include <vector>

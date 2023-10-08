@@ -1,16 +1,14 @@
-#include <string>
-
 #include "mymk/Keyboard.hpp"
 
 void setup() {
   interrupts();
   Serial.begin(9600);
-  delay(5000);
+  // delay(5000);
 
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[KEYMATRIX]");
+  Serial.println("[LED EVENTS]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
@@ -21,4 +19,4 @@ void setup() {
   Serial.println("# Looping");
 }
 
-void loop() { Keyboard::Loop(); }
+void loop() { Keyboard::Tick(); }
