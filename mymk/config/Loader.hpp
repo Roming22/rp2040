@@ -1,9 +1,10 @@
 #ifndef MYMK_CONFIG_LOADER
 #define MYMK_CONFIG_LOADER
 #include "../hardware/BitBang.hpp"
-#include "../hardware/DaughterBoard.hpp"
-#include "../hardware/MotherBoard.hpp"
 #include "../hardware/Pixels.hpp"
+#include "../hardware/board/DaughterBoard.hpp"
+#include "../hardware/board/MotherBoard.hpp"
+
 #include <ArduinoJson.h>
 #include <vector>
 
@@ -68,7 +69,7 @@ void load_board() {
                  isLeft);
     } else {
       Serial.println(
-          "[ERROR] CAnnot configure leds: '.{board_uid}.leds.count' or "
+          "[ERROR] Cannot configure leds: '.{board_uid}.leds.count' or "
           "'.{board_uid}.leds.pin' not found");
       delay(3600000);
     }
@@ -96,8 +97,8 @@ void load_board() {
       }
     } else {
       Serial.println(
-          "[ERROR] CAnnot configure leds: '.{board_uid}.leds.count' or "
-          "'.{board_uid}.leds.pin' not found");
+          "[ERROR] Cannot configure switches: '.{board_uid}.matrix.cols' or "
+          "'.{board_uid}.matrix.rows' not found");
       delay(3600000);
     }
   } else {

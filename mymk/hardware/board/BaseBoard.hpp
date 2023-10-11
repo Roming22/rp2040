@@ -1,9 +1,10 @@
-#ifndef MYMK_HARDWARE_BASEBOARD
-#define MYMK_HARDWARE_BASEBOARD
+#ifndef MYMK_HARDWARE_BOARD_BASEBOARD
+#define MYMK_HARDWARE_BOARD_BASEBOARD
 
-#include "BitBang.hpp"
-#include "KeyMatrix.hpp"
-#include "Pixels.hpp"
+#include "../BitBang.hpp"
+#include "../Pixels.hpp"
+#include "../switch/Key.hpp"
+#include "../switch/KeyMatrix.hpp"
 #include <vector>
 
 void blinkLeds(unsigned int duration) {
@@ -35,7 +36,7 @@ void error(unsigned int duration) {
 class BaseBoard {
 protected:
   static BaseBoard *instance;
-  KeyMatrix keymatrix;
+  Key *key;
   unsigned int msg_len;
   bool is_connected;
   bool is_motherboard;
@@ -45,7 +46,7 @@ public:
             const std::vector<unsigned int> &i_col_pins,
             const std::vector<unsigned int> &i_row_pins)
       : msg_len(i_msg_len), is_connected(true) {
-    keymatrix = KeyMatrix(i_col_pins, i_row_pins);
+    key = new KeyMatrix(i_col_pins, i_row_pins);
   }
 
   void send_switch_events(const std::vector<int> &events) {
@@ -55,21 +56,21 @@ public:
 
     for (unsigned int i = 0; i < events.size(); ++i) {
       // Serial.println("POST Value");
-      BitBang::send(events[i], msg_len);
+      BitBang::Send(events[i], msg_len);
     }
     // Serial.println("POST Value");
-    BitBang::send(0, msg_len);
+    BitBang::Send(0, msg_len);
   }
 
   virtual void receive_switch_events(std::vector<int> &events) {
     int event = 1;
     while (event != 0 && is_connected) {
       // Serial.println("GET Value");
-      event = BitBang::receive(msg_len);
+      event = BitBang::Receive(msg_len);
       if (event > 0) {
-        events.push_back(event + keymatrix.size);
+        events.push_back(event + key->size);
       } else if (event < 0) {
-        events.push_back(event - keymatrix.size);
+        events.push_back(event - key->size);
       }
     }
   }

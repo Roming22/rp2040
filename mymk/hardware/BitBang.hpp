@@ -143,7 +143,7 @@ public:
     _sendBit(!_active_state);
   }
 
-  static void sendSync() {
+  static void SendSync() {
     static BitBang &instance = getInstance();
 
     noInterrupts();
@@ -151,7 +151,7 @@ public:
     interrupts();
   }
 
-  static void receiveSync() {
+  static void ReceiveSync() {
     static BitBang &instance = getInstance();
 
     noInterrupts();
@@ -176,7 +176,7 @@ public:
     _resetPin();
   }
 
-  static void sendData(const unsigned int &value, const unsigned int &length) {
+  static void SendData(const unsigned int &value, const unsigned int &length) {
     static BitBang &instance = getInstance();
     // Serial.print("Send value: ");
     // Serial.println(value);
@@ -194,7 +194,7 @@ public:
     // Serial.println();
   }
 
-  static unsigned int receiveData(const unsigned int &length) {
+  static unsigned int ReceiveData(const unsigned int &length) {
     static BitBang &instance = getInstance();
     instance._pulses.reserve(length);
     static unsigned int value;
@@ -221,7 +221,7 @@ public:
     return value;
   }
 
-  static void send(const int &value, const unsigned int &length) {
+  static void Send(const int &value, const unsigned int &length) {
     static BitBang &instance = getInstance();
     // Serial.print("Send value: ");
     // Serial.println(value);
@@ -237,7 +237,7 @@ public:
     // Serial.println();
   }
 
-  static unsigned int receive(const unsigned int &length) {
+  static unsigned int Receive(const unsigned int &length) {
     static BitBang &instance = getInstance();
     instance._pulses.reserve(length);
     static unsigned int value;

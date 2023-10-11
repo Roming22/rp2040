@@ -1,5 +1,5 @@
-#ifndef MYMK_HARDWARE_DAUGHTERBOARD
-#define MYMK_HARDWARE_DAUGHTERBOARD
+#ifndef MYMK_HARDWARE_BOARD_DAUGHTERBOARD
+#define MYMK_HARDWARE_BOARD_DAUGHTERBOARD
 
 #include "BaseBoard.hpp"
 #include <vector>
@@ -14,7 +14,7 @@ public:
     events.clear();
 
     // Get events on the motherboard
-    keymatrix.poll_switch_events(events);
+    key->poll_events(events);
   }
 
   void receive_switch_events(std::vector<int> &events) override {
