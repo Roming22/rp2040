@@ -21,7 +21,7 @@ public:
       delay(1000);
     }
   }
-  static void Loop() { BaseBoard::Loop(); }
+  static void Tick() { BaseBoard::Tick(); }
 };
 Keyboard *Keyboard::instance = nullptr;
 #endif

@@ -10,17 +10,6 @@ public:
                 const std::vector<unsigned int> &i_col_pins,
                 const std::vector<unsigned int> &i_row_pins)
       : BaseBoard(i_msg_len, i_col_pins, i_row_pins) {}
-  void load_switch_events(std::vector<int> &events) {
-    events.clear();
-
-    // Get events on the motherboard
-    key->poll_events(events);
-  }
-
-  void receive_switch_events(std::vector<int> &events) override {
-    events.clear();
-    BaseBoard::receive_switch_events(events);
-  }
 
   static void Setup(const unsigned int &i_msg_len,
                     const std::vector<unsigned int> &i_col_pins,

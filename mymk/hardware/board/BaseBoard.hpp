@@ -49,38 +49,51 @@ public:
     key = new KeyMatrix(i_col_pins, i_row_pins);
   }
 
-  void send_switch_events(const std::vector<int> &events) {
+  void load_switch_events(std::vector<int> &switch_events) {
+    // Serial.println("BaseBoard::load_switch_events");
+    switch_events.clear();
+    key->poll_events(switch_events);
+  }
+
+  void send_switch_events(const std::vector<int> &switch_events) {
+    // Serial.println("BaseBoard::send_switch_events");
     if (!is_connected) {
       return;
     }
 
-    for (unsigned int i = 0; i < events.size(); ++i) {
+    int event;
+    for (unsigned int i = 0; i < switch_events.size(); ++i) {
       // Serial.println("POST Value");
-      BitBang::Send(events[i], msg_len);
+      event = switch_events[i];
+      Serial.print("Send event: ");
+      Serial.println(event);
+      BitBang::Send(event, msg_len);
     }
     // Serial.println("POST Value");
     BitBang::Send(0, msg_len);
   }
 
-  virtual void receive_switch_events(std::vector<int> &events) {
+  void receive_switch_events(std::vector<int> &switch_events) {
+    // Serial.println("BaseBoard::receive_switch_events");
     int event = 1;
     while (event != 0 && is_connected) {
       // Serial.println("GET Value");
       event = BitBang::Receive(msg_len);
       if (event > 0) {
-        events.push_back(event + key->size);
+        Serial.println("Received Press event");
+        switch_events.push_back(event + key->size);
       } else if (event < 0) {
-        events.push_back(event - key->size);
+        Serial.println("Received Release event");
+        switch_events.push_back(event - key->size);
       }
     }
   }
 
-  void process_switch_events(const std::vector<int> &events) {
-    // Serial.println("Process switch events");
+  void process_switch_events(const std::vector<int> &switch_events) {
+    // Serial.println("BaseBoard::process_switch_events");
     int event;
-    // Process events
-    for (int i = 0; i < events.size(); ++i) {
-      event = events[i];
+    for (int i = 0; i < switch_events.size(); ++i) {
+      event = switch_events[i];
       Serial.print("Switch Event: ");
       Serial.println(event);
       blinkLeds(100);
@@ -88,11 +101,14 @@ public:
   }
 
   virtual void loop() {
-    Serial.println("[ERROR] Unimplemented");
+    Serial.println("[ERROR] BaseBoard::loop is not implemented");
     delay(3600000);
   }
 
-  static void Loop() { instance->loop(); };
+  static void Tick() {
+    // Serial.println("BaseBoard::Tick");
+    instance->loop();
+  };
 };
 BaseBoard *BaseBoard::instance = nullptr;
 #endif

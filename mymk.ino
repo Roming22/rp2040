@@ -1,5 +1,3 @@
-#include <string>
-
 #include "mymk/Keyboard.hpp"
 
 void setup() {
@@ -20,4 +18,4 @@ void setup() {
   Serial.println("# Looping");
 }
 
-void loop() { Keyboard::Loop(); }
+void loop() { Keyboard::Tick(); }
