@@ -19,7 +19,6 @@ public:
     size = col_pins.size() * row_pins.size();
     Serial.println("KeyMatrix size:");
     Serial.println(size);
-    delay(2000);
     key_states = std::vector<bool>(size, HIGH);
 
     // Set col pins

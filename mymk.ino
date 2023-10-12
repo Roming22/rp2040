@@ -2,12 +2,12 @@
 
 void setup() {
   Serial.begin(9600);
-  delay(5000);
+  // delay(5000);
 
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[KEYMATRIX]");
+  Serial.println("[LED EVENTS]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");

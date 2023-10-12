@@ -18,10 +18,12 @@ public:
     if (instance == nullptr) {
       instance = new Keyboard();
       load_config();
-      delay(1000);
     }
   }
-  static void Tick() { BaseBoard::Tick(); }
+  static void Tick() {
+    // Serial.println("Keyboard::Tick");
+    BaseBoard::Tick();
+  }
 };
 Keyboard *Keyboard::instance = nullptr;
 #endif
