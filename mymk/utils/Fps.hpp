@@ -11,8 +11,7 @@ public:
     static unsigned long time = Time::Now();
     ++counter;
     if (Time::Now() - time > display_every * 1E6) {
-      Serial.print("FPS: ");
-      Serial.println((int)((1E6 * counter) / (Time::Now() - time)));
+      DEBUG_INFO("FPS: %d", (int)((1E6 * counter) / (Time::Now() - time)));
       time = micros();
       counter = 0;
     }

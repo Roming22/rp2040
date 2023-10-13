@@ -25,7 +25,7 @@ public:
     }
   }
   static void Tick() {
-    // Serial.println("Keyboard::Tick");
+    DEBUG_VERBOSE("Keyboard::Tick");
     Time::Tick();
     Timer::Tick();
     BaseBoard::Tick();

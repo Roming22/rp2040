@@ -28,7 +28,7 @@ public:
     pixels.clear();
     pixels.show();
     pixels.setBrightness(255);
-    Serial.println("[Pixels] OFF");
+    DEBUG_DEBUG("[Pixels] OFF");
   }
 
   static void Set(const unsigned int address, const unsigned int red,

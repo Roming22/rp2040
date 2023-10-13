@@ -25,18 +25,18 @@ public:
   }
 
   void load_switch_events(std::vector<int> &switch_events) {
-    // Serial.println("BaseBoard::load_switch_events");
+    DEBUG_VERBOSE("BaseBoard::load_switch_events");
     switch_events.clear();
     key->poll_events(switch_events);
   }
 
   virtual void loop() {
-    Serial.println("[ERROR] BaseBoard::loop is not implemented");
+    DEBUG_ERROR("[ERROR] BaseBoard::loop is not implemented");
     delay(3600000);
   }
 
   static void Tick() {
-    // Serial.println("BaseBoard::Tick");
+    DEBUG_VERBOSE("BaseBoard::Tick");
     instance->loop();
   };
 };

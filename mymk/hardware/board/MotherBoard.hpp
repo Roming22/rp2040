@@ -20,27 +20,26 @@ public:
   }
 
   void process_timer_events(std::vector<std::string> timer_events) {
-    // Serial.println("MotherBoard::process_timer_events");
+    DEBUG_VERBOSE("MotherBoard::process_timer_events");
     std::string event;
     for (int i = 0; i < timer_events.size(); ++i) {
       event = timer_events[i];
-      Serial.print("Timer Event: ");
-      Serial.println(event.c_str());
+      DEBUG_INFO("Timer Event: %d", event.c_str());
     }
     timer_events.clear();
   }
 
   void receive_switch_events(std::vector<int> &switch_events) {
-    // Serial.println("MotherBoard::receive_switch_events");
+    DEBUG_VERBOSE("MotherBoard::receive_switch_events");
     int event = 1;
     while (event != 0 && is_connected) {
-      // Serial.println("GET Value");
+      DEBUG_DEBUG("GET Value");
       event = BitBang::Receive(msg_len);
       if (event > 0) {
-        Serial.println("Received Press event");
+        DEBUG_INFO("Received Press event");
         switch_events.push_back(event + key->size);
       } else if (event < 0) {
-        Serial.println("Received Release event");
+        DEBUG_INFO("Received Release event");
         switch_events.push_back(event - key->size);
       }
     }
@@ -49,32 +48,30 @@ public:
   void process_switch_events(const std::vector<int> &switch_events,
                              std::vector<unsigned int> &messages,
                              std::vector<std::string> timer_events) {
-    // Serial.println("MotherBoard::process_switch_events");
+    DEBUG_VERBOSE("MotherBoard::process_switch_events");
     messages.clear();
     int event;
     for (int i = 0; i < switch_events.size(); ++i) {
       event = switch_events[i];
-      Serial.print("Switch Event: ");
-      Serial.println(event);
+      DEBUG_INFO("Switch Event: %d", event);
       messages.push_back(Pixels::FlipFlop());
     }
   }
 
   void send_messages(const std::vector<unsigned int> &messages) {
-    // Serial.println("MotherBoard::send_switch_events");
+    DEBUG_VERBOSE("MotherBoard::send_switch_events");
     if (!is_connected) {
       return;
     }
 
     unsigned int message;
     for (unsigned int i = 0; i < messages.size(); ++i) {
-      // Serial.println("POST Value");
+      DEBUG_DEBUG("POST Value");
       message = messages[i];
-      Serial.print("Send message: ");
-      Serial.println(message);
+      DEBUG_INFO("Send message: %d", message);
       BitBang::Send(message, msg_len);
     }
-    // Serial.println("POST Value");
+    DEBUG_DEBUG("POST Value");
     BitBang::Send(0, msg_len);
   }
 

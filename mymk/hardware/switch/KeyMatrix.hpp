@@ -17,40 +17,27 @@ public:
     col_pins = std::vector(i_col_pins);
     row_pins = std::vector(i_row_pins);
     size = col_pins.size() * row_pins.size();
-    Serial.println("KeyMatrix size:");
-    Serial.println(size);
+    DEBUG_DEBUG("KeyMatrix size: %d", size);
     key_states = std::vector<bool>(size, HIGH);
 
     // Set col pins
-    // Serial.print("Col pin: ");
     for (unsigned int col = 0; col < col_pins.size(); ++col) {
-      // if (col != 0) {
-      //   Serial.print(", ");
-      // }
-      // Serial.print(col_pins[col]);
       pinMode(col_pins[col], INPUT_PULLUP);
     }
-    // Serial.println("");
 
     // Set row pins
-    // Serial.print("Row pin: ");
     for (unsigned int row = 0; row < row_pins.size(); ++row) {
-      // if (row != 0) {
-      //   Serial.print(", ");
-      // }
-      // Serial.print(row_pins[row]);
       pinMode(row_pins[row], INPUT);
     }
-    // Serial.println("");
   }
 
   void poll_events(std::vector<int> &events) {
-    // Serial.println("KeyMatrix.poll_events");
+    DEBUG_VERBOSE("KeyMatrix.poll_events");
     bool state;
     int key_index = 0;
 
     if (!events.empty()) {
-      Serial.println("[ERROR] Switch events is not empty");
+      DEBUG_ERROR("[ERROR] Switch events is not empty");
       delay(3000);
     }
 
@@ -60,24 +47,18 @@ public:
       for (unsigned int col = 0; col < col_pins.size(); col++) {
         state = digitalRead(col_pins[col]);
         if (state != key_states[key_index]) {
-          Serial.print("COL pin: ");
-          Serial.print(col_pins[col]);
-          Serial.print("    ROW pin: ");
-          Serial.print(row_pins[row]);
-          Serial.print("    Before: ");
-          Serial.print(key_states[key_index]);
+          DEBUG_DEBUG("COL pin: %d    ROW pin: %d    Before: %d", col_pins[col],
+                      row_pins[row], key_states[key_index]);
           if (state == LOW) {
-            Serial.print("    Switch pressed: ");
-            Serial.print(key_index + 1);
+            DEBUG_DEBUG("Switch pressed: %d", key_index + 1);
             events.push_back(1 + key_index);
           } else {
-            Serial.print("    Switch released: ");
-            Serial.print(key_index + 1);
+            DEBUG_DEBUG("Switch released: %d", key_index + 1);
             events.push_back(-1 - key_index);
           }
           key_states[key_index] = state;
-          Serial.print("    After: ");
-          Serial.println(key_states[key_index]);
+          DEBUG_DEBUG("COL pin: %d    ROW pin: %d    After: %d", col_pins[col],
+                      row_pins[row], key_states[key_index]);
         }
         ++key_index;
       }

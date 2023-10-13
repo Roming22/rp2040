@@ -19,40 +19,38 @@ public:
   }
 
   void send_switch_events(const std::vector<int> &switch_events) {
-    // Serial.println("MotherBoard::send_switch_events");
+    DEBUG_VERBOSE("DaughterBoard::send_switch_events");
     if (!is_connected) {
       return;
     }
 
     int event;
     for (unsigned int i = 0; i < switch_events.size(); ++i) {
-      // Serial.println("POST Value");
+      DEBUG_DEBUG("POST Value");
       event = switch_events[i];
-      Serial.print("Send event: ");
-      Serial.println(event);
+      DEBUG_INFO("Send event: %d", event);
       BitBang::Send(event, msg_len);
     }
-    // Serial.println("POST Value");
+    DEBUG_DEBUG("POST Value");
     BitBang::Send(0, msg_len);
   }
 
   void receive_messages(std::vector<unsigned int> &messages) {
-    // Serial.println("DaughterBoard::receive_messages");
+    DEBUG_VERBOSE("DaughterBoard::receive_messages");
     messages.clear();
     unsigned int message = 1;
     while (message != 0 && is_connected) {
-      // Serial.println("GET Value");
+      DEBUG_DEBUG("GET Value");
       message = BitBang::Receive(msg_len);
       if (message != 0) {
-        Serial.print("Received message: ");
-        Serial.println(message);
+        DEBUG_INFO("Received message: %d", message);
         messages.push_back(message);
       }
     }
   }
 
   void process_messages(const std::vector<unsigned int> &messages) {
-    // Serial.println("DaughterBoard::process_messages");
+    DEBUG_VERBOSE("DaughterBoard::process_messages");
     int data;
     for (int i = 0; i < messages.size(); ++i) {
       data = messages[i];

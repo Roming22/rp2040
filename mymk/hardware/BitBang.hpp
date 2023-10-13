@@ -36,17 +36,10 @@ public:
 
     instance._tick = 1E6 / frequency / 4;
 
-    Serial.print("LOW: ");
-    Serial.print(LOW);
-    Serial.print("    HIGH: ");
-    Serial.print(HIGH);
-    Serial.print("    ACTIVE: ");
-    Serial.println(instance._active_state);
-
-    Serial.print("BitBang tick (usec): ");
-    Serial.print(instance._tick);
-    Serial.print("    Frequency (Hz): ");
-    Serial.println(int(1E6 / (instance._tick * 4)));
+    DEBUG_INFO("LOW: %d    HIGH: %d    ACTIVE: %d", LOW, HIGH,
+               instance._active_state);
+    DEBUG_INFO("BitBang tick (usec): %d    Frequency (Hz): %d", instance._tick,
+               int(1E6 / (instance._tick * 4)));
   }
 
   inline void _resetPin() const {
@@ -178,8 +171,7 @@ public:
 
   static void SendData(const unsigned int &value, const unsigned int &length) {
     static BitBang &instance = getInstance();
-    // Serial.print("Send value: ");
-    // Serial.println(value);
+    DEBUG_DEBUG("Send value: %d", value);
 
     // Send GO
     noInterrupts();
@@ -190,8 +182,7 @@ public:
     interrupts();
 
     // Serial.print("Sent bits: ");
-    // Serial.print(value, BIN);
-    // Serial.println();
+    // Serial.println(value, BIN);
   }
 
   static unsigned int ReceiveData(const unsigned int &length) {
@@ -215,16 +206,14 @@ public:
 
     // Serial.print("Received bits: ");
     // Serial.println(value, BIN);
-    // Serial.print("Received value: ");
-    // Serial.println(value);
+    DEBUG_DEBUG("Received value: %d", value);
 
     return value;
   }
 
   static void Send(const int &value, const unsigned int &length) {
     static BitBang &instance = getInstance();
-    // Serial.print("Send value: ");
-    // Serial.println(value);
+    DEBUG_DEBUG("Send value: %d", value);
 
     noInterrupts();
     instance._sendSync();
@@ -233,8 +222,7 @@ public:
     interrupts();
 
     // Serial.print("Sent bits: ");
-    // Serial.print(value, BIN);
-    // Serial.println();
+    // Serial.println(value, BIN);
   }
 
   static unsigned int Receive(const unsigned int &length) {
@@ -252,8 +240,7 @@ public:
 
     // Serial.print("Received bits: ");
     // Serial.println(value, BIN);
-    // Serial.print("Received value: ");
-    // Serial.println(value);
+    DEBUG_DEBUG("Received value: %d", value);
 
     return value;
   }

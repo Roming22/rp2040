@@ -1,21 +1,21 @@
+#include "Arduino_DebugUtils.h"
+
 #include "mymk/Keyboard.hpp"
 
 void setup() {
   Serial.begin(9600);
-  // delay(5000);
+  Debug.timestampOn();
 
-  for (int i = 10; i > 0; --i) {
-    Serial.println();
-  }
-  Serial.println("[TIMER]");
-  Serial.println("#############################################################"
-                 "###################");
-  Serial.println("# Rebooting");
+  DEBUG_INFO("\n\n\n\n\n\n\n\n\n\n");
+  DEBUG_INFO("[TIMER]");
+  DEBUG_INFO("#############################################################"
+             "###################");
+  DEBUG_INFO("# Rebooting");
 
   Keyboard::Setup();
 
-  Serial.println("");
-  Serial.println("# Looping");
+  DEBUG_INFO("");
+  DEBUG_INFO("# Looping");
 }
 
 void loop() { Keyboard::Tick(); }

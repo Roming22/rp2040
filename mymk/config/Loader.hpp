@@ -18,30 +18,27 @@ std::string get_controller_uid() {
 }
 
 void load_board() {
-  Serial.println("Loading board");
+  DEBUG_INFO("Loading board");
 
   const char *jsonString = BOARD_CONFIG_JSON;
-  Serial.println(jsonString);
+  DEBUG_INFO("%s", jsonString);
 
   // Decode the document
   DynamicJsonDocument jsonDoc(1000);
   DeserializationError error = deserializeJson(jsonDoc, jsonString);
 
   if (error) {
-    Serial.print("[ERROR] Parsing failed: ");
-    Serial.println(error.c_str());
+    // DEBUG_INFO("[ERROR] Parsing failed: %s", error.c_str());
     delay(3600000);
   } else {
-    Serial.println("[INFO] Board configuration parsed");
+    DEBUG_INFO("[INFO] Board configuration parsed");
   }
 
   std::string board_uid = get_controller_uid();
-  Serial.print("[INFO] Board UID: ");
-  Serial.println(board_uid.c_str());
+  DEBUG_INFO("[INFO] Board UID: %s", board_uid.c_str());
 
   if (!jsonDoc.containsKey(board_uid)) {
-    Serial.print("[ERROR] No configuration found for ");
-    Serial.println(board_uid.c_str());
+    DEBUG_INFO("[ERROR] No configuration found for %s", board_uid.c_str());
     delay(3600000);
   }
   JsonObject config = jsonDoc[board_uid].as<JsonObject>();
@@ -53,13 +50,12 @@ void load_board() {
     if (config["data"].containsKey("pin")) {
       BitBang::initialize((int)config["data"]["pin"], 31250);
     } else {
-      Serial.println("[ERROR] Not connection between boards: "
-                     "'.{board_uid}.data.pin' not found");
+      DEBUG_INFO("[ERROR] Not connection between boards: "
+                 "'.{board_uid}.data.pin' not found");
       delay(3600000);
     }
   }
-  Serial.print("[INFO] Board chirality is on the left side: ");
-  Serial.println(isLeft);
+  DEBUG_INFO("[INFO] Board chirality is on the left side: %d", isLeft);
   randomSeed(isLeft * 42);
 
   if (config.containsKey("leds")) {
@@ -68,14 +64,12 @@ void load_board() {
       set_pixels((int)config["leds"]["pin"], (int)config["leds"]["count"],
                  isLeft);
     } else {
-      Serial.println(
-          "[ERROR] Cannot configure leds: '.{board_uid}.leds.count' or "
-          "'.{board_uid}.leds.pin' not found");
+      DEBUG_INFO("[ERROR] Cannot configure leds: '.{board_uid}.leds.count' or "
+                 "'.{board_uid}.leds.pin' not found");
       delay(3600000);
     }
   } else {
-    Serial.println(
-        "[INFO] No leds on the board: '.{board_uid}.leds' not found");
+    DEBUG_INFO("[INFO] No leds on the board: '.{board_uid}.leds' not found");
   }
 
   if (config.containsKey("matrix")) {
@@ -96,21 +90,21 @@ void load_board() {
         DaughterBoard::Setup(msgLength, col_pins, row_pins);
       }
     } else {
-      Serial.println(
+      DEBUG_INFO(
           "[ERROR] Cannot configure switches: '.{board_uid}.matrix.cols' or "
           "'.{board_uid}.matrix.rows' not found");
       delay(3600000);
     }
   } else {
-    Serial.println(
+    DEBUG_INFO(
         "[WARNING] No switches on the board: '.{board_uid}.matrix' not found");
   }
-  Serial.println("Board loaded");
+  DEBUG_INFO("Board loaded");
 };
 
 void load_layout() {
-  Serial.println("Loading layout");
-  Serial.println("Layout loaded");
+  DEBUG_INFO("Loading layout");
+  DEBUG_INFO("Layout loaded");
 };
 
 void load_config() {

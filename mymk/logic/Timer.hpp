@@ -18,15 +18,11 @@ private:
       : name(i_name), callable(i_func) {
     end_time = Time::Now() + (delay_ms * 1E3);
 
-    Serial.print("Now: ");
-    Serial.print(Time::Now());
-    Serial.print("    Timer.end_time: ");
-    Serial.println(end_time);
+    DEBUG_DEBUG("Timer Start: %d    End: %d", Time::Now(), end_time);
   };
 
   void run() {
-    Serial.print("Timer.run ");
-    Serial.println(name.c_str());
+    DEBUG_INFO("Timer.run %d", name.c_str());
     callable();
   }
 

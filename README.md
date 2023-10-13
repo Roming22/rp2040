@@ -15,6 +15,7 @@ Boards managers:
 
 Libraries:
 * [Adafruit NeoPixels](https://adafruit.github.io/Adafruit_NeoPixel/html/index.html)
+* [Arduino_DebugUtils](https://github.com/arduino-libraries/Arduino_DebugUtils#readme)
 * [ArduinoJson](https://arduinojson.org/v6/doc/)
 
 ## Other dependencies
