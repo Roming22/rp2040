@@ -6,6 +6,7 @@
 #include "../hardware/board/DaughterBoard.hpp"
 #include "../hardware/board/MotherBoard.hpp"
 #include "../hardware/led/Pixels.hpp"
+#include "../logic/quantum/Universe.hpp"
 
 #include <ArduinoJson.h>
 #include <string>
@@ -120,12 +121,17 @@ void load_layout() {
   DynamicJsonDocument jsonDoc(LAYOUT_CONFIG_JSON_SIZE);
   parse_json(jsonDoc, jsonString);
 
+  std::string default_layer = "";
   for (JsonPair kvp : jsonDoc["layers"].as<JsonObject>()) {
     const std::string layer_name = kvp.key().c_str();
     const JsonObject layer_config = kvp.value().as<JsonObject>();
     Layer::Load(layer_name, layer_config);
+    if (default_layer == "") {
+      default_layer = layer_name;
+    }
   }
   DEBUG_INFO("Layout loaded");
+  Universe::Init(default_layer);
 };
 
 void load_config() {

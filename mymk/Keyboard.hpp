@@ -4,6 +4,7 @@
 #include "config/Loader.hpp"
 #include "hardware/board/BaseBoard.hpp"
 #include "logic/Timer.hpp"
+#include "logic/quantum/Universe.hpp"
 #include "utils/Fps.hpp"
 #include "utils/Time.hpp"
 
@@ -22,6 +23,7 @@ public:
     if (instance == nullptr) {
       instance = new Keyboard();
       load_config();
+      Universe::Start();
     }
   }
   static void Tick() {

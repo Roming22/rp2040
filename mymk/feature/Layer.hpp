@@ -56,35 +56,37 @@ public:
 
   static void LoadKeys(const JsonArray &config,
                        std::map<std::string, std::string> &keys) {
-    DEBUG_INFO("Layer::LoadKeys: %d keys", config.size());
+    DEBUG_VERBOSE("Layer::LoadKeys: %d keys", config.size());
     for (JsonVariant v : config) {
       std::string event_uid = "switch." + std::to_string(keys.size());
       keys[event_uid] = v.as<std::string>();
-      DEBUG_INFO("%s: %s", event_uid.c_str(), v.as<std::string>().c_str());
+      DEBUG_DEBUG("%s: %s", event_uid.c_str(), v.as<std::string>().c_str());
     }
     return;
   }
 
   static void LoadCombos(const JsonObject &config,
                          std::map<std::string, std::function<void()>> &combos) {
-    DEBUG_INFO("Layer::LoadCombos");
+    DEBUG_VERBOSE("Layer::LoadCombos");
 
     DEBUG_DEBUG("Loading chords");
     for (JsonPair kvp : config["chords"].as<JsonObject>()) {
       std::string definition = kvp.key().c_str();
       std::string key = kvp.value().as<std::string>();
-      DEBUG_INFO("Chord %s: %s", definition.c_str(), key.c_str());
+      DEBUG_DEBUG("Chord %s: %s", definition.c_str(), key.c_str());
     }
     DEBUG_DEBUG("Loading sequences");
     for (JsonPair kvp : config["sequences"].as<JsonObject>()) {
       std::string definition = kvp.key().c_str();
       std::string key = kvp.value().as<std::string>();
-      DEBUG_INFO("Sequence: %s: %s", definition.c_str(), key.c_str());
+      DEBUG_DEBUG("Sequence: %s: %s", definition.c_str(), key.c_str());
     }
     return;
   }
 
-  void set_leds() {
+  static const Layer &Get(std::string name) { return *layers[name]; }
+
+  void set_leds() const {
     if (color[0] < 0) {
       return;
     }
