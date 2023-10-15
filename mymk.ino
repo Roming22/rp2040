@@ -5,9 +5,10 @@
 void setup() {
   Serial.begin(9600);
   Debug.timestampOn();
+  delay(1000);
 
   DEBUG_INFO("\n\n\n\n\n\n\n\n\n\n");
-  DEBUG_INFO("[TIMER]");
+  DEBUG_INFO("[LAYER]");
   DEBUG_INFO("#############################################################"
              "###################");
   DEBUG_INFO("# Rebooting");

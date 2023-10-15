@@ -3,7 +3,7 @@ Custom keyboard firmware generator, in the vein of QMK and KMK.
 
 ## Features
 * Full configuration through YAML files
-* Split keyboard
+* Split keyboard support
 
 ## Differences with QMK
 * Support for input backtracking (i.e. when the output cannot be decided until additional key presses, or the lack of thereof, is detected)

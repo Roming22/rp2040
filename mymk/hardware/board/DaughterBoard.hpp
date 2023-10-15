@@ -10,7 +10,7 @@ public:
   DaughterBoard(const unsigned int &i_msg_len,
                 const std::vector<unsigned int> &i_col_pins,
                 const std::vector<unsigned int> &i_row_pins)
-      : BaseBoard(i_msg_len, i_col_pins, i_row_pins) {}
+      : BaseBoard(i_msg_len, i_col_pins, i_row_pins, true) {}
 
   static void Setup(const unsigned int &i_msg_len,
                     const std::vector<unsigned int> &i_col_pins,

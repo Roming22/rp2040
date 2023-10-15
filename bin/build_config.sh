@@ -48,12 +48,21 @@ parse_args(){
 }
 
 generate_hpp() {
+    MAGIC_NUMBER=3 # Used to calculate the size of the JsonDocument in memory
+    BOARD_CONFIG="$(yq --no-colors --output-format json "$BOARD_PATH" | jq -c -M)"
+    LAYOUT_CONFIG="$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M)"
     cat << EOF
 #ifndef BOARD_CONFIG_JSON
-#define BOARD_CONFIG_JSON "$(yq --no-colors --output-format json "$BOARD_PATH" | jq -c -M | sed 's:":\\":g')"
+#define BOARD_CONFIG_JSON "$(echo "$BOARD_CONFIG"  | sed 's:":\\":g')"
+#endif
+#ifndef BOARD_CONFIG_JSON_SIZE
+#define BOARD_CONFIG_JSON_SIZE $(( $(echo "$BOARD_CONFIG" | wc -c) * MAGIC_NUMBER))
 #endif
 #ifndef LAYOUT_CONFIG_JSON
-#define LAYOUT_CONFIG_JSON "$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M | sed 's:":\\":g')"
+#define LAYOUT_CONFIG_JSON "$(echo "$LAYOUT_CONFIG" | sed 's:":\\":g')"
+#endif
+#ifndef LAYOUT_CONFIG_JSON_SIZE
+#define LAYOUT_CONFIG_JSON_SIZE $(( $(echo "$LAYOUT_CONFIG" | wc -c) * MAGIC_NUMBER))
 #endif
 EOF
 }

@@ -1,16 +1,16 @@
-"layers":
+layers:
   alpha:
     leds:
-      RGB: [127, 0, 0]
+      color: [127, 0, 0]
     keys: [
       # Left
-        TH_HD(TAB, LSFT),  TH_HD(D, LSFT),           TH_HD(C, LALT),           TH_HD(L, LCTL),
-        NO,                TH_HD(T,LY_MO(systemL)),  TH_HD(A,LY_MO(fn_numL)),  TH_HD(E,LY_MO(symbolsL)),
-        NO,                SPACE,                    LGUI,                     NO,
+        TH_HD(TAB|LSFT),  TH_HD(D|LSFT),            TH_HD(C|LALT),            TH_HD(L|LCTL),
+        NO,               TH_HD(T|LY_MO(systemL)),  TH_HD(A|LY_MO(fn_numL)),  TH_HD(E|LY_MO(symbolsL)),
+        NO,               SPACE,                    LGUI,                     NO,
       # Right
-        TH_HD(R,RCTL),             TH_HD(S,RALT),            TH_HD(H,RSFT),          TH_HD(ENTER,RSFT),
-        TH_HD(I,LY_MO(symbolsR)),  TH_HD(O,LY_MO(fn_numR)),  TH_HD(N,LY_MO(systemR), NO,
-        NO,                        RGUI,                     MEH,                    NO
+        TH_HD(R|RCTL),            TH_HD(S|RALT),            TH_HD(H|RSFT),          TH_HD(ENTER|RSFT),
+        TH_HD(I|LY_MO(symbolsR)), TH_HD(O|LY_MO(fn_numR)),  TH_HD(N|LY_MO(systemR), NO,
+        NO,                       RGUI,                     MEH,                    NO
       ]
     combos:
       chords:
@@ -32,7 +32,7 @@
         18*17*16: W
   symbols:
     leds:
-      RGB: [127, 21, 0]
+      color: [127, 21, 0]
     keys: [
       # Left
         TRNS, GRAVE,        BACKSLASH,  UNDERSCORE,
@@ -56,7 +56,7 @@
       17*18: ")"
   fn_num:
     leds:
-      RGB: [127, 42, 0]
+      color: [127, 42, 0]
     keys: [
       # Left
         TRNS, F1,           F3,   F5,
@@ -83,7 +83,7 @@
         17*18: "3"
   system:
     leds:
-      RGB: [127, 0, 127]
+      color: [127, 0, 127]
     keys: [
       # Left
         TRNS, ESC,          PAGEUP,   PRTSCR,

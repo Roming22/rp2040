@@ -19,8 +19,9 @@ protected:
 public:
   BaseBoard(const unsigned int &i_msg_len,
             const std::vector<unsigned int> &i_col_pins,
-            const std::vector<unsigned int> &i_row_pins)
-      : msg_len(i_msg_len), is_connected(true) {
+            const std::vector<unsigned int> &i_row_pins,
+            const bool i_is_connected)
+      : msg_len(i_msg_len), is_connected(i_is_connected) {
     key = new KeyMatrix(i_col_pins, i_row_pins);
   }
 

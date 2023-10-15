@@ -9,14 +9,17 @@
 class MotherBoard : public BaseBoard {
 public:
   MotherBoard(const unsigned int &i_msg_len,
-              const std::vector<unsigned int> i_col_pins,
-              const std::vector<unsigned int> i_row_pins)
-      : BaseBoard(i_msg_len, i_col_pins, i_row_pins) {}
+              const std::vector<unsigned int> &i_col_pins,
+              const std::vector<unsigned int> &i_row_pins,
+              const bool i_is_connected)
+      : BaseBoard(i_msg_len, i_col_pins, i_row_pins, i_is_connected) {}
 
   static void Setup(const unsigned int &i_msg_len,
                     const std::vector<unsigned int> &i_col_pins,
-                    const std::vector<unsigned int> &i_row_pins) {
-    instance = new MotherBoard(i_msg_len, i_col_pins, i_row_pins);
+                    const std::vector<unsigned int> &i_row_pins,
+                    const bool i_is_connected) {
+    instance =
+        new MotherBoard(i_msg_len, i_col_pins, i_row_pins, i_is_connected);
   }
 
   void process_timer_events(std::vector<std::string> timer_events) {
