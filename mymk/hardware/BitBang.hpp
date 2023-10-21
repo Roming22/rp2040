@@ -3,15 +3,19 @@
 #ifndef MYMK_HARDWARE_BITBANG
 #define MYMK_HARDWARE_BITBANG
 
+#include <queue>
 #define DEFAULT_INPUT_TIMEOUT_US 2000
 
 class BitBang {
 private:
   unsigned int _pin;
+  unsigned int msg_len;
   unsigned int _input_mode;
   bool _active_state;
   unsigned int _tick;
   std::vector<unsigned int> _pulses;
+
+  std::queue<unsigned int> in, out;
 
   // Singleton
   BitBang() {}
@@ -26,10 +30,13 @@ public:
     return instance;
   }
 
-  static void initialize(const unsigned int pin, const unsigned int frequency,
+  static void initialize(const unsigned int pin,
+                         const unsigned int message_length,
+                         const unsigned int frequency,
                          const unsigned input_mode = INPUT) {
     BitBang &instance = getInstance();
     instance._pin = pin;
+    instance.msg_len = message_length;
     instance._input_mode = input_mode;
     instance._active_state = (instance._input_mode == INPUT);
     instance._resetPin();
@@ -152,24 +159,23 @@ public:
     interrupts();
   }
 
-  inline void _sendData(const unsigned &value,
-                        const unsigned int &length) const {
+  inline void _sendData(const unsigned &value) const {
     // Send bits, LSB first.
-    for (int i = 0; i < length; ++i) {
+    for (int i = 0; i < msg_len; ++i) {
       _sendBit(bitRead(value, i));
     }
   }
 
-  inline void _receiveData(const unsigned int &length) {
+  inline void _receiveData() {
     // Read bits
     _inputPin();
-    for (int i = length; i > 0; --i) {
+    for (int i = msg_len; i > 0; --i) {
       _pulses.push_back(_receivePulse(1E6));
     }
     _resetPin();
   }
 
-  static void SendData(const unsigned int &value, const unsigned int &length) {
+  static void SendData(const unsigned int &value) {
     static BitBang &instance = getInstance();
     DEBUG_DEBUG("Send value: %d", value);
 
@@ -178,16 +184,16 @@ public:
     instance._sendBit(!instance._active_state);
 
     // Send bits, LSB first.
-    instance._sendData(value, length);
+    instance._sendData(value);
     interrupts();
 
     // Serial.print("Sent bits: ");
     // Serial.println(value, BIN);
   }
 
-  static unsigned int ReceiveData(const unsigned int &length) {
+  static unsigned int ReceiveData() {
     static BitBang &instance = getInstance();
-    instance._pulses.reserve(length);
+    instance._pulses.reserve(instance.msg_len);
     static unsigned int value;
 
     noInterrupts();
@@ -198,7 +204,7 @@ public:
     }
 
     // Read bits
-    instance._receiveData(length);
+    instance._receiveData();
     interrupts();
 
     // Decode pulse
@@ -211,28 +217,28 @@ public:
     return value;
   }
 
-  static void Send(const int &value, const unsigned int &length) {
+  static void Send(const int &value) {
     static BitBang &instance = getInstance();
     DEBUG_DEBUG("Send value: %d", value);
 
     noInterrupts();
     instance._sendSync();
     busy_wait_us_32(instance._tick * 4);
-    instance._sendData(value, length);
+    instance._sendData(value);
     interrupts();
 
     // Serial.print("Sent bits: ");
     // Serial.println(value, BIN);
   }
 
-  static unsigned int Receive(const unsigned int &length) {
+  static unsigned int Receive() {
     static BitBang &instance = getInstance();
-    instance._pulses.reserve(length);
+    instance._pulses.reserve(instance.msg_len);
     static unsigned int value;
 
     noInterrupts();
     instance._receiveSync();
-    instance._receiveData(length);
+    instance._receiveData();
     interrupts();
 
     // Decode pulse
@@ -243,6 +249,24 @@ public:
     DEBUG_DEBUG("Received value: %d", value);
 
     return value;
+  }
+
+  static void Out(const unsigned int value) { getInstance().out.push(value); }
+
+  static std::queue<unsigned int> &In() { return getInstance().in; }
+
+  static void Tick() {
+    BitBang &instance = getInstance();
+    int data = 0;
+
+    data = Receive();
+    instance.in.push(data);
+
+    if (instance.out.size() != 0) {
+      data = instance.out.front();
+      instance.out.pop();
+    }
+    Send(data);
   }
 };
 #endif

@@ -5,6 +5,7 @@
 // them based on the events that are triggered during its lifetime.
 
 #include "../../feature/Layer.hpp"
+#include "../../logic/Events.hpp"
 #include "Timeline.hpp"
 
 #include <map>
@@ -22,17 +23,21 @@ protected:
                                  // processed by the universe
 
 public:
-  static void Init(std::string layer_name) {
-    DEBUG_INFO("Universe::Init %s", layer_name.c_str());
+  static void Setup(std::string layer_name) {
+    DEBUG_INFO("Universe::Setup %s", layer_name.c_str());
     start_state = new Timeline("start", nullptr);
     // The default layer will activate 'start' event.
     start_state->possible_events["start"] = "LY_TO(" + layer_name + ")";
+    Event::Add(std::string("start"));
   }
 
-  static void Start() {
-    DEBUG_INFO("Universe::Start");
-    active_state = start_state;
-    // TODO Send a 'start' event.
+  static void Tick() {
+    DEBUG_VERBOSE("Universe::Tick");
+
+    if (Event::HasEvents()) {
+      std::string event_id = Event::Get();
+      DEBUG_INFO("Universe: processing the '%s' event", event_id.c_str());
+    }
   }
 };
 Timeline *Universe::start_state = nullptr;

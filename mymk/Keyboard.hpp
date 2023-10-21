@@ -23,14 +23,15 @@ public:
     if (instance == nullptr) {
       instance = new Keyboard();
       load_config();
-      Universe::Start();
     }
   }
+
   static void Tick() {
     DEBUG_VERBOSE("Keyboard::Tick");
     Time::Tick();
     Timer::Tick();
     BaseBoard::Tick();
+    Universe::Tick();
     FPS::Tick();
   }
 };

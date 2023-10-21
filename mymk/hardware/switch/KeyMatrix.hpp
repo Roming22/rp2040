@@ -2,7 +2,7 @@
 #define MYMK_HARDWARE_KEYMATRIX
 
 #include "Key.hpp"
-#include <queue>
+
 #include <vector>
 
 class KeyMatrix : public Key {
@@ -36,11 +36,7 @@ public:
     bool state;
     int key_index = 0;
 
-    if (!events.empty()) {
-      DEBUG_ERROR("[ERROR] Switch events is not empty");
-      delay(3000);
-    }
-
+    events.clear();
     for (unsigned int row = 0; row < row_pins.size(); ++row) {
       pinMode(row_pins[row], OUTPUT);
       digitalWrite(row_pins[row], LOW);

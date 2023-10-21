@@ -60,7 +60,7 @@ void load_board() {
     is_connected = true;
     if (config["data"].containsKey("pin")) {
 
-      BitBang::initialize((int)config["data"]["pin"], 31250);
+      BitBang::initialize((int)config["data"]["pin"], 32, 31250);
     } else {
       DEBUG_INFO("[ERROR] Not connection between boards: "
                  "'.{board_uid}.data.pin' not found");
@@ -95,11 +95,11 @@ void load_board() {
       for (JsonVariant item : config["matrix"]["rows"].as<JsonArray>()) {
         row_pins.push_back(item.as<unsigned int>());
       }
-      const unsigned int msgLength = 32;
       if (isLeft) {
-        MotherBoard::Setup(msgLength, col_pins, row_pins, is_connected);
+        is_connected = false;
+        MotherBoard::Setup(col_pins, row_pins, is_connected);
       } else {
-        DaughterBoard::Setup(msgLength, col_pins, row_pins);
+        DaughterBoard::Setup(col_pins, row_pins);
       }
     } else {
       DEBUG_INFO(
@@ -131,7 +131,7 @@ void load_layout() {
     }
   }
   DEBUG_INFO("Layout loaded");
-  Universe::Init(default_layer);
+  Universe::Setup(default_layer);
 };
 
 void load_config() {
