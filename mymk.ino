@@ -1,6 +1,4 @@
-#include "Arduino_DebugUtils.h"
-
-#include "mymk/Keyboard.hpp"
+#include "mymk.hpp"
 
 void setup() {
   Serial.begin(9600);

@@ -35,9 +35,6 @@ parse_args(){
             -d|--debug)
                 set -x
                 ;;
-            -d|--debug)
-                set -x
-                ;;
             -h|--help)
                 usage
                 exit 0

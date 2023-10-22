@@ -1,12 +1,13 @@
 #ifndef MYMK_CONFIG_LOADER
 #define MYMK_CONFIG_LOADER
 
-#include "../feature/Layer.hpp"
-#include "../hardware/BitBang.hpp"
-#include "../hardware/board/DaughterBoard.hpp"
-#include "../hardware/board/MotherBoard.hpp"
-#include "../hardware/led/Pixels.hpp"
-#include "../logic/quantum/Universe.hpp"
+#include "../feature/Layer.h"
+#include "../hardware/BitBang.h"
+#include "../hardware/board/DaughterBoard.h"
+#include "../hardware/board/MotherBoard.h"
+#include "../hardware/led/Pixels.h"
+#include "../logic/quantum/Universe.h"
+#include "../utils/Debug.hpp"
 
 #include <ArduinoJson.h>
 #include <string>
@@ -60,7 +61,7 @@ void load_board() {
     is_connected = true;
     if (config["data"].containsKey("pin")) {
 
-      BitBang::initialize((int)config["data"]["pin"], 32, 31250);
+      BitBang::Setup((int)config["data"]["pin"], 32, 31250);
     } else {
       DEBUG_INFO("[ERROR] Not connection between boards: "
                  "'.{board_uid}.data.pin' not found");
@@ -73,8 +74,8 @@ void load_board() {
   if (config.containsKey("leds")) {
     if (config["leds"].containsKey("count") &&
         config["leds"].containsKey("pin")) {
-      set_pixels((int)config["leds"]["pin"], (int)config["leds"]["count"],
-                 isLeft);
+      Pixels::Setup((int)config["leds"]["pin"], (int)config["leds"]["count"],
+                    isLeft);
     } else {
       DEBUG_INFO("[ERROR] Cannot configure leds: '.{board_uid}.leds.count' or "
                  "'.{board_uid}.leds.pin' not found");
