@@ -12,7 +12,7 @@ class Layer {
 private:
   static std::map<const std::string, const Layer *> layers;
   const std::string name;
-  const int *color;
+  int *color;
   std::map<std::string, std::string> keys;
   std::map<std::string, std::function<void()>> combos;
 

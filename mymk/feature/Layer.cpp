@@ -3,17 +3,21 @@
 #include "../logic/quantum/Timeline.h"
 #include "../utils/Debug.hpp"
 
+#include <cstring>
+
 Layer::Layer(const std::string &i_name, const int *i_color,
              std::map<std::string, std::string> &i_keys,
              std::map<std::string, std::function<void()>> &i_combos)
-    : name(i_name), color(i_color), keys(i_keys), combos(i_combos) {}
+    : name(i_name), color(nullptr), keys(i_keys), combos(i_combos) {
+  color = new int[4];
+  std::memcpy(color, i_color, sizeof(int) * 4);
+}
 
 void Layer::LoadConfig(const std::string name, const JsonObject &config) {
   DEBUG_INFO("Layer::Load: %s", name.c_str());
 
   int color[] = {-1, -1, -1, 0};
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
-  DEBUG_INFO("Loaded! layer pixels [%d, %d, %d]", color[0], color[1], color[2]);
 
   std::map<std::string, std::string> keys;
   LoadKeys(config["keys"].as<JsonArray>(), keys);
@@ -35,7 +39,6 @@ void Layer::LoadLedColor(const JsonArray &config, int *color) {
   for (int i = 0; i < config.size(); ++i) {
     color[i] = config[i].as<int>();
   }
-  DEBUG_INFO("Load layer pixels [%d, %d, %d]", color[0], color[1], color[2]);
 }
 
 void Layer::LoadKeys(const JsonArray &config,
@@ -67,9 +70,9 @@ void Layer::LoadCombos(const JsonObject &config,
 }
 
 const Layer &Layer::Get(const std::string &name) {
-  DEBUG_INFO("class layer '%d'", layers[name]);
-  DEBUG_INFO("class pixels [%d, %d, %d]", layers[name]->color[0],
-             layers[name]->color[1], layers[name]->color[2]);
+  if (layers.count(name) == 0) {
+    DEBUG_ERROR("Unknown layer: '%s'", name.c_str());
+  }
   return *layers[name];
 }
 
@@ -81,8 +84,9 @@ void Layer::LoadKeyDefinition(Timeline &timeline, const std::string &switch_uid,
   DEBUG_INFO("Loading layer '%s'", layer_name.c_str());
 
   Layer layer = Layer::Get(layer_name);
-  DEBUG_INFO("copy layer '%d'", &layer);
   if (!timeline.active_layers.empty()) {
+    // TODO: Implement overlaying layers
+    DEBUG_ERROR("Layer change not implemented");
     // layer.overlay(timeline.active_layers.back());
   }
   timeline.active_layers.push(layer);
