@@ -11,7 +11,10 @@ private:
   std::vector<unsigned int> row_pins;
   std::vector<bool> key_states;
 
+  void set_timer();
+
 public:
+  bool can_poll;
   KeyMatrix(const std::vector<unsigned int> &i_col_pins,
             const std::vector<unsigned int> &i_row_pins);
 

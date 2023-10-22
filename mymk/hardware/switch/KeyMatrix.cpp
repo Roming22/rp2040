@@ -1,8 +1,10 @@
 #include "KeyMatrix.h"
+#include "../../logic/Timer.h"
 #include "../../utils/Debug.hpp"
 
 KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
-                     const std::vector<unsigned int> &i_row_pins) {
+                     const std::vector<unsigned int> &i_row_pins)
+    : can_poll(false) {
   col_pins = std::vector(i_col_pins);
   row_pins = std::vector(i_row_pins);
   size = col_pins.size() * row_pins.size();
@@ -18,14 +20,23 @@ KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
   for (unsigned int row = 0; row < row_pins.size(); ++row) {
     pinMode(row_pins[row], INPUT);
   }
+  set_timer();
+}
+
+void KeyMatrix::set_timer() {
+  can_poll = false;
+  Timer::Start("#poll_switches", 10, [this] { this->can_poll = true; });
 }
 
 void KeyMatrix::poll_events(std::vector<int> &events) {
+  events.clear();
+  if (!can_poll) {
+    return;
+  }
+
   DEBUG_VERBOSE("KeyMatrix.poll_events");
   bool state;
   int key_index = 0;
-
-  events.clear();
   for (unsigned int row = 0; row < row_pins.size(); ++row) {
     pinMode(row_pins[row], OUTPUT);
     digitalWrite(row_pins[row], LOW);
@@ -49,4 +60,5 @@ void KeyMatrix::poll_events(std::vector<int> &events) {
     }
     pinMode(row_pins[row], INPUT);
   }
+  set_timer();
 }

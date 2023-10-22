@@ -10,7 +10,9 @@ Timer::Timer(std::string i_name, int delay_ms, std::function<void()> i_func)
 };
 
 void Timer::run() {
-  DEBUG_INFO("Timer.run %d", name.c_str());
+  if (name[0] != '#') {
+    DEBUG_INFO("Timer.run %s", name.c_str());
+  }
   callable();
 }
 
