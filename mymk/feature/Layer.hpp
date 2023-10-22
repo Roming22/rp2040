@@ -2,6 +2,7 @@
 #define MYMK_FEATURE_LAYER
 
 #include "../hardware/led/Pixels.hpp"
+#include "../logic/quantum/Timeline.hpp"
 
 #include <ArduinoJson.h>
 #include <functional>
@@ -21,7 +22,7 @@ protected:
       : name(i_name), color(i_color), keys(i_keys), combos(i_combos){};
 
 public:
-  static void Load(const std::string name, const JsonObject &config) {
+  static void LoadConfig(const std::string name, const JsonObject &config) {
     DEBUG_INFO("Layer::Load: %s", name.c_str());
 
     int *color;
@@ -85,6 +86,38 @@ public:
   }
 
   static const Layer &Get(std::string name) { return *layers[name]; }
+
+  static void LoadKeyDefinition(Timeline *timeline,
+                                const std::string &switch_uid,
+                                const std::vector<std::string> &definition,
+                                const bool is_toggle) {
+    DEBUG_VERBOSE("KeyLayer::LoadDefinition");
+    std::string layer_name = definition[0];
+    DEBUG_INFO("Loading layer '%s'", layer_name.c_str());
+  }
+
+  static void
+  LoadMomentaryDefinition(Timeline *timeline, const std::string &switch_uid,
+                          const std::vector<std::string> &definition) {
+    DEBUG_VERBOSE("KeyLayer::LoadMomentaryDefinition");
+    LoadKeyDefinition(timeline, switch_uid, definition, false);
+  }
+
+  static void LoadToggleDefinition(Timeline *timeline,
+                                   const std::string &switch_uid,
+                                   const std::vector<std::string> &definition) {
+    DEBUG_INFO("KeyLayer::LoadToggleDefinition");
+    LoadKeyDefinition(timeline, switch_uid, definition, true);
+  }
+
+  void Activate(std::string &layer_name, Timeline &timeline) {
+    DEBUG_VERBOSE("Layer::activate");
+    Layer layer = Layer::Get(layer_name);
+    DEBUG_INFO("[%s] Load layer '%s'", timeline.history.c_str(),
+               layer_name.c_str());
+    timeline.active_layers.push(layer);
+    timeline.actions.push([layer]() { layer.set_leds(); });
+  }
 
   void set_leds() const {
     if (color[0] < 0) {

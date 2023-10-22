@@ -125,7 +125,7 @@ void load_layout() {
   for (JsonPair kvp : jsonDoc["layers"].as<JsonObject>()) {
     const std::string layer_name = kvp.key().c_str();
     const JsonObject layer_config = kvp.value().as<JsonObject>();
-    Layer::Load(layer_name, layer_config);
+    Layer::LoadConfig(layer_name, layer_config);
     if (default_layer == "") {
       default_layer = layer_name;
     }

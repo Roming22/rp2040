@@ -13,6 +13,7 @@ void setup() {
              "###################");
   DEBUG_INFO("# Rebooting");
 
+  // Debug.setDebugLevel(DBG_VERBOSE);
   Keyboard::Setup();
 
   DEBUG_INFO("");
