@@ -5,7 +5,7 @@
 
 class Combo {
 public:
-  static void LoadDefinition(Timeline *timeline, const std::string &switch_uid,
+  static void LoadDefinition(Timeline &timeline, const std::string &switch_uid,
                              const std::vector<std::string> &definition);
 };
 #endif

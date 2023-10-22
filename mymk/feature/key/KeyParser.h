@@ -16,12 +16,12 @@
 class KeyParser {
 protected:
   static std::map<std::string,
-                  std::function<void(Timeline *, const std::string &,
+                  std::function<void(Timeline &, const std::string &,
                                      const std::vector<std::string> &)>>
       loader;
 
 public:
-  static void Load(Timeline *timeline, const std::string &switch_uid,
+  static void Load(Timeline &timeline, const std::string &switch_uid,
                    const std::string &definition);
 
   static std::tuple<std::string, std::vector<std::string>>

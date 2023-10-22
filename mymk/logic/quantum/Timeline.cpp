@@ -9,11 +9,13 @@ void Timeline::process_event(std::string &event_id) {
     std::string &definition = possible_events[event_id];
     DEBUG_INFO("Timeline maps the event to '%s'", definition.c_str());
     std::string switch_uid = event_id.substr(0, event_id.find_last_of("."));
-    KeyParser::Load(this, switch_uid, definition);
+    KeyParser::Load(*this, switch_uid, definition);
   } else {
     DEBUG_INFO("Timeline ignores the event");
   }
 }
+
+void Timeline::mark_determined() { is_determined = true; }
 
 void Timeline::execute() {
   DEBUG_VERBOSE("Timeline::execute");

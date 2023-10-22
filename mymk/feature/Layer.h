@@ -31,23 +31,21 @@ public:
 
   static void LoadConfig(const std::string name, const JsonObject &config);
 
-  static void LoadKeyDefinition(Timeline *timeline,
+  static void LoadKeyDefinition(Timeline &timeline,
                                 const std::string &switch_uid,
                                 const std::vector<std::string> &definition,
                                 const bool is_toggle);
 
   static void
-  LoadMomentaryDefinition(Timeline *timeline, const std::string &switch_uid,
+  LoadMomentaryDefinition(Timeline &timeline, const std::string &switch_uid,
                           const std::vector<std::string> &definition);
 
-  static void LoadToggleDefinition(Timeline *timeline,
+  static void LoadToggleDefinition(Timeline &timeline,
                                    const std::string &switch_uid,
                                    const std::vector<std::string> &definition);
 
-  static void Activate(std::string &layer_name, Timeline &timeline);
+  static const Layer &Get(const std::string &name);
 
   void set_leds() const;
-
-  static const Layer &Get(std::string name);
 };
 #endif

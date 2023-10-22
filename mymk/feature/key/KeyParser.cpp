@@ -1,7 +1,7 @@
 #include "KeyParser.h"
 #include "../../utils/Debug.hpp"
 
-void KeyParser::Load(Timeline *timeline, const std::string &switch_uid,
+void KeyParser::Load(Timeline &timeline, const std::string &switch_uid,
                      const std::string &definition) {
   DEBUG_VERBOSE("KeyParse::Load");
   const auto [name, args] = KeyParser::ParseDefinition(definition);
@@ -65,7 +65,7 @@ KeyParser::ParseDefinition(const std::string &keycode) {
   return std::make_tuple(func_name, args);
 }
 
-std::map<std::string, std::function<void(Timeline *, const std::string &,
+std::map<std::string, std::function<void(Timeline &, const std::string &,
                                          const std::vector<std::string> &)>>
     KeyParser::loader = {
         {"KEYCODE", &Keycode::LoadDefinition},
