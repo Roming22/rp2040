@@ -19,7 +19,7 @@ void Universe::Tick() {
     std::string event_id = Event::Get();
     DEBUG_INFO("Universe: processing the '%s' event", event_id.c_str());
     start_timeline->process_event(event_id);
-    start_timeline->resolve();
+    start_timeline = start_timeline->resolve();
   }
 }
 

@@ -11,22 +11,24 @@
 
 class Timeline {
 protected:
-public:
   std::string history;
   bool is_determined;
   Timeline *next_timeline;
-  std::map<std::string, std::string> possible_events;
-  std::queue<Layer> active_layers;
-  std::queue<std::function<void()>> actions;
   Timeline *parent;
-  std::vector<Timeline> children;
+  std::vector<Timeline *> children;
 
-  Timeline(std::string i_history, Timeline *i_parent)
-      : history(i_history), parent(i_parent) {}
+public:
+  std::queue<Layer> active_layers;
+  std::map<std::string, std::string> possible_events;
+  std::queue<std::function<void()>> actions;
+
+  Timeline(const std::string &i_history, Timeline *i_parent);
 
   void activate_layer(const std::string &layer_name);
 
   void process_event(std::string &event_id);
+
+  Timeline &split(const std::string &id);
 
   void mark_determined();
 
