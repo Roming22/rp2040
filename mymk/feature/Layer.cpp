@@ -85,15 +85,16 @@ void Layer::LoadKeyDefinition(Timeline &timeline, const std::string &switch_uid,
 
   Layer layer = Layer::Get(layer_name);
   const std::string timeline_id =
-      "layer." + (std::string(is_toggle ? "toggle" : "momentary")) + "." +
-      layer_name;
-  Timeline new_timeline = timeline.split(timeline_id);
+      "layer." + layer_name +
+      (std::string(is_toggle ? ".toggle" : ".momentary"));
+  Timeline &new_timeline = timeline.split(timeline_id);
 
-  if (!new_timeline.active_layers.empty()) {
-    // TODO: Implement overlaying layers
-    DEBUG_ERROR("Layer change not implemented");
-    // layer.overlay(timeline.active_layers.back());
+  for (const auto &pair : layer.keys) {
+    const std::string id = pair.first;
+    const std::string definition = pair.second;
+    new_timeline.possible_events[id + ".pressed"] = definition;
   }
+
   if (!is_toggle) {
     // TODO: Implement momentary layers
   }

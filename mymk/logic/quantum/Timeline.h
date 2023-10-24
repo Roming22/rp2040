@@ -6,8 +6,8 @@
 #include <functional>
 #include <map>
 #include <queue>
+#include <set>
 #include <string>
-#include <vector>
 
 class Timeline {
 protected:
@@ -15,7 +15,7 @@ protected:
   bool is_determined;
   Timeline *next_timeline;
   Timeline *parent;
-  std::vector<Timeline *> children;
+  std::set<Timeline *> children;
 
 public:
   std::queue<Layer> active_layers;
