@@ -8,9 +8,11 @@
 #include <queue>
 #include <set>
 #include <string>
+#include <vector>
 
 class Timeline {
 protected:
+  static Timeline *current;
   std::string history;
   bool is_determined;
   Timeline *next_timeline;
@@ -18,11 +20,13 @@ protected:
   std::set<Timeline *> children;
 
 public:
-  std::queue<Layer> active_layers;
-  std::map<std::string, std::string> possible_events;
+  std::vector<Layer> active_layers;
+  std::map<std::string, std::function<void()>> possible_events;
   std::queue<std::function<void()>> actions;
 
   Timeline(const std::string &i_history, Timeline *i_parent);
+
+  static Timeline &GetCurrent();
 
   void activate_layer(const std::string &layer_name);
 

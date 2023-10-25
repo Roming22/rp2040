@@ -69,8 +69,8 @@ std::map<std::string, std::function<void(Timeline &, const std::string &,
                                          const std::vector<std::string> &)>>
     KeyParser::loader = {
         {"KEYCODE", &Keycode::LoadDefinition},
-        {"LY_MO", &Layer::LoadMomentaryDefinition},
-        {"LY_TO", &Layer::LoadToggleDefinition},
+        // {"LY_MO", &Layer::LoadMomentaryDefinition},
+        // {"LY_TO", &Layer::LoadToggleDefinition},
         {"MT", &MultiTap::LoadDefinition},
         {"SQ", &Combo::LoadDefinition},
 };

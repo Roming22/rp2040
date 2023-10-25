@@ -1,32 +1,39 @@
 #include "Timeline.h"
 #include "../../feature/key/KeyParser.h"
 #include "../../utils/Debug.hpp"
+#include <functional>
 
 Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
     : history(i_history), parent(i_parent), children(), is_determined(false),
       next_timeline(nullptr), active_layers(), actions() {
   DEBUG_VERBOSE("Timeline::Timeline");
+  if (current == nullptr) {
+    current = this;
+  }
   if (parent != nullptr) {
     parent->mark_determined();
     parent->children.insert(this);
     possible_events = parent->possible_events;
-    std::queue<Layer> tmp_layer_queue = parent->active_layers;
-    while (!tmp_layer_queue.empty()) {
-      active_layers.push(tmp_layer_queue.front());
-      tmp_layer_queue.pop();
-    }
+    // std::vector<Layer> tmp_layer_queue = parent->active_layers;
+    // while (!tmp_layer_queue.empty()) {
+    //   active_layers.push_back(tmp_layer_queue.front());
+    //   tmp_layer_queue.pop();
+    // }
   }
 }
 
+Timeline &Timeline::GetCurrent() { return *current; }
+
 void Timeline::process_event(std::string &event_id) {
   DEBUG_VERBOSE("Timeline::process_event");
+  current = this;
   DEBUG_INFO("Timeline %s: processing the '%s' event", history.c_str(),
              event_id.c_str());
+  DEBUG_INFO("Timeline events: %d", possible_events.size());
   if (possible_events.count(event_id) > 0) {
-    std::string &definition = possible_events[event_id];
-    DEBUG_INFO("Timeline maps the event to '%s'", definition.c_str());
-    std::string switch_uid = event_id.substr(0, event_id.find_last_of("."));
-    KeyParser::Load(*this, switch_uid, definition);
+    DEBUG_INFO("Timeline maps the event");
+    std::function<void()> &function = possible_events[event_id];
+    function();
   } else {
     DEBUG_INFO("Timeline '%s' @%d ignores the event", history.c_str(), this);
 
@@ -82,3 +89,5 @@ Timeline *Timeline::resolve() {
   delete this;
   return child.resolve();
 }
+
+Timeline *Timeline::current = nullptr;
