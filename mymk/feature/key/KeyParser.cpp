@@ -2,8 +2,8 @@
 #include "../../utils/Debug.hpp"
 #include <functional>
 
-std::function<void()> KeyParser::Load(const std::string &switch_uid,
-                                      const std::string &definition) {
+std::function<void(Timeline &)> KeyParser::Load(const std::string &switch_uid,
+                                                const std::string &definition) {
   DEBUG_VERBOSE("KeyParse::Load");
   const auto [name, args] = KeyParser::ParseDefinition(definition);
   DEBUG_VERBOSE("Func name: %s", name.c_str());
@@ -68,8 +68,8 @@ KeyParser::ParseDefinition(const std::string &keycode) {
 }
 
 std::map<std::string,
-         std::function<std::function<void()>(const std::string &,
-                                             const std::vector<std::string> &)>>
+         std::function<std::function<void(Timeline &)>(
+             const std::string &, const std::vector<std::string> &)>>
     KeyParser::loader = {
         {"IGNORE", &Keycode::LoadDefinition},
         {"KEYCODE", &Keycode::LoadDefinition},

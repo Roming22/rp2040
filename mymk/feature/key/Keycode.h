@@ -8,17 +8,16 @@
 
 class Keycode {
 public:
-  static std::function<void()>
+  static std::function<void(Timeline &)>
   LoadDefinition(const std::string &switch_uid,
                  const std::vector<std::string> &definition);
 
-  static void OnPress(const std::string &switch_uid,
+  static void OnPress(Timeline &timeline, const std::string &switch_uid,
                       const std::string &keycode);
 
-  static void OnCommit(const std::string &switch_uid,
-                       const std::string &keycode);
+  static void OnCommit(Timeline &timeline, const std::string &keycode);
 
-  static void OnRelease(const std::string &switch_uid,
+  static void OnRelease(Timeline &timeline, const std::string &switch_uid,
                         const std::string &keycode);
 };
 #endif

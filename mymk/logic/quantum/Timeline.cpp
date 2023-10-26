@@ -24,10 +24,8 @@ Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
   DEBUG_INFO("New Timeline has %d events", possible_events.size());
 }
 
-Timeline &Timeline::GetCurrent() { return *current; }
-
 void Timeline::add_event_function(std::string event_id,
-                                  std::function<void()> function) {
+                                  std::function<void(Timeline &)> function) {
   DEBUG_INFO("Timeline::add_event_function %s: %s", history.c_str(),
              event_id.c_str());
   this->possible_events[event_id] = function;
@@ -39,7 +37,7 @@ void Timeline::remove_event_function(std::string event_id) {
   this->possible_events.erase(this->possible_events.find(event_id));
 }
 
-void Timeline::add_commit_action(std::function<void()> function) {
+void Timeline::add_commit_action(std::function<void(Timeline &)> function) {
   DEBUG_INFO("Timeline::add_commit_action %s", history.c_str());
   this->commit_actions.push(function);
 }
@@ -52,8 +50,8 @@ void Timeline::process_event(std::string &event_id) {
   DEBUG_INFO("Timeline events: %d", possible_events.size());
   if (possible_events.count(event_id) > 0) {
     DEBUG_INFO("Timeline maps the event");
-    std::function<void()> &function = possible_events[event_id];
-    function();
+    std::function<void(Timeline &)> &function = possible_events[event_id];
+    function(*this);
   } else {
     DEBUG_INFO("Timeline '%s' @%d ignores the event", history.c_str(), this);
 
@@ -83,9 +81,9 @@ void Timeline::mark_determined() {
 void Timeline::execute() {
   DEBUG_VERBOSE("Timeline::execute");
   while (!commit_actions.empty()) {
-    std::function<void()> &action = commit_actions.front();
+    std::function<void(Timeline &)> &action = commit_actions.front();
     commit_actions.pop();
-    action();
+    action(*this);
   }
 }
 

@@ -10,8 +10,8 @@
 #include <string>
 
 Layer::Layer(const std::string &i_name, const int *i_color,
-             std::map<std::string, std::function<void()>> &i_keys,
-             std::map<std::string, std::function<void()>> &i_combos)
+             std::map<std::string, std::function<void(Timeline &)>> &i_keys,
+             std::map<std::string, std::function<void(Timeline &)>> &i_combos)
     : name(i_name), color(nullptr), keys(i_keys), combos(i_combos) {
   color = new int[4];
   std::memcpy(color, i_color, sizeof(int) * 4);
@@ -23,10 +23,10 @@ void Layer::LoadConfig(const std::string name, const JsonObject &config) {
   int color[] = {-1, -1, -1, 0};
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
 
-  std::map<std::string, std::function<void()>> keys;
+  std::map<std::string, std::function<void(Timeline &)>> keys;
   LoadKeys(config["keys"].as<JsonArray>(), keys);
 
-  std::map<std::string, std::function<void()>> combos;
+  std::map<std::string, std::function<void(Timeline &)>> combos;
   LoadCombos(config["combos"], combos);
 
   layers[name] = new Layer(name, color, keys, combos);
@@ -45,8 +45,9 @@ void Layer::LoadLedColor(const JsonArray &config, int *color) {
   }
 }
 
-void Layer::LoadKeys(const JsonArray &config,
-                     std::map<std::string, std::function<void()>> &keys) {
+void Layer::LoadKeys(
+    const JsonArray &config,
+    std::map<std::string, std::function<void(Timeline &)>> &keys) {
   DEBUG_VERBOSE("Layer::LoadKeys: %d keys", config.size());
   for (JsonVariant v : config) {
     std::string switch_uid = "switch." + std::to_string(keys.size() + 1);
@@ -58,8 +59,9 @@ void Layer::LoadKeys(const JsonArray &config,
   }
 }
 
-void Layer::LoadCombos(const JsonObject &config,
-                       std::map<std::string, std::function<void()>> &combos) {
+void Layer::LoadCombos(
+    const JsonObject &config,
+    std::map<std::string, std::function<void(Timeline &)>> &combos) {
   DEBUG_VERBOSE("Layer::LoadCombos");
 
   DEBUG_DEBUG("Loading chords");
@@ -83,19 +85,21 @@ Layer Layer::Get(const std::string &name) {
   return *layers[name];
 }
 
-void Layer::load(const std::string &switch_uid, const bool is_toggle) {
+void Layer::load(Timeline &timeline, const std::string &switch_uid,
+                 const bool is_toggle) {
   DEBUG_INFO("KeyLayer::load");
   std::string press_event = switch_uid + std::string(".pressed");
-  Timeline::GetCurrent().add_event_function(
-      press_event, [this, switch_uid, is_toggle]() {
-        this->on_press(switch_uid, is_toggle);
+  timeline.add_event_function(
+      press_event, [this, switch_uid, is_toggle](Timeline &timeline) {
+        this->on_press(timeline, switch_uid, is_toggle);
       });
 }
 
-void Layer::on_press(const std::string &switch_uid, const bool is_toggle) {
+void Layer::on_press(Timeline &timeline, const std::string &switch_uid,
+                     const bool is_toggle) {
   const std::string timeline_id =
       "layer." + name + (std::string(is_toggle ? ".toggle" : ".momentary"));
-  Timeline &new_timeline = Timeline::GetCurrent().split(timeline_id);
+  Timeline &new_timeline = timeline.split(timeline_id);
   std::string press_event = switch_uid + std::string(".pressed");
   std::string release_event = switch_uid + std::string(".released");
 
@@ -108,18 +112,28 @@ void Layer::on_press(const std::string &switch_uid, const bool is_toggle) {
   new_timeline.mark_determined();
 
   // On commit actions
-  new_timeline.add_commit_action([this]() { this->set_leds(); });
+  new_timeline.add_commit_action(
+      [this](Timeline &timeline) { this->on_commit(timeline); });
 
   // On release configuration
-  new_timeline.add_event_function(release_event,
-                                  [this, release_event, is_toggle]() {
-                                    this->on_release(release_event, is_toggle);
-                                  });
+  new_timeline.add_event_function(
+      release_event, [this, release_event, is_toggle](Timeline &timeline) {
+        this->on_release(timeline, release_event, is_toggle);
+      });
 }
 
-void Layer::on_release(const std::string &release_event, const bool is_toggle) {
+void Layer::on_commit(Timeline &timeline) const {
+  // Set LEDs
+  DEBUG_INFO("Set pixels to [%d, %d, %d]", color[0], color[1], color[2]);
+  if (color[0] < 0) {
+    return;
+  }
+  Pixels::Set(0, color[0], color[1], color[2]);
+}
+
+void Layer::on_release(Timeline &timeline, const std::string &release_event,
+                       const bool is_toggle) {
   DEBUG_INFO("%s", release_event.c_str());
-  Timeline &timeline = Timeline::GetCurrent();
   timeline.remove_event_function(release_event);
   if (!is_toggle) {
     // Remove layer on release
@@ -130,20 +144,12 @@ void Layer::add_to_timeline(Timeline &timeline) {
   DEBUG_INFO("Timeline::add_to_timeline");
   for (const auto &pair : keys) {
     const std::string pressed_id = pair.first;
-    const std::function<void()> function = pair.second;
+    const std::function<void(Timeline &)> function = pair.second;
     timeline.possible_events[pressed_id] = function;
   }
   DEBUG_INFO("Timeline events %s after load: %d (@%d)",
              timeline.history.c_str(), timeline.possible_events.size(),
              &timeline);
-}
-
-void Layer::set_leds() const {
-  DEBUG_INFO("Set pixels to [%d, %d, %d]", color[0], color[1], color[2]);
-  if (color[0] < 0) {
-    return;
-  }
-  Pixels::Set(0, color[0], color[1], color[2]);
 }
 
 std::map<const std::string, const Layer *> Layer::layers;

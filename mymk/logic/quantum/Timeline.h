@@ -22,20 +22,19 @@ public:
   std::string history;
 
   std::vector<Layer> active_layers;
-  std::map<std::string, std::function<void()>> possible_events;
-  std::queue<std::function<void()>> commit_actions;
+  std::map<std::string, std::function<void(Timeline &)>> possible_events;
+  std::queue<std::function<void(Timeline &)>> commit_actions;
 
   Timeline(const std::string &i_history, Timeline *i_parent);
 
-  static Timeline &GetCurrent();
-
   void activate_layer(const std::string &layer_name);
 
-  void add_event_function(std::string event_id, std::function<void()> function);
+  void add_event_function(std::string event_id,
+                          std::function<void(Timeline &)> function);
 
   void remove_event_function(std::string event_id);
 
-  void add_commit_action(std::function<void()> function);
+  void add_commit_action(std::function<void(Timeline &)> function);
 
   void process_event(std::string &event_id);
 
