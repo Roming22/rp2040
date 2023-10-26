@@ -39,7 +39,7 @@ public:
 
   void on_release(const std::string &release_event, const bool is_toggle);
 
-  void add_to_timeline();
+  void add_to_timeline(Timeline &timeline);
 
   void set_leds() const;
 };

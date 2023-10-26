@@ -2,6 +2,7 @@
 #include "../hardware/led/Pixels.h"
 #include "../logic/quantum/Timeline.h"
 #include "../utils/Debug.hpp"
+#include "key/KeyParser.h"
 
 #include <cstring>
 #include <functional>
@@ -48,20 +49,12 @@ void Layer::LoadKeys(const JsonArray &config,
                      std::map<std::string, std::function<void()>> &keys) {
   DEBUG_VERBOSE("Layer::LoadKeys: %d keys", config.size());
   for (JsonVariant v : config) {
-    std::string event_uid = "switch." + std::to_string(keys.size() + 1);
+    std::string switch_uid = "switch." + std::to_string(keys.size() + 1);
     std::string definition = v.as<std::string>();
-    std::string pressed_uid = event_uid + std::string(".pressed");
-    std::string released_uid = event_uid + std::string(".released");
-    keys[pressed_uid] = [pressed_uid, released_uid, definition]() {
-      DEBUG_INFO("%s: %s", pressed_uid.c_str(), definition.c_str());
-      Timeline::GetCurrent().possible_events[released_uid] = [released_uid]() {
-        DEBUG_INFO("%s", released_uid.c_str());
-        Timeline &timeline = Timeline::GetCurrent();
-        timeline.possible_events.erase(
-            timeline.possible_events.find(released_uid));
-      };
-    };
-    DEBUG_DEBUG("%s: %s", event_uid.c_str(), v.as<std::string>().c_str());
+    std::string pressed_uid = switch_uid + std::string(".pressed");
+    std::string released_uid = switch_uid + std::string(".released");
+    keys[pressed_uid] = KeyParser::Load(switch_uid, definition);
+    DEBUG_DEBUG("%s: %s", switch_uid.c_str(), v.as<std::string>().c_str());
   }
 }
 
@@ -93,10 +86,10 @@ Layer Layer::Get(const std::string &name) {
 void Layer::load(const std::string &switch_uid, const bool is_toggle) {
   DEBUG_INFO("KeyLayer::load");
   std::string press_event = switch_uid + std::string(".pressed");
-  Timeline::GetCurrent().possible_events[press_event] = [this, switch_uid,
-                                                         is_toggle]() {
-    this->on_press(switch_uid, is_toggle);
-  };
+  Timeline::GetCurrent().add_event_function(
+      press_event, [this, switch_uid, is_toggle]() {
+        this->on_press(switch_uid, is_toggle);
+      });
 }
 
 void Layer::on_press(const std::string &switch_uid, const bool is_toggle) {
@@ -108,37 +101,41 @@ void Layer::on_press(const std::string &switch_uid, const bool is_toggle) {
 
   // On press actions
   DEBUG_INFO("%s", press_event.c_str());
-  this->add_to_timeline();
+  this->add_to_timeline(new_timeline);
+  DEBUG_INFO("New Timeline %s events after load: %d (@%d)",
+             new_timeline.history.c_str(), new_timeline.possible_events.size(),
+             &new_timeline);
   new_timeline.mark_determined();
 
   // On commit actions
-  new_timeline.actions.push([this]() { this->set_leds(); });
+  new_timeline.add_commit_action([this]() { this->set_leds(); });
 
   // On release configuration
-  new_timeline.possible_events[release_event] = [this, release_event,
-                                                 is_toggle]() {
-    this->on_release(release_event, is_toggle);
-  };
+  new_timeline.add_event_function(release_event,
+                                  [this, release_event, is_toggle]() {
+                                    this->on_release(release_event, is_toggle);
+                                  });
 }
 
 void Layer::on_release(const std::string &release_event, const bool is_toggle) {
   DEBUG_INFO("%s", release_event.c_str());
   Timeline &timeline = Timeline::GetCurrent();
-  timeline.possible_events.erase(timeline.possible_events.find(release_event));
+  timeline.remove_event_function(release_event);
   if (!is_toggle) {
     // Remove layer on release
   }
 }
 
-void Layer::add_to_timeline() {
+void Layer::add_to_timeline(Timeline &timeline) {
   DEBUG_INFO("Timeline::add_to_timeline");
-  Timeline &timeline = Timeline::GetCurrent();
   for (const auto &pair : keys) {
     const std::string pressed_id = pair.first;
     const std::function<void()> function = pair.second;
     timeline.possible_events[pressed_id] = function;
   }
-  DEBUG_INFO("Timeline events after load: %d", timeline.possible_events.size());
+  DEBUG_INFO("Timeline events %s after load: %d (@%d)",
+             timeline.history.c_str(), timeline.possible_events.size(),
+             &timeline);
 }
 
 void Layer::set_leds() const {

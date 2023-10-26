@@ -1,8 +1,9 @@
 #include "KeyParser.h"
 #include "../../utils/Debug.hpp"
+#include <functional>
 
-void KeyParser::Load(Timeline &timeline, const std::string &switch_uid,
-                     const std::string &definition) {
+std::function<void()> KeyParser::Load(const std::string &switch_uid,
+                                      const std::string &definition) {
   DEBUG_VERBOSE("KeyParse::Load");
   const auto [name, args] = KeyParser::ParseDefinition(definition);
   DEBUG_VERBOSE("Func name: %s", name.c_str());
@@ -13,8 +14,9 @@ void KeyParser::Load(Timeline &timeline, const std::string &switch_uid,
     for (const auto &pair : loader) {
       DEBUG_ERROR("  - %s", pair.first.c_str());
     }
+    return loader["IGNORE"](switch_uid, args);
   }
-  loader[name](timeline, switch_uid, args);
+  return loader[name](switch_uid, args);
 }
 
 std::tuple<std::string, std::vector<std::string>>
@@ -65,12 +67,14 @@ KeyParser::ParseDefinition(const std::string &keycode) {
   return std::make_tuple(func_name, args);
 }
 
-std::map<std::string, std::function<void(Timeline &, const std::string &,
-                                         const std::vector<std::string> &)>>
+std::map<std::string,
+         std::function<std::function<void()>(const std::string &,
+                                             const std::vector<std::string> &)>>
     KeyParser::loader = {
+        {"IGNORE", &Keycode::LoadDefinition},
         {"KEYCODE", &Keycode::LoadDefinition},
         // {"LY_MO", &Layer::LoadMomentaryDefinition},
         // {"LY_TO", &Layer::LoadToggleDefinition},
-        {"MT", &MultiTap::LoadDefinition},
-        {"SQ", &Combo::LoadDefinition},
+        // {"MT", &MultiTap::LoadDefinition},
+        // {"SQ", &Combo::LoadDefinition},
 };
