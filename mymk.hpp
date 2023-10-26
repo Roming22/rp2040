@@ -18,6 +18,7 @@
 #include "mymk/logic/quantum/Universe.h"
 #include "mymk/logic/Timer.h"
 #include "mymk/utils/Fps.h"
+#include "mymk/utils/Memory.h"
 #include "mymk/utils/Time.h"
 #include "mymk/feature/key/Combo.cpp"
 #include "mymk/feature/key/Keycode.cpp"
@@ -37,4 +38,5 @@
 #include "mymk/logic/quantum/Universe.cpp"
 #include "mymk/logic/Timer.cpp"
 #include "mymk/utils/Fps.cpp"
+#include "mymk/utils/Memory.cpp"
 #include "mymk/utils/Time.cpp"

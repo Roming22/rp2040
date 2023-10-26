@@ -1,8 +1,9 @@
 #include "Universe.h"
+#include "../../utils/Debug.hpp"
+#include "../../utils/Memory.h"
 #include "../Events.h"
 #include "Timeline.h"
 
-#include "../../utils/Debug.hpp"
 #include <string>
 
 void Universe::Setup(std::string layer_name) {
@@ -13,6 +14,7 @@ void Universe::Setup(std::string layer_name) {
   std::string switch_id("switch.1");
   Layer::Get(layer_name).on_press(*start_timeline, switch_id, true);
   start_timeline = start_timeline->resolve();
+  Memory::printFreeMemory();
 }
 
 void Universe::Tick() {
@@ -22,6 +24,7 @@ void Universe::Tick() {
     DEBUG_DEBUG("Universe: processing the '%s' event", event_id.c_str());
     start_timeline->process_event(event_id);
     start_timeline = start_timeline->resolve();
+    Memory::printFreeMemory();
   }
 }
 
