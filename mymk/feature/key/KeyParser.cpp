@@ -1,5 +1,12 @@
 #include "KeyParser.h"
+
 #include "../../utils/Debug.hpp"
+#include "../Layer.h"
+#include "Combo.h"
+#include "Keycode.h"
+#include "MultiTap.h"
+#include "TapHold.h"
+
 #include <functional>
 
 std::function<void(Timeline &)> KeyParser::Load(const std::string &switch_uid,
@@ -10,11 +17,10 @@ std::function<void(Timeline &)> KeyParser::Load(const std::string &switch_uid,
   if (loader.count(name) == 0) {
     DEBUG_ERROR("Unknown Key function: %s", name.c_str());
 
-    DEBUG_ERROR("Known functions: ");
+    DEBUG_VERBOSE("Known functions: ");
     for (const auto &pair : loader) {
-      DEBUG_ERROR("  - %s", pair.first.c_str());
+      DEBUG_VERBOSE("  - %s", pair.first.c_str());
     }
-    return loader["IGNORE"](switch_uid, args);
   }
   return loader[name](switch_uid, args);
 }
@@ -71,10 +77,12 @@ std::map<std::string,
          std::function<std::function<void(Timeline &)>(
              const std::string &, const std::vector<std::string> &)>>
     KeyParser::loader = {
-        {"IGNORE", &Keycode::LoadDefinition},
         {"KEYCODE", &Keycode::LoadDefinition},
-        // {"LY_MO", &Layer::LoadMomentaryDefinition},
-        // {"LY_TO", &Layer::LoadToggleDefinition},
-        // {"MT", &MultiTap::LoadDefinition},
+        {"LY_MO", &Layer::LoadMomentaryDefinition},
+        {"LY_TO", &Layer::LoadToggleDefinition},
+        {"MT", &MultiTap::LoadDefinition},
+        {"TH_HD", &TapHold::LoadHoldDefinition},
+        {"TH_NO", &TapHold::LoadNoneDefinition},
+        {"TH_TP", &TapHold::LoadTapDefinition},
         // {"SQ", &Combo::LoadDefinition},
 };

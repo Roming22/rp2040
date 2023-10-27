@@ -14,6 +14,8 @@ void Universe::Setup(std::string layer_name) {
   std::string switch_id("switch.1");
   Layer::Get(layer_name).on_press(*start_timeline, switch_id, true);
   start_timeline = start_timeline->resolve();
+  std::string release_event = switch_id + ".released";
+  start_timeline->process_event(release_event);
   Memory::printFreeMemory();
 }
 

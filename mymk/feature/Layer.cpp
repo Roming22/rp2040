@@ -18,7 +18,7 @@ Layer::Layer(const std::string &i_name, const int *i_color,
 }
 
 void Layer::LoadConfig(const std::string name, const JsonObject &config) {
-  DEBUG_INFO("Layer::Load: %s", name.c_str());
+  DEBUG_INFO("Layer::LoadConfig: %s", name.c_str());
 
   int color[] = {-1, -1, -1, 0};
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
@@ -78,21 +78,36 @@ void Layer::LoadCombos(
   }
 }
 
+std::function<void(Timeline &)>
+Layer::LoadDefinition(const std::string &switch_uid,
+                      const std::vector<std::string> &definition,
+                      const bool is_toggle) {
+  DEBUG_VERBOSE("Layer::LoadDefinition");
+  const std::string layer_name = definition[0];
+  return [switch_uid, layer_name, is_toggle](Timeline &timeline) {
+    Get(layer_name).on_press(timeline, switch_uid, is_toggle);
+  };
+}
+
+std::function<void(Timeline &)>
+Layer::LoadMomentaryDefinition(const std::string &switch_uid,
+                               const std::vector<std::string> &definition) {
+  DEBUG_INFO("Layer::LoadMomentaryDefinition");
+  return LoadDefinition(switch_uid, definition, false);
+}
+
+std::function<void(Timeline &)>
+Layer::LoadToggleDefinition(const std::string &switch_uid,
+                            const std::vector<std::string> &definition) {
+  DEBUG_INFO("Layer::LoadToggleDefinition");
+  return LoadDefinition(switch_uid, definition, true);
+}
+
 Layer Layer::Get(const std::string &name) {
   if (layers.count(name) == 0) {
     DEBUG_ERROR("Unknown layer: '%s'", name.c_str());
   }
   return *layers[name];
-}
-
-void Layer::load(Timeline &timeline, const std::string &switch_uid,
-                 const bool is_toggle) {
-  DEBUG_INFO("KeyLayer::load");
-  std::string press_event = switch_uid + std::string(".pressed");
-  timeline.add_event_function(
-      press_event, [this, switch_uid, is_toggle](Timeline &timeline) {
-        this->on_press(timeline, switch_uid, is_toggle);
-      });
 }
 
 void Layer::on_press(Timeline &timeline, const std::string &switch_uid,

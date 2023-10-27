@@ -33,17 +33,27 @@ public:
 
   static void LoadConfig(const std::string name, const JsonObject &config);
 
+  static std::function<void(Timeline &)>
+  LoadDefinition(const std::string &switch_uid,
+                 const std::vector<std::string> &definition,
+                 const bool is_toggle);
+
+  static std::function<void(Timeline &)>
+  LoadMomentaryDefinition(const std::string &switch_uid,
+                          const std::vector<std::string> &definition);
+
+  static std::function<void(Timeline &)>
+  LoadToggleDefinition(const std::string &switch_uid,
+                       const std::vector<std::string> &definition);
+
   static Layer Get(const std::string &name);
 
-  void load(Timeline &timeline, const std::string &switch_uid,
-            const bool is_toggle);
-
-  void on_press(Timeline &timeline, const std::string &switch_event,
+  void on_press(Timeline &timeline, const std::string &switch_uid,
                 const bool is_toggle);
 
   void on_commit(Timeline &timeline) const;
 
-  void on_release(Timeline &timeline, const std::string &release_event,
+  void on_release(Timeline &timeline, const std::string &switch_uid,
                   const bool is_toggle);
 
   void add_to_timeline(Timeline &timeline);
