@@ -39,7 +39,7 @@ void Timeline::remove_event_function(std::string event_id) {
 
 void Timeline::add_commit_action(std::function<void(Timeline &)> function) {
   DEBUG_INFO("Timeline::add_commit_action %s", history.c_str());
-  this->commit_actions.push(function);
+  this->commit_actions.push_back(function);
 }
 
 void Timeline::process_event(std::string &event_id) {
@@ -80,11 +80,11 @@ void Timeline::mark_determined() {
 
 void Timeline::execute() {
   DEBUG_VERBOSE("Timeline::execute");
-  while (!commit_actions.empty()) {
-    std::function<void(Timeline &)> &action = commit_actions.front();
-    commit_actions.pop();
+  for (int i = 0; i < commit_actions.size(); ++i) {
+    std::function<void(Timeline &)> &action = commit_actions[i];
     action(*this);
   }
+  commit_actions.clear();
 }
 
 Timeline *Timeline::resolve() {

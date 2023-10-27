@@ -23,7 +23,7 @@ public:
 
   std::vector<Layer> active_layers;
   std::map<std::string, std::function<void(Timeline &)>> possible_events;
-  std::queue<std::function<void(Timeline &)>> commit_actions;
+  std::vector<std::function<void(Timeline &)>> commit_actions;
 
   Timeline(const std::string &i_history, Timeline *i_parent);
 
