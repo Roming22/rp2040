@@ -3,7 +3,7 @@
 #include "Time.h"
 
 void FPS::Tick() {
-  int display_every = 15; // seconds
+  int display_every = 30; // seconds
   static unsigned int counter = 0;
   static unsigned long time = Time::Now();
   ++counter;
