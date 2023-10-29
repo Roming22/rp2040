@@ -149,10 +149,10 @@ void Layer::on_commit(Timeline &timeline) const {
 void Layer::on_release(Timeline &timeline, const std::string &release_event,
                        const bool is_toggle) {
   DEBUG_INFO("%s", release_event.c_str());
-  timeline.remove_event_function(release_event);
   if (!is_toggle) {
     // Remove layer on release
   }
+  timeline.remove_event_function(release_event);
 }
 
 void Layer::add_to_timeline(Timeline &timeline) {

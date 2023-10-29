@@ -5,18 +5,15 @@
 
 #include <functional>
 #include <map>
-#include <queue>
-#include <set>
 #include <string>
 #include <vector>
 
 class Timeline {
 protected:
-  static Timeline *current;
   bool is_determined;
   Timeline *next_timeline;
   Timeline *parent;
-  std::set<Timeline *> children;
+  std::vector<Timeline *> children;
 
 public:
   std::string history;
@@ -27,16 +24,16 @@ public:
 
   Timeline(const std::string &i_history, Timeline *i_parent);
 
-  void activate_layer(const std::string &layer_name);
+  static void End(Timeline &timeline);
 
-  void add_event_function(std::string event_id,
-                          std::function<void(Timeline &)> function);
+  void add_event_function(const std::string event_id,
+                          const std::function<void(Timeline &)> function);
 
-  void remove_event_function(std::string event_id);
+  void remove_event_function(const std::string event_id);
 
-  void add_commit_action(std::function<void(Timeline &)> function);
+  void add_commit_action(const std::function<void(Timeline &)> function);
 
-  void process_event(std::string &event_id);
+  void process_event(const std::string &event_id);
 
   Timeline &split(const std::string &id);
 
@@ -44,6 +41,8 @@ public:
 
   void execute();
 
-  Timeline *resolve();
+  void resolve();
+
+  void end();
 };
 #endif

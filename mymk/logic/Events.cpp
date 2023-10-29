@@ -5,13 +5,18 @@
 #include <string>
 
 void Event::Add(const std::string &id) {
-  DEBUG_INFO("Event added: %s", id.c_str());
+  DEBUG_INFO("Event::Add %s", id.c_str());
   ids.push(id);
 }
 
-bool Event::HasEvents() { return !ids.empty(); }
+bool Event::HasEvents() {
+  DEBUG_VERBOSE("Event::HasEvents");
+  return !ids.empty();
+}
 
 std::string Event::Get() {
+  DEBUG_VERBOSE("Event::Get");
+  DEBUG_INFO("");
   std::string event_id = ids.front();
   ids.pop();
   return event_id;

@@ -1,34 +1,60 @@
 #include "Timer.h"
+#include "../logic/Events.h"
 #include "../utils/Debug.hpp"
 #include "../utils/Time.h"
 
-Timer::Timer(std::string i_name, int delay_ms, std::function<void()> i_func)
-    : name(i_name), callable(i_func) {
+#include <string>
+
+Timer::Timer(const std::string &i_name, const int &delay_ms) : name(i_name) {
   end_time = Time::Now() + (delay_ms * 1E3);
 
-  DEBUG_DEBUG("Timer Start: %d    End: %d", Time::Now(), end_time);
+  DEBUG_INFO("Timer %s @%d    Start: %d    End: %d", name.c_str(), this,
+             Time::Now(), end_time);
 };
 
-void Timer::run() {
-  if (name[0] != '#') {
-    DEBUG_INFO("Timer.run %s", name.c_str());
-  }
-  callable();
-}
-
 void Timer::Tick() {
-  for (int i = 0; i < timers.size(); ++i) {
-    Timer *timer = timers[i];
-    if (timer->end_time <= Time::Now()) {
-      timer->run();
-      timers.erase(timers.begin() + i--);
-      delete timer;
+  std::vector<std::string> to_delete;
+  for (auto pair : timers) {
+    if (pair.second->tick()) {
+      to_delete.push_back(pair.second->name);
     }
   }
+  for (const std::string name : to_delete) {
+    Stop(name);
+  }
 }
 
-void Timer::Start(std::string name, int delay_ms, std::function<void()> func) {
-  timers.push_back(new Timer(name, delay_ms, func));
+Timer *Timer::Start(const std::string &name, const int &delay_ms) {
+  if (timers.count(name) > 0) {
+    Stop(name);
+  }
+  timers[name] = new Timer(name, delay_ms);
+  return timers[name];
 }
 
-std::vector<Timer *> Timer::timers = std::vector<Timer *>();
+void Timer::Stop(const std::string &name) {
+  DEBUG_INFO("Timer::Stop %s", name.c_str());
+  if (timers.count(name) > 0) {
+    Timer *timer = timers[name];
+    timers.erase(name);
+    delete timer;
+  } else {
+    DEBUG_WARNING("Timer not found in map: %s", name.c_str());
+  }
+}
+
+void Timer::add_event() {
+  DEBUG_VERBOSE("Timer::add_event %s @%d", name.c_str(), this);
+  Event::Add(name);
+}
+
+bool Timer::tick() {
+  DEBUG_VERBOSE("Timer::tick %s", name.c_str());
+  if (end_time <= Time::Now()) {
+    add_event();
+    return true;
+  }
+  return false;
+}
+
+std::map<std::string, Timer *> Timer::timers = std::map<std::string, Timer *>();

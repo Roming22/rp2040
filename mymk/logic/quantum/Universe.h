@@ -20,5 +20,7 @@ public:
   static void Setup(std::string layer_name);
 
   static void Tick();
+
+  static void StartTimeline(Timeline &timeline);
 };
 #endif

@@ -2,23 +2,26 @@
 #define MYMK_LOGIC_TIMER
 
 #include <functional>
+#include <map>
 #include <string>
-#include <vector>
 
 class Timer {
 private:
-  std::string name;
   long end_time;
   std::function<void()> callable;
-  static std::vector<Timer *> timers;
+  static std::map<std::string, Timer *> timers;
 
-  Timer(std::string i_name, int delay_ms, std::function<void()> i_func);
+  Timer(const std::string &i_name, const int &delay_ms);
 
-  void run();
+  void add_event();
+  bool tick();
 
 public:
+  std::string name;
   static void Tick();
 
-  static void Start(std::string name, int delay_ms, std::function<void()> func);
+  static Timer *Start(const std::string &name, const int &delay_ms);
+
+  static void Stop(const std::string &name);
 };
 #endif

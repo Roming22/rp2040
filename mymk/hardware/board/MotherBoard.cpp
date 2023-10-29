@@ -30,6 +30,7 @@ void MotherBoard::add_events(const std::vector<int> &switch_events) {
     std::string event_id;
     if (switch_event > 0) {
       event_id = "switch." + std::to_string(switch_event) + ".pressed";
+      Event::Add("interrupt");
     } else {
       event_id = "switch." + std::to_string(-switch_event) + ".released";
     }

@@ -7,7 +7,7 @@
 #include <vector>
 
 class TapHold {
-public:
+protected:
   enum InterruptMode {
     NONE,
     HOLD,
@@ -19,6 +19,7 @@ public:
                  const std::vector<std::string> &definition,
                  const InterruptMode interrupt_mode);
 
+public:
   static std::function<void(Timeline &)>
   LoadHoldDefinition(const std::string &switch_uid,
                      const std::vector<std::string> &definition);

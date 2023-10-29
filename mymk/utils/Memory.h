@@ -4,8 +4,11 @@
 #include "Debug.hpp"
 
 class Memory {
+protected:
+  static int totalMemory;
+
 public:
-  static int freeMemory();
-  static void printFreeMemory();
+  static int GetFreeMemory();
+  static void PrintMemoryUsage();
 };
 #endif
