@@ -1,0 +1,14 @@
+layers:
+  alpha:
+    leds:
+      color: [127, 0, 0]
+    keys: [
+      # Left
+        TAB,  D,      C,    L,
+        NONE, T,      A,    E,
+        NONE, SPACE,  LSFT, NONE,
+      # Right
+        R,    S,    H,    RETURN,
+        I,    O,    N,    NONE,
+        NONE, RGUI, MEH,  NONE
+      ]

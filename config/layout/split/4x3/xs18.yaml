@@ -5,19 +5,19 @@ layers:
     keys: [
       # Left
         TH_HD(TAB|LSFT),  TH_HD(D|LSFT),            TH_HD(C|LALT),            TH_HD(L|LCTL),
-        NO,               TH_HD(T|LY_MO(systemL)),  TH_HD(A|LY_MO(fn_numL)),  TH_HD(E|LY_MO(symbolsL)),
-        NO,               SPACE,                    LGUI,                     NO,
+        NONE,             TH_HD(T|LY_MO(systemL)),  TH_HD(A|LY_MO(fn_numL)),  TH_HD(E|LY_MO(symbolsL)),
+        NONE,             SPACE,                    LGUI,                     NONE,
       # Right
-        TH_HD(R|RCTL),            TH_HD(S|RALT),            TH_HD(H|RSFT),          TH_HD(ENTER|RSFT),
-        TH_HD(I|LY_MO(symbolsR)), TH_HD(O|LY_MO(fn_numR)),  TH_HD(N|LY_MO(systemR), NO,
-        NO,                       RGUI,                     MEH,                    NO
+        TH_HD(R|RCTL),            TH_HD(S|RALT),            TH_HD(H|RSFT),          TH_HD(RETURN|RSFT),
+        TH_HD(I|LY_MO(symbolsR)), TH_HD(O|LY_MO(fn_numR)),  TH_HD(N|LY_MO(systemR), NONE,
+        NONE,                     RGUI,                     MEH,                    NONE
       ]
     combos:
       chords:
         1*2: X
         2*3: V
         1*3: Z
-        1*2*3: ESCAPE
+        1*2*3: ESC
         5*6: F
         6*7: U
         5*7: B
@@ -25,7 +25,7 @@ layers:
         12*13: K
         13*14: Q
         12*14: J
-        12*13*14: BACKSPACE
+        12*13*14: BSPACE
         16*17: Y
         17*18: G
         16*18: P
@@ -34,24 +34,24 @@ layers:
     leds:
       color: [127, 21, 0]
     keys: [
-      # Left
-        TRNS, GRAVE,        BACKSLASH,  UNDERSCORE,
-        TRNS, HASH,         DOLLAR,     EXCLAIM,
-        TRNS, LY_TO(alpha), TRNS,       TRNS,
-      # Right
-        TRNS, MINUS, SLASH, EQUAL,
-        TRNS, DOT, COMMA, QUOTE,
+  #     # Left
+        TRNS, "`",          "\\\\", "_",
+        TRNS, "#",          "$",    "!",
+        TRNS, LY_TO(alpha), TRNS,   TRNS,
+  #     # Right
+        TRNS, "-",  "/",          "=",
+        TRNS, ".",  ",",          "'",
         TRNS, TRNS, LY_TO(alpha), TRNS
       ]
     chords:
       1*2: "<"
       2*3: ">"
-      1*2*3: ESCAPE
+      1*2*3: ESC
       5*6: "{"
       6*7: "}"
       12*13: "["
       13*14: "]"
-      12*13*14: BACKSPACE
+      12*13*14: BSPACE
       16*17: "("
       17*18: ")"
   fn_num:
@@ -72,13 +72,13 @@ layers:
         1*2: F2
         2*3: F4
         1*3: F6
-        1*2*3: ESCAPE
+        1*2*3: ESC
         5*6: F8
         6*7: F10
         5*7: F12
         12*13: "6"
         13*14: "7"
-        12*13*14: BACKSPACE
+        12*13*14: BSPACE
         16*17: "1"
         17*18: "3"
   system:
@@ -86,11 +86,11 @@ layers:
       color: [127, 0, 127]
     keys: [
       # Left
-        TRNS, ESC,          PAGEUP,   PRTSCR,
-        TRNS, HOME,         PAGEDOWN, END,
-        TRNS, LY_TO(alpha), TRNS,     TRNS,
+        TRNS, ESC,          PGUP, PRTSCR,
+        TRNS, HOME,         PGDN, END,
+        TRNS, LY_TO(alpha), TRNS, TRNS,
       # Right
-        TRNS, BACKSPACE,  UP,           DELETE,
-        TRNS, LEFT,       DONW,         RIGHT,
-        TRNS, TRNS,       LY_TO(alpha), TRNS
+        TRNS, BSPACE, UP,           DEL,
+        TRNS, LEFT,   DONW,         RIGHT,
+        TRNS, TRNS,   LY_TO(alpha), TRNS
       ]

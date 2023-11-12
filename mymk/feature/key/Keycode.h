@@ -7,6 +7,9 @@
 #include <vector>
 
 class Keycode {
+protected:
+  static std::map<std::string, char> keycodes;
+
 public:
   static std::function<void(Timeline &)>
   LoadDefinition(const std::string &switch_uid,

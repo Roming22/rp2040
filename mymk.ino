@@ -12,10 +12,10 @@ void setup() {
   DEBUG_INFO("# Rebooting");
 
   // Debug.setDebugLevel(DBG_VERBOSE);
-  Keyboard::Setup();
+  Firmware::Setup();
 
   DEBUG_INFO("");
   DEBUG_INFO("# Looping");
 }
 
-void loop() { Keyboard::Tick(); }
+void loop() { Firmware::Tick(); }

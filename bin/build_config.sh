@@ -45,7 +45,7 @@ parse_args(){
 }
 
 generate_hpp() {
-    MAGIC_NUMBER=3 # Used to calculate the size of the JsonDocument in memory
+    MAGIC_NUMBER=4 # Used to calculate the size of the JsonDocument in memory
     BOARD_CONFIG="$(yq --no-colors --output-format json "$BOARD_PATH" | jq -c -M)"
     LAYOUT_CONFIG="$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M)"
     cat << EOF

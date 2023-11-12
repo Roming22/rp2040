@@ -1,4 +1,4 @@
-#include "Keyboard.h"
+#include "Firmware.h"
 #include "config/Loader.hpp"
 #include "hardware/board/BaseBoard.h"
 #include "logic/Timer.h"
@@ -7,15 +7,18 @@
 #include "utils/Fps.h"
 #include "utils/Time.h"
 
-void Keyboard::Setup() {
+#include "Keyboard.h"
+
+void Firmware::Setup() {
   if (instance == nullptr) {
-    instance = new Keyboard();
+    instance = new Firmware();
     load_config();
   }
+  Keyboard.begin();
 }
 
-void Keyboard::Tick() {
-  DEBUG_VERBOSE("Keyboard::Tick");
+void Firmware::Tick() {
+  DEBUG_VERBOSE("Firmware::Tick");
   Time::Tick();
   Timer::Tick();
   BaseBoard::Tick();
@@ -23,4 +26,4 @@ void Keyboard::Tick() {
   FPS::Tick();
 }
 
-Keyboard *Keyboard::instance = nullptr;
+Firmware *Firmware::instance = nullptr;

@@ -78,11 +78,11 @@ std::map<std::string,
              const std::string &, const std::vector<std::string> &)>>
     KeyParser::loader = {
         {"KEYCODE", &Keycode::LoadDefinition},
-        {"LY_MO", &Layer::LoadMomentaryDefinition},
-        {"LY_TO", &Layer::LoadToggleDefinition},
-        {"MT", &MultiTap::LoadDefinition},
-        {"TH_HD", &TapHold::LoadHoldDefinition},
-        {"TH_NO", &TapHold::LoadNoneDefinition},
-        {"TH_TP", &TapHold::LoadTapDefinition},
+        // {"LY_MO", &Layer::LoadMomentaryDefinition},
+        // {"LY_TO", &Layer::LoadToggleDefinition},
+        // {"MT", &MultiTap::LoadDefinition},
+        // {"TH_HD", &TapHold::LoadHoldDefinition},
+        // {"TH_NO", &TapHold::LoadNoneDefinition},
+        // {"TH_TP", &TapHold::LoadTapDefinition},
         // {"SQ", &Combo::LoadDefinition},
 };
