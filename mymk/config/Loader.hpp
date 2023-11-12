@@ -6,6 +6,7 @@
 #include "../hardware/board/DaughterBoard.h"
 #include "../hardware/board/MotherBoard.h"
 #include "../hardware/led/Pixels.h"
+#include "../hardware/usb/UsbKey.h"
 #include "../logic/quantum/Universe.h"
 #include "../utils/Debug.hpp"
 
@@ -35,6 +36,8 @@ std::string get_controller_uid() {
 
 void load_board() {
   DEBUG_INFO("Loading board");
+
+  UsbKey::Init();
 
   const char *jsonString = BOARD_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(BOARD_CONFIG_JSON_SIZE);
