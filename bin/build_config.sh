@@ -8,7 +8,7 @@ usage() {
 Create an hpp file with the chosen configuration.
 
 Options:
-    -b, --board BOARD_PATH      Path to the json file holding the board configuration.
+    -h, --hardware HARDWARE_PATH      Path to the json file holding the hardware configuration.
     -l, --layout LAYOUT_PATH    Path to the json file holding the layout configuration.
     -d, --debug                 Debug mode.
     -h, --help                  Print this message.
@@ -24,8 +24,8 @@ cd "$PROJECT_DIR"
 parse_args(){
     while [[ "$#" -gt "0" ]]; do
         case $1 in
-            -b|--board)
-                BOARD_PATH="$2"
+            -h|--hardware)
+                HARDWARE_PATH="$2"
                 shift
                 ;;
             -l|--layout)
@@ -35,7 +35,7 @@ parse_args(){
             -d|--debug)
                 set -x
                 ;;
-            -h|--help)
+            --help|help)
                 usage
                 exit 0
         esac
@@ -46,14 +46,14 @@ parse_args(){
 
 generate_hpp() {
     MAGIC_NUMBER=4 # Used to calculate the size of the JsonDocument in memory
-    BOARD_CONFIG="$(yq --no-colors --output-format json "$BOARD_PATH" | jq -c -M)"
+    HARDWARE_CONFIG="$(yq --no-colors --output-format json "$HARDWARE_PATH" | jq -c -M)"
     LAYOUT_CONFIG="$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M)"
     cat << EOF
-#ifndef BOARD_CONFIG_JSON
-#define BOARD_CONFIG_JSON "$(echo "$BOARD_CONFIG"  | sed 's:":\\":g')"
+#ifndef HARDWARE_CONFIG_JSON
+#define HARDWARE_CONFIG_JSON "$(echo "$HARDWARE_CONFIG"  | sed 's:":\\":g')"
 #endif
-#ifndef BOARD_CONFIG_JSON_SIZE
-#define BOARD_CONFIG_JSON_SIZE $(( $(echo "$BOARD_CONFIG" | wc -c) * MAGIC_NUMBER))
+#ifndef HARDWARE_CONFIG_JSON_SIZE
+#define HARDWARE_CONFIG_JSON_SIZE $(( $(echo "$HARDWARE_CONFIG" | wc -c) * MAGIC_NUMBER))
 #endif
 #ifndef LAYOUT_CONFIG_JSON
 #define LAYOUT_CONFIG_JSON "$(echo "$LAYOUT_CONFIG" | sed 's:":\\":g')"

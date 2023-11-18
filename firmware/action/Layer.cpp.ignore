@@ -1,21 +1,16 @@
 #include "Layer.h"
+#include "../config/Key.h"
 #include "../hardware/led/Pixels.h"
 #include "../logic/quantum/Timeline.h"
 #include "../utils/Debug.hpp"
-#include "KeyParser.h"
 
 #include <cstring>
-#include <functional>
 #include <map>
 #include <string>
 
 namespace action {
-Layer::Layer(
-    const std::string &i_name, const int *i_color,
-    std::map<std::string, std::function<void(logic::quantum::Timeline &)>>
-        &i_keys,
-    std::map<std::string, std::function<void(logic::quantum::Timeline &)>>
-        &i_combos)
+Layer::Layer(const std::string &i_name, const int *i_color, StringMap &i_keys,
+             StringMap &i_combos)
     : name(i_name), color(nullptr), keys(i_keys), combos(i_combos) {
   color = new int[4];
   std::memcpy(color, i_color, sizeof(int) * 4);
@@ -27,10 +22,10 @@ void Layer::LoadConfig(const std::string name, const JsonObject &config) {
   int color[] = {-1, -1, -1, 0};
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
 
-  std::map<std::string, std::function<void(logic::quantum::Timeline &)>> keys;
+  StringMap keys;
   LoadKeys(config["keys"].as<JsonArray>(), keys);
 
-  std::map<std::string, std::function<void(logic::quantum::Timeline &)>> combos;
+  StringMap combos;
   LoadCombos(config["combos"], combos);
 
   layers[name] = new Layer(name, color, keys, combos);
@@ -49,25 +44,19 @@ void Layer::LoadLedColor(const JsonArray &config, int *color) {
   }
 }
 
-void Layer::LoadKeys(
-    const JsonArray &config,
-    std::map<std::string, std::function<void(logic::quantum::Timeline &)>>
-        &keys) {
+void Layer::LoadKeys(const JsonArray &config, StringMap &keys) {
   DEBUG_VERBOSE("Layer::LoadKeys: %d keys", config.size());
   for (JsonVariant v : config) {
     std::string switch_uid = "switch." + std::to_string(keys.size() + 1);
     std::string definition = v.as<std::string>();
     std::string pressed_uid = switch_uid + std::string(".pressed");
     std::string released_uid = switch_uid + std::string(".released");
-    keys[pressed_uid] = KeyParser::Load(switch_uid, definition);
+    keys[pressed_uid] = config::Key::Load(switch_uid, definition);
     DEBUG_DEBUG("%s: %s", switch_uid.c_str(), v.as<std::string>().c_str());
   }
 }
 
-void Layer::LoadCombos(
-    const JsonObject &config,
-    std::map<std::string, std::function<void(logic::quantum::Timeline &)>>
-        &combos) {
+void Layer::LoadCombos(const JsonObject &config, StringMap &combos) {
   DEBUG_VERBOSE("Layer::LoadCombos");
 
   DEBUG_DEBUG("Loading chords");

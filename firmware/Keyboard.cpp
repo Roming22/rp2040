@@ -1,5 +1,5 @@
 #include "Keyboard.h"
-#include "config/Loader.hpp"
+#include "config/Keyboard.h"
 #include "hardware/board/BaseBoard.h"
 #include "logic/Timer.h"
 #include "logic/quantum/Universe.h"
@@ -9,14 +9,15 @@
 
 namespace firmware {
 void Keyboard::Setup() {
+  DEBUG_VERBOSE("firmware::Keyboard::Setup");
   if (instance == nullptr) {
     instance = new Keyboard();
-    load_config();
+    config::Keyboard::Load();
   }
 }
 
 void Keyboard::Tick() {
-  DEBUG_VERBOSE("Keyboard::Tick");
+  DEBUG_VERBOSE("firmware::Keyboard::Tick");
   utils::Time::Tick();
   logic::Timer::Tick();
   hardware::board::BaseBoard::Tick();

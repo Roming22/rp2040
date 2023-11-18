@@ -1,7 +1,7 @@
 #ifndef MYMK_LOGIC_QUANTUM_TIMELINE
 #define MYMK_LOGIC_QUANTUM_TIMELINE
 
-#include "../../action/Layer.h"
+// #include "../../action/Layer.h"
 
 #include <functional>
 #include <map>
@@ -20,7 +20,7 @@ protected:
 public:
   std::string history;
 
-  std::vector<action::Layer> active_layers;
+  // std::vector<action::Layer> active_layers;
   std::map<std::string, std::function<void(Timeline &)>> possible_events;
   std::vector<std::function<void(Timeline &)>> commit_actions;
 

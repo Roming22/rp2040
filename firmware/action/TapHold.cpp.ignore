@@ -1,7 +1,7 @@
 #include "TapHold.h"
+#include "../config/Key.h"
 #include "../logic/Timer.h"
 #include "../utils/Debug.hpp"
-#include "KeyParser.h"
 
 #include <functional>
 #include <string>
@@ -84,7 +84,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       release_event, [switch_uid, release_event, definition_tap,
                       timer_event_id](logic::quantum::Timeline &timeline_tap) {
         DEBUG_VERBOSE("Lambda tap: %s", switch_uid.c_str());
-        KeyParser::Load(switch_uid, definition_tap)(timeline_tap);
+        config::Key::Load(switch_uid, definition_tap)(timeline_tap);
         DEBUG_INFO("Trigger release?");
         timeline_tap.add_commit_action(
             [release_event](logic::quantum::Timeline &timeline_tap) {
@@ -105,7 +105,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       "interrupt", [switch_uid, definition_interrupt, timer_event_id](
                        logic::quantum::Timeline &timeline_interrupt) {
         DEBUG_VERBOSE("Lambda interrupt: %s", switch_uid.c_str());
-        KeyParser::Load(switch_uid, definition_interrupt)(timeline_interrupt);
+        config::Key::Load(switch_uid, definition_interrupt)(timeline_interrupt);
         logic::Timer::Stop(timer_event_id);
         timeline_interrupt.remove_event_function("interrupt");
       });
@@ -120,7 +120,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       timer_event_id, [switch_uid, definition_hold, timer_event_id](
                           logic::quantum::Timeline &timeline_hold) {
         DEBUG_VERBOSE("Lambda hold: %s", switch_uid.c_str());
-        KeyParser::Load(switch_uid, definition_hold)(timeline_hold);
+        config::Key::Load(switch_uid, definition_hold)(timeline_hold);
         timeline_hold.remove_event_function("interrupt");
         timeline_hold.remove_event_function(timer_event_id);
       });

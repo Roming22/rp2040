@@ -1,7 +1,6 @@
-#ifndef MYMK_CONFIG_LOADER
-#define MYMK_CONFIG_LOADER
+#include "Keyboard.h"
 
-#include "../action/Layer.h"
+#include "../../config/config.hpp"
 #include "../hardware/board/DaughterBoard.h"
 #include "../hardware/board/MotherBoard.h"
 #include "../hardware/led/Pixels.h"
@@ -9,49 +8,28 @@
 #include "../hardware/usb/Key.h"
 #include "../logic/quantum/Universe.h"
 #include "../utils/Debug.hpp"
+#include "Layer.h"
 
-#include <ArduinoJson.h>
-#include <string>
-#include <vector>
-
-#include "../../config/config.hpp"
-
-void parse_json(DynamicJsonDocument &jsonDoc, const char *&jsonString) {
-  DEBUG_INFO("%s", jsonString);
-  DeserializationError error = deserializeJson(jsonDoc, jsonString);
-  if (error) {
-    DEBUG_INFO("[ERROR] Parsing failed: %s", error.c_str());
-    delay(3600000);
-  } else {
-    DEBUG_INFO("[INFO] Configuration parsed");
-  }
-}
-
-std::string get_controller_uid() {
-  int len = 2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1;
-  char board_uid[len] = "";
-  pico_get_unique_board_id_string(board_uid, len);
-  return std::string(board_uid);
-}
-
-void load_board() {
-  DEBUG_INFO("Loading board");
-
+namespace config {
+void Keyboard::Load() {
   hardware::usb::Key::Init();
 
-  const char *jsonString = BOARD_CONFIG_JSON;
-  DynamicJsonDocument jsonDoc(BOARD_CONFIG_JSON_SIZE);
-  parse_json(jsonDoc, jsonString);
+  LoadHardware();
+  LoadLayout();
+}
 
-  std::string board_uid = get_controller_uid();
+void Keyboard::LoadHardware() {
+  DEBUG_INFO("config::Keyboard::LoadHardware");
+
+  const char *jsonString = HARDWARE_CONFIG_JSON;
+  DynamicJsonDocument jsonDoc(HARDWARE_CONFIG_JSON_SIZE);
+  ParseJson(jsonDoc, jsonString);
+
+  std::string board_uid = GetControllerUid();
   DEBUG_INFO("[INFO] Board UID: %s", board_uid.c_str());
   if (!jsonDoc.containsKey(board_uid)) {
-    DEBUG_INFO("[ERROR] No configuration found for %s", board_uid.c_str());
-    delay(3600000);
-  }
-
-  if (!jsonDoc.containsKey(board_uid)) {
-    DEBUG_INFO("[ERROR] No configuration found for %s", board_uid.c_str());
+    DEBUG_INFO("[ERROR] No hardware configuration found for %s",
+               board_uid.c_str());
     delay(3600000);
   }
   JsonObject config = jsonDoc[board_uid].as<JsonObject>();
@@ -67,7 +45,7 @@ void load_board() {
       hardware::txrx::BitBang::Setup((int)config["data"]["pin"], 32, 31250);
     } else {
       DEBUG_INFO("[ERROR] Not connection between boards: "
-                 "'.{board_uid}.data.pin' not found");
+                 "'.$board_uid.data.pin' not found");
       delay(3600000);
     }
   }
@@ -107,39 +85,53 @@ void load_board() {
       }
     } else {
       DEBUG_INFO(
-          "[ERROR] Cannot configure switches: '.{board_uid}.matrix.cols' or "
-          "'.{board_uid}.matrix.rows' not found");
+          "[ERROR] Cannot configure switches: '.$board_uid.matrix.cols' or "
+          "'.$board_uid.matrix.rows' not found");
       delay(3600000);
     }
   } else {
     DEBUG_INFO(
         "[WARNING] No switches on the board: '.{board_uid}.matrix' not found");
   }
-  DEBUG_INFO("Board loaded");
-};
+  DEBUG_INFO("Hardware loaded");
+}
 
-void load_layout() {
-  DEBUG_INFO("Loading layout");
+void Keyboard::LoadLayout() {
+  DEBUG_INFO("config::Keyboard::LoadLayout");
 
   const char *jsonString = LAYOUT_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(LAYOUT_CONFIG_JSON_SIZE);
-  parse_json(jsonDoc, jsonString);
+  ParseJson(jsonDoc, jsonString);
 
   std::string default_layer = "";
   for (JsonPair kvp : jsonDoc["layers"].as<JsonObject>()) {
     const std::string layer_name = kvp.key().c_str();
     const JsonObject layer_config = kvp.value().as<JsonObject>();
-    action::Layer::LoadConfig(layer_name, layer_config);
+    config::Layer::Load(layer_name, layer_config);
     if (default_layer == "") {
       default_layer = layer_name;
     }
   }
   DEBUG_INFO("Layout loaded");
   logic::quantum::Universe::Setup(default_layer);
-};
+}
 
-void load_config() {
-  load_board();
-  load_layout();
-};
-#endif
+std::string Keyboard::GetControllerUid() {
+  int len = 2 * PICO_UNIQUE_BOARD_ID_SIZE_BYTES + 1;
+  char board_uid[len] = "";
+  pico_get_unique_board_id_string(board_uid, len);
+  return std::string(board_uid);
+}
+
+void Keyboard::ParseJson(DynamicJsonDocument &jsonDoc,
+                         const char *&jsonString) {
+  DEBUG_INFO("%s", jsonString);
+  DeserializationError error = deserializeJson(jsonDoc, jsonString);
+  if (error) {
+    DEBUG_INFO("[ERROR] Parsing failed: %s", error.c_str());
+    delay(3600000);
+  } else {
+    DEBUG_INFO("[INFO] Configuration parsed");
+  }
+}
+} // namespace config

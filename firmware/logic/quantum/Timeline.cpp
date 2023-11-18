@@ -1,5 +1,4 @@
 #include "Timeline.h"
-#include "../../action/KeyParser.h"
 #include "../../utils/Debug.hpp"
 #include "Universe.h"
 
@@ -9,7 +8,7 @@ namespace logic {
 namespace quantum {
 Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
     : history(i_history), parent(i_parent), children(), is_determined(false),
-      next_timeline(nullptr), active_layers(), commit_actions() {
+      next_timeline(nullptr), /*active_layers(),*/ commit_actions() {
   DEBUG_VERBOSE("Timeline::Timeline");
   DEBUG_INFO("New Timeline: %s (@%d)", i_history.c_str(), this);
   if (parent != nullptr) {

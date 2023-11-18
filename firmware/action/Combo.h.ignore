@@ -1,5 +1,5 @@
-#ifndef MYMK_FEATURE_KEY_COMBO
-#define MYMK_FEATURE_KEY_COMBO
+#ifndef MYMK_ACTION_KEY_COMBO
+#define MYMK_ACTION_KEY_COMBO
 
 #include "../logic/quantum/Timeline.h"
 

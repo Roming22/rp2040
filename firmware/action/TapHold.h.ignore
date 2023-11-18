@@ -1,5 +1,5 @@
-#ifndef MYMK_FEATURE_KEY_TAPHOLD
-#define MYMK_FEATURE_KEY_TAPHOLD
+#ifndef MYMK_ACTION_KEY_TAPHOLD
+#define MYMK_ACTION_KEY_TAPHOLD
 
 #include "../logic/quantum/Timeline.h"
 

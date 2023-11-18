@@ -1,5 +1,5 @@
-#ifndef MYMK_FEATURE_KEY_MULTITAP
-#define MYMK_FEATURE_KEY_MULTITAP
+#ifndef MYMK_ACTION_KEY_MULTITAP
+#define MYMK_ACTION_KEY_MULTITAP
 
 #include "../logic/quantum/Timeline.h"
 

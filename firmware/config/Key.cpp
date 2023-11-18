@@ -1,19 +1,19 @@
-#include "KeyParser.h"
+#include "Key.h"
 
-#include "../utils/Debug.hpp"
-#include "Combo.h"
+// #include "../action/Combo.h"
 #include "Keycode.h"
-#include "Layer.h"
-#include "MultiTap.h"
-#include "TapHold.h"
+// #include "../action/Layer.h"
+// #include "../action/MultiTap.h"
+// #include "../action/TapHold.h"
+#include "../utils/Debug.hpp"
 
-#include <functional>
-
-namespace action {
-std::function<void(logic::quantum::Timeline &)>
-KeyParser::Load(const std::string &switch_uid, const std::string &definition) {
-  DEBUG_VERBOSE("KeyParse::Load");
-  const auto [name, args] = KeyParser::ParseDefinition(definition);
+namespace config {
+void Key::Load(const std::string &definition) {
+  DEBUG_VERBOSE("config::Key::Load: %s", definition.c_str());
+  if (key_func.count(definition) != 0) {
+    return;
+  }
+  const auto [name, args] = Key::ParseDefinition(definition);
   DEBUG_VERBOSE("Func name: %s", name.c_str());
   if (loader.count(name) == 0) {
     DEBUG_ERROR("Unknown Key function: %s", name.c_str());
@@ -23,12 +23,12 @@ KeyParser::Load(const std::string &switch_uid, const std::string &definition) {
       DEBUG_VERBOSE("  - %s", pair.first.c_str());
     }
   }
-  return loader[name](switch_uid, args);
+  key_func[definition] = loader[name](args);
 }
 
 std::tuple<std::string, std::vector<std::string>>
-KeyParser::ParseDefinition(const std::string &keycode) {
-  DEBUG_VERBOSE("KeyParse::ParseDefinition");
+Key::ParseDefinition(const std::string &keycode) {
+  DEBUG_VERBOSE("config::Key::ParseDefinition");
   std::string func_name;
   std::vector<std::string> args;
 
@@ -74,11 +74,9 @@ KeyParser::ParseDefinition(const std::string &keycode) {
   return std::make_tuple(func_name, args);
 }
 
-std::map<std::string,
-         std::function<std::function<void(logic::quantum::Timeline &)>(
-             const std::string &, const std::vector<std::string> &)>>
-    KeyParser::loader = {
-        {"KEYCODE", &Keycode::LoadDefinition},
+std::map<std::string, std::function<KeyFunc(const std::vector<std::string> &)>>
+    Key::loader = {
+        {"KEYCODE", &Keycode::Load},
         // {"LY_MO", &Layer::LoadMomentaryDefinition},
         // {"LY_TO", &Layer::LoadToggleDefinition},
         // {"MT", &MultiTap::LoadDefinition},
@@ -87,4 +85,5 @@ std::map<std::string,
         // {"TH_TP", &TapHold::LoadTapDefinition},
         // {"SQ", &Combo::LoadDefinition},
 };
-} // namespace action
+std::map<std::string, KeyFunc> Key::key_func;
+} // namespace config
