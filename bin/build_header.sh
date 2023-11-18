@@ -33,12 +33,12 @@ parse_args(){
         esac
         shift
     done
-    HPP_FILE="$PROJECT_DIR/mymk.hpp"
+    HPP_FILE="$PROJECT_DIR/firmware.hpp"
 }
 
 generate_hpp() {
     for extension in hpp h cpp; do
-        find mymk/ -name \*.$extension | sort
+        find firmware/ -name \*.$extension | sort
     done | sed 's:.*:#include "\0":'
 }
 

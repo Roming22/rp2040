@@ -1,4 +1,4 @@
-#include "mymk.hpp"
+#include "firmware.hpp"
 
 void setup() {
   Serial.begin(9600);
@@ -12,10 +12,10 @@ void setup() {
   DEBUG_INFO("# Rebooting");
 
   // Debug.setDebugLevel(DBG_VERBOSE);
-  Firmware::Setup();
+  firmware::Keyboard::Setup();
 
   DEBUG_INFO("");
   DEBUG_INFO("# Looping");
 }
 
-void loop() { Firmware::Tick(); }
+void loop() { firmware::Keyboard::Tick(); }
