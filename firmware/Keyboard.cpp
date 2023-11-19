@@ -1,5 +1,5 @@
 #include "Keyboard.h"
-#include "config/Keyboard.h"
+#include "config/file/Keyboard.h"
 #include "hardware/board/BaseBoard.h"
 #include "logic/Timer.h"
 #include "logic/quantum/Universe.h"
@@ -12,7 +12,7 @@ void Keyboard::Setup() {
   DEBUG_VERBOSE("firmware::Keyboard::Setup");
   if (instance == nullptr) {
     instance = new Keyboard();
-    config::Keyboard::Load();
+    config::file::Keyboard::Load();
   }
 }
 

@@ -1,21 +1,18 @@
-#ifndef MYMK_CONFIG_KEY
-#define MYMK_CONFIG_KEY
+#ifndef MYMK_CONFIG_FILE_KEY
+#define MYMK_CONFIG_FILE_KEY
 
-#include "KeyFunc.h"
+#include "../../logic/typedef.h"
 
 #include <map>
 #include <string>
-#include <tuple>
-#include <vector>
 
 namespace config {
-
+namespace file {
 class Key {
 protected:
-  static std::map<std::string,
-                  std::function<KeyFunc(const std::vector<std::string> &)>>
+  static std::map<std::string, std::function<logic::KeyFunc(
+                                   const std::vector<std::string> &)>>
       loader;
-  static std::map<std::string, KeyFunc> key_func;
 
   static std::tuple<std::string, std::vector<std::string>>
   ParseDefinition(const std::string &keycode);
@@ -23,5 +20,6 @@ protected:
 public:
   static void Load(const std::string &definition);
 };
+} // namespace file
 } // namespace config
 #endif

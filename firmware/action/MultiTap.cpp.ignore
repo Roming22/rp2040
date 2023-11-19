@@ -2,7 +2,7 @@
 #include "../utils/Debug.hpp"
 
 namespace action {
-std::function<void(logic::quantum::Timeline &)>
+logic::KeyFunc
 MultiTap::LoadDefinition(const std::string &switch_uid,
                          const std::vector<std::string> &definition) {
   DEBUG_VERBOSE("MultiTap::Load");

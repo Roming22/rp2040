@@ -1,10 +1,11 @@
-#ifndef MYMK_CONFIG_KEYBOARD
-#define MYMK_CONFIG_KEYBOARD
+#ifndef MYMK_CONFIG_FILE_KEYBOARD
+#define MYMK_CONFIG_FILE_KEYBOARD
 
 #include <ArduinoJson.h>
 #include <string>
 
 namespace config {
+namespace file {
 class Keyboard {
 protected:
   static void LoadHardware();
@@ -15,5 +16,6 @@ protected:
 public:
   static void Load();
 };
+} // namespace file
 } // namespace config
 #endif

@@ -1,13 +1,15 @@
 #ifndef MYMK_CONFIG_KEY_KEYCODE
 #define MYMK_CONFIG_KEY_KEYCODE
 
-#include "KeyFunc.h"
+#include "../../logic/typedef.h"
 
 namespace config {
+namespace key {
 class Keycode {
 protected:
 public:
-  static KeyFunc Load(const std::vector<std::string> &definition);
+  static logic::KeyFunc Load(const std::vector<std::string> &definition);
 };
+} // namespace key
 } // namespace config
 #endif

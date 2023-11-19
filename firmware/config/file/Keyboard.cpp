@@ -1,16 +1,17 @@
 #include "Keyboard.h"
 
-#include "../../config/config.hpp"
-#include "../hardware/board/DaughterBoard.h"
-#include "../hardware/board/MotherBoard.h"
-#include "../hardware/led/Pixels.h"
-#include "../hardware/txrx/BitBang.h"
-#include "../hardware/usb/Key.h"
-#include "../logic/quantum/Universe.h"
-#include "../utils/Debug.hpp"
+#include "../../../config/config.hpp"
+#include "../../hardware/board/DaughterBoard.h"
+#include "../../hardware/board/MotherBoard.h"
+#include "../../hardware/led/Pixels.h"
+#include "../../hardware/txrx/BitBang.h"
+#include "../../hardware/usb/Key.h"
+#include "../../logic/quantum/Universe.h"
+#include "../../utils/Debug.hpp"
 #include "Layer.h"
 
 namespace config {
+namespace file {
 void Keyboard::Load() {
   hardware::usb::Key::Init();
 
@@ -19,7 +20,7 @@ void Keyboard::Load() {
 }
 
 void Keyboard::LoadHardware() {
-  DEBUG_INFO("config::Keyboard::LoadHardware");
+  DEBUG_INFO("config::file::Keyboard::LoadHardware");
 
   const char *jsonString = HARDWARE_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(HARDWARE_CONFIG_JSON_SIZE);
@@ -97,7 +98,7 @@ void Keyboard::LoadHardware() {
 }
 
 void Keyboard::LoadLayout() {
-  DEBUG_INFO("config::Keyboard::LoadLayout");
+  DEBUG_INFO("config::file::Keyboard::LoadLayout");
 
   const char *jsonString = LAYOUT_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(LAYOUT_CONFIG_JSON_SIZE);
@@ -107,7 +108,7 @@ void Keyboard::LoadLayout() {
   for (JsonPair kvp : jsonDoc["layers"].as<JsonObject>()) {
     const std::string layer_name = kvp.key().c_str();
     const JsonObject layer_config = kvp.value().as<JsonObject>();
-    config::Layer::Load(layer_name, layer_config);
+    config::file::Layer::Load(layer_name, layer_config);
     if (default_layer == "") {
       default_layer = layer_name;
     }
@@ -134,4 +135,5 @@ void Keyboard::ParseJson(DynamicJsonDocument &jsonDoc,
     DEBUG_INFO("[INFO] Configuration parsed");
   }
 }
+} // namespace file
 } // namespace config

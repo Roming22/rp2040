@@ -15,21 +15,21 @@ protected:
     TAP,
   };
 
-  static std::function<void(logic::quantum::Timeline &)>
+  static logic::KeyFunc
   LoadDefinition(const std::string &switch_uid,
                  const std::vector<std::string> &definition,
                  const InterruptMode interrupt_mode);
 
 public:
-  static std::function<void(logic::quantum::Timeline &)>
+  static logic::KeyFunc
   LoadHoldDefinition(const std::string &switch_uid,
                      const std::vector<std::string> &definition);
 
-  static std::function<void(logic::quantum::Timeline &)>
+  static logic::KeyFunc
   LoadNoneDefinition(const std::string &switch_uid,
                      const std::vector<std::string> &definition);
 
-  static std::function<void(logic::quantum::Timeline &)>
+  static logic::KeyFunc
   LoadTapDefinition(const std::string &switch_uid,
                     const std::vector<std::string> &definition);
 

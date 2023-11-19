@@ -9,7 +9,7 @@
 namespace action {
 class MultiTap {
 public:
-  static std::function<void(logic::quantum::Timeline &)>
+  static logic::KeyFunc
   LoadDefinition(const std::string &switch_uid,
                  const std::vector<std::string> &definition);
 

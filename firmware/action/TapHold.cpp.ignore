@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace action {
-std::function<void(logic::quantum::Timeline &)>
+logic::KeyFunc
 TapHold::LoadDefinition(const std::string &switch_uid,
                         const std::vector<std::string> &definition,
                         const InterruptMode interrupt_mode) {
@@ -19,21 +19,21 @@ TapHold::LoadDefinition(const std::string &switch_uid,
   };
 }
 
-std::function<void(logic::quantum::Timeline &)>
+logic::KeyFunc
 TapHold::LoadHoldDefinition(const std::string &switch_uid,
                             const std::vector<std::string> &definition) {
   DEBUG_VERBOSE("TapHold::LoadHold");
   return LoadDefinition(switch_uid, definition, HOLD);
 }
 
-std::function<void(logic::quantum::Timeline &)>
+logic::KeyFunc
 TapHold::LoadNoneDefinition(const std::string &switch_uid,
                             const std::vector<std::string> &definition) {
   DEBUG_VERBOSE("TapHold::LoadNone");
   return LoadDefinition(switch_uid, definition, NONE);
 }
 
-std::function<void(logic::quantum::Timeline &)>
+logic::KeyFunc
 TapHold::LoadTapDefinition(const std::string &switch_uid,
                            const std::vector<std::string> &definition) {
   DEBUG_VERBOSE("TapHold::LoadTap");

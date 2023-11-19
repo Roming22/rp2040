@@ -1,15 +1,14 @@
 #include "Timeline.h"
 #include "../../utils/Debug.hpp"
+#include "../feature/Key.h"
 #include "Universe.h"
-
-#include <functional>
 
 namespace logic {
 namespace quantum {
 Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
     : history(i_history), parent(i_parent), children(), is_determined(false),
-      next_timeline(nullptr), /*active_layers(),*/ commit_actions() {
-  DEBUG_VERBOSE("Timeline::Timeline");
+      next_timeline(nullptr), active_layers(), commit_actions() {
+  DEBUG_VERBOSE("logic::quantum::Timeline::Timeline");
   DEBUG_INFO("New Timeline: %s (@%d)", i_history.c_str(), this);
   if (parent != nullptr) {
     parent->mark_determined();
@@ -22,25 +21,40 @@ Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
 
 void Timeline::End(Timeline &timeline) { timeline.end(); }
 
-void Timeline::add_event_function(
-    const std::string event_id,
-    const std::function<void(Timeline &)> function) {
-  DEBUG_INFO("Timeline::add_event_function %s: %s", history.c_str(),
-             event_id.c_str());
+void Timeline::add_layer(logic::feature::Layer &layer) {
+  DEBUG_INFO("logic::quantum::Timeline::add_layer");
+  active_layers.push_back(layer);
+
+  for (const auto &pair : layer.get_keys()) {
+    const std::string &switch_uid = pair.first;
+    const std::string &definition = pair.second;
+    const logic::KeyFunc &action = logic::feature::Key::Get(definition);
+    std::string pressed_event = switch_uid + std::string(".pressed");
+    possible_events[pressed_event] = [action, switch_uid](Timeline &timeline) {
+      action(timeline, switch_uid);
+    };
+  };
+  DEBUG_INFO("logic::quantum::Timeline events %s after load: %d (@%d)",
+             history.c_str(), possible_events.size(), this);
+}
+
+void Timeline::add_event_action(const std::string event_id,
+                                const ActionFunc function) {
+  DEBUG_INFO("logic::quantum::Timeline::add_event_function %s: %s",
+             history.c_str(), event_id.c_str());
   this->possible_events[event_id] = function;
 }
 
-void Timeline::remove_event_function(const std::string event_id) {
-  DEBUG_INFO("Timeline::remove_event_function %s: %s", history.c_str(),
-             event_id.c_str());
+void Timeline::remove_event_action(const std::string event_id) {
+  DEBUG_INFO("logic::quantum::Timeline::remove_event_function %s: %s",
+             history.c_str(), event_id.c_str());
   if (this->possible_events.count(event_id) > 0) {
     this->possible_events.erase(this->possible_events.find(event_id));
   }
 }
 
-void Timeline::add_commit_action(
-    const std::function<void(Timeline &)> function) {
-  DEBUG_INFO("Timeline::add_commit_action %s", history.c_str());
+void Timeline::add_commit_action(const ActionFunc function) {
+  DEBUG_INFO("logic::quantum::Timeline::add_commit_action %s", history.c_str());
   this->commit_actions.push_back(function);
 }
 
@@ -57,7 +71,7 @@ void Timeline::process_event(const std::string &event_id) {
              event_id.c_str());
   if (possible_events.count(event_id) > 0) {
     DEBUG_VERBOSE("Timeline: running lambda");
-    std::function<void(Timeline &)> &function = possible_events[event_id];
+    ActionFunc &function = possible_events[event_id];
     function(*this);
     DEBUG_VERBOSE("Timeline: lambda done");
   } else {
@@ -68,7 +82,7 @@ void Timeline::process_event(const std::string &event_id) {
 }
 
 Timeline &Timeline::split(const std::string &id) {
-  DEBUG_VERBOSE("Timeline::split");
+  DEBUG_VERBOSE("logic::quantum::Timeline::split");
   const std::string new_history = history + "|" + id;
   Timeline &new_timeline = *new Timeline(new_history, this);
   DEBUG_VERBOSE("Split Timeline has %d events", possible_events.size());
@@ -76,7 +90,7 @@ Timeline &Timeline::split(const std::string &id) {
 }
 
 void Timeline::mark_determined() {
-  DEBUG_INFO("Timeline::mark_determined %s", history.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::mark_determined %s", history.c_str());
   is_determined = true;
   if (parent != nullptr) {
     parent->next_timeline = this;
@@ -84,9 +98,9 @@ void Timeline::mark_determined() {
 }
 
 void Timeline::execute() {
-  DEBUG_VERBOSE("Timeline::execute");
+  DEBUG_VERBOSE("logic::quantum::Timeline::execute");
   for (int i = 0; i < commit_actions.size(); ++i) {
-    std::function<void(Timeline &)> &action = commit_actions[i];
+    ActionFunc &action = commit_actions[i];
     action(*this);
   }
   commit_actions.clear();

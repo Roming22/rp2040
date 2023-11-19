@@ -1,11 +1,12 @@
-#ifndef MYMK_ACTION_KEY_KEYCODE
-#define MYMK_ACTION_KEY_KEYCODE
+#ifndef MYMK_LOGIC_FEATURE_KEYCODE
+#define MYMK_LOGIC_FEATURE_KEYCODE
 
-#include "../logic/quantum/Timeline.h"
+#include "../../logic/quantum/Timeline.h"
 
 #include <string>
 
-namespace action {
+namespace logic {
+namespace feature {
 class Keycode {
 protected:
 public:
@@ -20,5 +21,6 @@ public:
                         const std::string &switch_uid,
                         const std::string &keycode);
 };
-} // namespace action
+} // namespace feature
+} // namespace logic
 #endif
