@@ -7,7 +7,7 @@ namespace usb {
 Key::Key(const char key) : keycode(key), count(0) {}
 
 void Key::Init() {
-  DEBUG_VERBOSE("Key:Init");
+  DEBUG_VERBOSE("hardware::usb::Key:Init");
   for (auto pair : definition2code) {
     if (Key::map.count(pair.second) == 0) {
       Key::map[pair.second] = new Key(pair.second);
@@ -22,7 +22,7 @@ void Key::Init() {
 }
 
 void Key::Press(const std::string key_definition) {
-  DEBUG_VERBOSE("Key:Press");
+  DEBUG_VERBOSE("hardware::usb::Key:Press");
   if (key_definition == "NONE") {
     return;
   }
@@ -35,14 +35,14 @@ void Key::Press(const std::string key_definition) {
 }
 
 void Key::Release(const std::string key_definition) {
-  DEBUG_VERBOSE("Key:Release");
+  DEBUG_VERBOSE("hardware::usb::Key:Release");
   if (key_definition == "NONE") {
     return;
   }
   Key &event = *(map[definition2code[key_definition]]);
   event.count -= 1;
   if (event.count == 0) {
-    DEBUG_INFO("Key::Release %s", key_definition.c_str());
+    DEBUG_INFO("hardware::usb::Key::Release %s", key_definition.c_str());
     Keyboard.release(event.keycode);
   }
 }
@@ -100,6 +100,10 @@ std::map<const std::string, const char> Key::definition2code = {
     {"*", '*'},
     {"(", '('},
     {")", ')'},
+    {"-", '-'},
+    {"_", '_'},
+    {"=", '='},
+    {"+", '+'},
     {"\\", '\\'},
     {"|", '|'},
     {";", ';'},

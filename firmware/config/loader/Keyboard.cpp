@@ -78,7 +78,7 @@ void Keyboard::LoadHardware() {
       for (JsonVariant item : config["matrix"]["rows"].as<JsonArray>()) {
         row_pins.push_back(item.as<unsigned int>());
       }
-      if (isLeft) {
+      if (Serial) {
         is_connected = false;
         hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
       } else {

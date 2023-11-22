@@ -12,14 +12,14 @@ protected:
 public:
   static void OnPress(logic::quantum::Timeline &timeline,
                       const std::string &switch_uid,
-                      const std::string &keycode);
+                      const std::vector<std::string> &definition);
 
   static void OnCommit(logic::quantum::Timeline &timeline,
-                       const std::string &keycode);
+                       const std::vector<std::string> &definition);
 
   static void OnRelease(logic::quantum::Timeline &timeline,
                         const std::string &switch_uid,
-                        const std::string &keycode);
+                        const std::vector<std::string> &definition);
 };
 } // namespace feature
 } // namespace logic

@@ -1,5 +1,5 @@
-#ifndef MYMK_CONFIG_FILE_KEYBOARD
-#define MYMK_CONFIG_FILE_KEYBOARD
+#ifndef MYMK_CONFIG_LOADER_KEYBOARD
+#define MYMK_CONFIG_LOADER_KEYBOARD
 
 #include <ArduinoJson.h>
 #include <string>

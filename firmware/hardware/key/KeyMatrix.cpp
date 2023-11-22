@@ -30,7 +30,7 @@ void KeyMatrix::poll_events(std::vector<int> &events) {
     return;
   }
 
-  DEBUG_VERBOSE("KeyMatrix.poll_events");
+  DEBUG_VERBOSE("harware::key::KeyMatrix.poll_events");
   bool state;
   int key_index = 0;
   for (unsigned int row = 0; row < row_pins.size(); ++row) {

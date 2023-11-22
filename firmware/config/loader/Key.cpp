@@ -1,17 +1,17 @@
 #include "Key.h"
 
-// #include "../../action/Combo.h"
-#include "../key/Keycode.h"
-// #include "../../action/Layer.h"
-// #include "../../action/MultiTap.h"
-// #include "../../action/TapHold.h"
+// #include "../key/Combo.h"
+// #include "../key/MultiTap.h"
+// #include "../key/TapHold.h"
 #include "../../logic/feature/Key.h"
 #include "../../utils/Debug.hpp"
+#include "../key/Keycode.h"
+#include "../key/Layer.h"
 
 namespace config {
 namespace file {
 void Key::Load(const std::string &definition) {
-  DEBUG_VERBOSE("config::Key::Load: %s", definition.c_str());
+  DEBUG_VERBOSE("config::file::Key::Load: %s", definition.c_str());
   if (logic::feature::Key::Has(definition)) {
     return;
   }
@@ -30,7 +30,7 @@ void Key::Load(const std::string &definition) {
 
 std::tuple<std::string, std::vector<std::string>>
 Key::ParseDefinition(const std::string &keycode) {
-  DEBUG_VERBOSE("config::Key::ParseDefinition");
+  DEBUG_VERBOSE("config::file::Key::ParseDefinition");
   std::string func_name;
   std::vector<std::string> args;
 
@@ -80,13 +80,13 @@ std::map<std::string,
          std::function<logic::KeyFunc(const std::vector<std::string> &)>>
     Key::loader = {
         {"KEYCODE", &key::Keycode::Load},
-        // {"LY_MO", &Layer::LoadMomentaryDefinition},
-        // {"LY_TO", &Layer::LoadToggleDefinition},
-        // {"MT", &MultiTap::LoadDefinition},
-        // {"TH_HD", &TapHold::LoadHoldDefinition},
-        // {"TH_NO", &TapHold::LoadNoneDefinition},
-        // {"TH_TP", &TapHold::LoadTapDefinition},
-        // {"SQ", &Combo::LoadDefinition},
+        {"LY_MO", &config::key::Layer::LoadMomentary},
+        {"LY_TO", &config::key::Layer::LoadToggle},
+        // {"MT", &MultiTap::Load},
+        // {"TH_HD", &TapHold::LoadHold},
+        // {"TH_NO", &TapHold::LoadNone},
+        // {"TH_TP", &TapHold::LoadTap},
+        // {"SQ", &Combo::Load},
 };
 } // namespace file
 } // namespace config

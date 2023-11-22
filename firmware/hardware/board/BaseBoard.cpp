@@ -4,7 +4,7 @@
 namespace hardware {
 namespace board {
 void BaseBoard::load_switch_events(std::vector<int> &switch_events) {
-  DEBUG_VERBOSE("BaseBoard::load_switch_events");
+  DEBUG_VERBOSE("harware::board::BaseBoard::load_switch_events");
   key_switch->poll_events(switch_events);
 }
 
@@ -14,7 +14,7 @@ void BaseBoard::tick() {
 }
 
 void BaseBoard::Tick() {
-  DEBUG_VERBOSE("BaseBoard::Tick");
+  DEBUG_VERBOSE("harware::board::BaseBoard::Tick");
   if (instance->is_connected) {
     hardware::txrx::BitBang::Tick();
   }

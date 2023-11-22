@@ -1,22 +1,19 @@
 #include "Events.h"
 #include "../utils/Debug.hpp"
 
-#include <queue>
-#include <string>
-
 namespace logic {
 void Event::Add(const std::string &id) {
-  DEBUG_INFO("Event::Add %s", id.c_str());
+  DEBUG_INFO("logic::Event::Add %s", id.c_str());
   ids.push(id);
 }
 
 bool Event::HasEvents() {
-  DEBUG_VERBOSE("Event::HasEvents");
+  DEBUG_VERBOSE("logic::Event::HasEvents");
   return !ids.empty();
 }
 
 std::string Event::Get() {
-  DEBUG_VERBOSE("Event::Get");
+  DEBUG_VERBOSE("logic::Event::Get");
   DEBUG_INFO("");
   std::string event_id = ids.front();
   ids.pop();

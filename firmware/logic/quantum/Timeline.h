@@ -2,22 +2,23 @@
 #define MYMK_LOGIC_QUANTUM_TIMELINE
 
 #include "../../logic/feature/Layer.h"
+#include "../typedef.h"
 
 #include <functional>
+#include <list>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace logic {
 namespace quantum {
-typedef std::function<void(Timeline &)> ActionFunc;
 class Timeline {
 protected:
   bool is_determined;
   Timeline *next_timeline;
   Timeline *parent;
-  std::vector<Timeline *> children;
-  std::vector<logic::feature::Layer> active_layers;
+  std::list<Timeline *> children;
+  std::list<logic::feature::LayerPtr> active_layers;
 
 public:
   std::string history;
@@ -29,7 +30,11 @@ public:
 
   static void End(Timeline &timeline);
 
-  void add_layer(logic::feature::Layer &layer);
+  void add_layer(logic::feature::LayerPtr layer);
+
+  void merge_layers();
+
+  void remove_layer(const logic::feature::Layer &layer);
 
   void add_event_action(const std::string event_id, const ActionFunc function);
 

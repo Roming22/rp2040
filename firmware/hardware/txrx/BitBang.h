@@ -1,7 +1,7 @@
 // Max frequency on an RP2040: 31250Hz (8us tick)
 
-#ifndef MYMK_HARDWARE_BITBANG
-#define MYMK_HARDWARE_BITBANG
+#ifndef MYMK_HARDWARE_TXRX_BITBANG
+#define MYMK_HARDWARE_TXRX_BITBANG
 
 #include <queue>
 

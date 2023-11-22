@@ -34,11 +34,11 @@ layers:
     leds:
       color: [127, 21, 0]
     keys: [
-  #     # Left
+      # Left
         TRNS, "`",          "\\\\", "_",
         TRNS, "#",          "$",    "!",
         TRNS, LY_TO(alpha), TRNS,   TRNS,
-  #     # Right
+      # Right
         TRNS, "-",  "/",          "=",
         TRNS, ".",  ",",          "'",
         TRNS, TRNS, LY_TO(alpha), TRNS

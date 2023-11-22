@@ -1,5 +1,5 @@
-#ifndef MYMK_CONFIG_FILE_LAYER
-#define MYMK_CONFIG_FILE_LAYER
+#ifndef MYMK_CONFIG_LOADER_LAYER
+#define MYMK_CONFIG_LOADER_LAYER
 
 #include "../../logic/feature/Layer.h"
 

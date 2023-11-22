@@ -1,7 +1,6 @@
 #ifndef MYMK_LOGIC_TIMER
 #define MYMK_LOGIC_TIMER
 
-#include <functional>
 #include <map>
 #include <string>
 
@@ -9,7 +8,6 @@ namespace logic {
 class Timer {
 private:
   long end_time;
-  std::function<void()> callable;
   static std::map<std::string, Timer *> timers;
 
   Timer(const std::string &i_name, const int &delay_ms);

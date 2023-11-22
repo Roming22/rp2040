@@ -1,5 +1,5 @@
 #include "Keyboard.h"
-#include "config/file/Keyboard.h"
+#include "config/loader/Keyboard.h"
 #include "hardware/board/BaseBoard.h"
 #include "logic/Timer.h"
 #include "logic/quantum/Universe.h"

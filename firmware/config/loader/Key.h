@@ -1,5 +1,5 @@
-#ifndef MYMK_CONFIG_FILE_KEY
-#define MYMK_CONFIG_FILE_KEY
+#ifndef MYMK_CONFIG_LOADER_KEY
+#define MYMK_CONFIG_LOADER_KEY
 
 #include "../../logic/typedef.h"
 

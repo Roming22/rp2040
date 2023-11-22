@@ -3,18 +3,17 @@
 #include "../../logic/typedef.h"
 #include "../../utils/Debug.hpp"
 
-#include <string>
-
 namespace config {
 namespace key {
 logic::KeyFunc Layer::Load(const std::vector<std::string> &definition,
                            const bool is_toggle) {
   DEBUG_VERBOSE("config::key::Layer::Load");
-  const std::string layer_name = definition[0];
-  return [layer_name, is_toggle](logic::quantum::Timeline &timeline,
+  return [definition, is_toggle](logic::quantum::Timeline &timeline,
                                  const std::string &switch_uid) {
-    logic::feature::Layer::Get(layer_name)
-        .on_press(timeline, switch_uid, is_toggle);
+    for (auto layer_name : definition) {
+      logic::feature::Layer::OnPress(layer_name, timeline, switch_uid,
+                                     is_toggle);
+    }
   };
 }
 

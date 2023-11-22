@@ -1,0 +1,27 @@
+layers:
+  alpha:
+    leds:
+      color: [127, 0, 0]
+    keys: [
+      # Left
+        TAB,  D,      C,    L,
+        NONE, T,      A,    E,
+        NONE, SPACE,  LY_MO(symbols), NONE,
+      # Right
+        R,    S,    H,    RETURN,
+        I,    O,    N,    NONE,
+        NONE, RGUI, MEH,  NONE
+      ]
+  symbols:
+    leds:
+      color: [127, 21, 0]
+    keys: [
+      # Left
+        TRNS, "`",            "\\\\",       "_",
+        TRNS, "#",            "$",          "!",
+        TRNS, LY_TO(), LY_TO(alpha), TRNS,
+      # Right
+        TRNS, "-",  "/",          "=",
+        TRNS, ".",  ",",          "'",
+        TRNS, TRNS, LY_TO(alpha), TRNS
+      ]

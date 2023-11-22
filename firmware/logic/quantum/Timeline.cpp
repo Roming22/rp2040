@@ -14,18 +14,20 @@ Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
     parent->mark_determined();
     parent->children.push_back(this);
     possible_events = parent->possible_events;
-    // TODO: Copy active_layers?
+    for (auto item : parent->active_layers) {
+      active_layers.push_back(item);
+    }
   }
   DEBUG_VERBOSE("New Timeline has %d events", possible_events.size());
 }
 
 void Timeline::End(Timeline &timeline) { timeline.end(); }
 
-void Timeline::add_layer(logic::feature::Layer &layer) {
+void Timeline::add_layer(logic::feature::LayerPtr layer) {
   DEBUG_INFO("logic::quantum::Timeline::add_layer");
   active_layers.push_back(layer);
 
-  for (const auto &pair : layer.get_keys()) {
+  for (const auto &pair : layer->get_keys()) {
     const std::string &switch_uid = pair.first;
     const std::string &definition = pair.second;
     const logic::KeyFunc &action = logic::feature::Key::Get(definition);
@@ -34,8 +36,38 @@ void Timeline::add_layer(logic::feature::Layer &layer) {
       action(timeline, switch_uid);
     };
   };
+  DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d",
+             history.c_str(), active_layers.size());
   DEBUG_INFO("logic::quantum::Timeline events %s after load: %d (@%d)",
              history.c_str(), possible_events.size(), this);
+}
+
+void Timeline::merge_layers() {
+  DEBUG_INFO("logic::quantum::Timeline::merge_layers");
+  feature::LayerPtr current_layer = active_layers.back();
+  active_layers.clear();
+  feature::LayerPtr merged_layer = feature::Layer::Get(current_layer->name);
+  active_layers.push_back(merged_layer);
+}
+
+void Timeline::remove_layer(const logic::feature::Layer &layer) {
+  DEBUG_INFO("logic::quantum::Timeline::remove_layer");
+  DEBUG_INFO("%d Layers left", active_layers.size());
+  bool layer_deleted = false;
+  for (auto it : active_layers) {
+    if (*it == layer) {
+      active_layers.remove(it);
+      DEBUG_INFO("Layer found, %d layers left", active_layers.size());
+      layer_deleted = true;
+      break;
+    }
+  }
+  if (layer_deleted) {
+    feature::LayerPtr current_layer = active_layers.back();
+    active_layers.pop_back();
+    add_layer(current_layer);
+    current_layer->on_commit(*this);
+  }
 }
 
 void Timeline::add_event_action(const std::string event_id,
@@ -59,11 +91,10 @@ void Timeline::add_commit_action(const ActionFunc function) {
 }
 
 void Timeline::process_event(const std::string &event_id) {
-  DEBUG_VERBOSE("Timeline::process_event %s", history.c_str());
+  DEBUG_VERBOSE("logic::quantum::Timeline::process_event %s", history.c_str());
   if (children.size() > 0) {
-    for (int i = children.size() - 1; i >= 0; --i) {
-      DEBUG_VERBOSE("Child #%d", i + 1);
-      children[i]->process_event(event_id);
+    for (auto child : children) {
+      child->process_event(event_id);
     }
     return;
   }
@@ -98,16 +129,16 @@ void Timeline::mark_determined() {
 }
 
 void Timeline::execute() {
-  DEBUG_VERBOSE("logic::quantum::Timeline::execute");
-  for (int i = 0; i < commit_actions.size(); ++i) {
-    ActionFunc &action = commit_actions[i];
+  DEBUG_INFO("logic::quantum::Timeline::execute");
+  for (auto action : commit_actions) {
+    DEBUG_INFO("execute action");
     action(*this);
   }
   commit_actions.clear();
 }
 
 void Timeline::resolve() {
-  DEBUG_VERBOSE("Timeline::resolve");
+  DEBUG_VERBOSE("logic::quantum::Timeline::resolve");
   DEBUG_INFO("Resolving timeline: %s (%s, %d)", history.c_str(),
              is_determined ? "true" : "false", children.size());
 
@@ -127,7 +158,7 @@ void Timeline::resolve() {
   // The current timeline has no purpose anymore,
   // move to the next node.
   DEBUG_INFO("Moving onto the next Timeline");
-  Timeline &child = *children[0];
+  Timeline &child = **children.begin();
   DEBUG_INFO("Moving onto the next Timeline: %s (@%d)", child.history.c_str(),
              &child);
   child.parent = nullptr;
@@ -140,7 +171,7 @@ void Timeline::resolve() {
 }
 
 void Timeline::end() {
-  DEBUG_INFO("Timeline::end '%s'", history.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::end '%s'", history.c_str());
   if (parent != nullptr) {
     for (auto child = parent->children.begin(); child != parent->children.end();
          ++child) {

@@ -3,8 +3,6 @@
 #include "../utils/Debug.hpp"
 #include "../utils/Time.h"
 
-#include <string>
-
 namespace logic {
 Timer::Timer(const std::string &i_name, const int &delay_ms) : name(i_name) {
   end_time = utils::Time::Now() + (delay_ms * 1E3);
@@ -34,7 +32,7 @@ Timer *Timer::Start(const std::string &name, const int &delay_ms) {
 }
 
 void Timer::Stop(const std::string &name) {
-  DEBUG_INFO("Timer::Stop %s", name.c_str());
+  DEBUG_INFO("logic::Timer::Stop %s", name.c_str());
   if (timers.count(name) > 0) {
     Timer *timer = timers[name];
     timers.erase(name);
@@ -45,12 +43,12 @@ void Timer::Stop(const std::string &name) {
 }
 
 void Timer::add_event() {
-  DEBUG_VERBOSE("Timer::add_event %s @%d", name.c_str(), this);
+  DEBUG_VERBOSE("logic::Timer::add_event %s @%d", name.c_str(), this);
   Event::Add(name);
 }
 
 bool Timer::tick() {
-  DEBUG_VERBOSE("Timer::tick %s", name.c_str());
+  DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
   if (end_time <= utils::Time::Now()) {
     add_event();
     return true;

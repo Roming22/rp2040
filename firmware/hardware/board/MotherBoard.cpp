@@ -11,7 +11,7 @@ void MotherBoard::Setup(const std::vector<unsigned int> &i_col_pins,
 }
 
 void MotherBoard::receive_switch_events(std::vector<int> &switch_events) {
-  DEBUG_VERBOSE("MotherBoard::receive_switch_events");
+  DEBUG_VERBOSE("harware::board::MotherBoard::receive_switch_events");
   std::queue<unsigned int> &daughterboard_switch_events =
       hardware::txrx::BitBang::In();
   while (daughterboard_switch_events.size() > 0) {
