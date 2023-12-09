@@ -28,7 +28,7 @@ void Key::Press(const std::string key_definition) {
   }
   Key &event = *(map[definition2code[key_definition]]);
   if (event.count == 0) {
-    DEBUG_INFO("Key::Press %s", key_definition.c_str());
+    DEBUG_INFO("hardware::usb::Key::Press %s", key_definition.c_str());
     Keyboard.press(event.keycode);
   }
   event.count += 1;

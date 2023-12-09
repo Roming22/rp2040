@@ -13,7 +13,6 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
   DEBUG_VERBOSE("logic::feature::Keycode::OnPress");
   std::string press_event = switch_uid + std::string(".pressed");
   std::string release_event = switch_uid + std::string(".released");
-  timeline.mark_determined();
 
   // On commit actions
   DEBUG_INFO("logic::feature::Keycode::OnPress %s: %s", switch_uid.c_str(),
@@ -23,7 +22,7 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
   });
 
   // On release configuration
-  timeline.add_event_action(
+  timeline.set_event_action(
       release_event,
       [switch_uid, definition](logic::quantum::Timeline &timeline) {
         Keycode::OnRelease(timeline, switch_uid, definition);
@@ -43,7 +42,7 @@ void Keycode::OnRelease(logic::quantum::Timeline &timeline,
                         const std::vector<std::string> &definition) {
   DEBUG_VERBOSE("logic::feature::Keycode::OnRelease");
   timeline.add_commit_action([definition](logic::quantum::Timeline &) {
-    DEBUG_INFO("Keycode released: %s", definition[0].c_str());
+    DEBUG_INFO("logic::feature::Keycode released: %s", definition[0].c_str());
     for (auto keycode : definition) {
       hardware::usb::Key::Release(keycode);
     }

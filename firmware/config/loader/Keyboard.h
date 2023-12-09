@@ -5,7 +5,7 @@
 #include <string>
 
 namespace config {
-namespace file {
+namespace loader {
 class Keyboard {
 protected:
   static void LoadHardware();
@@ -16,6 +16,6 @@ protected:
 public:
   static void Load();
 };
-} // namespace file
+} // namespace loader
 } // namespace config
 #endif

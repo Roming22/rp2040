@@ -27,12 +27,18 @@ void Universe::StartTimeline(Timeline &timeline) {
   start_timeline = &timeline;
 }
 
+void Universe::Resolve() {
+  DEBUG_INFO("############################################################");
+  start_timeline->resolve();
+}
+
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
   if (logic::Event::HasEvents()) {
     std::string event_id = logic::Event::Get();
     DEBUG_DEBUG("Universe: processing the '%s' event", event_id.c_str());
     start_timeline->process_event(event_id);
+    DEBUG_INFO("############################################################");
     start_timeline->resolve();
   }
 }

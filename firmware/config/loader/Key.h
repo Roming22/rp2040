@@ -7,7 +7,7 @@
 #include <string>
 
 namespace config {
-namespace file {
+namespace loader {
 class Key {
 protected:
   static std::map<std::string, std::function<logic::KeyFunc(
@@ -20,6 +20,6 @@ protected:
 public:
   static void Load(const std::string &definition);
 };
-} // namespace file
+} // namespace loader
 } // namespace config
 #endif

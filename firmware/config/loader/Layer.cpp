@@ -6,9 +6,9 @@
 #include "Key.h"
 
 namespace config {
-namespace file {
+namespace loader {
 void Layer::Load(const std::string name, const JsonObject &config) {
-  DEBUG_INFO("config::file::Layer::Load: %s", name.c_str());
+  DEBUG_INFO("config::loader::Layer::Load: %s", name.c_str());
 
   int color[] = {-1, -1, -1, 0};
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
@@ -25,7 +25,7 @@ void Layer::Load(const std::string name, const JsonObject &config) {
 }
 
 void Layer::LoadLedColor(const JsonArray &config, int *color) {
-  DEBUG_VERBOSE("config::file::Layer::LoadLedColor");
+  DEBUG_VERBOSE("config::loader::Layer::LoadLedColor");
   if (config.size() < 3 || config.size() > 4) {
     DEBUG_WARNING("[WARNING] Incorrect led color length: %d", config.size());
     return;
@@ -36,19 +36,19 @@ void Layer::LoadLedColor(const JsonArray &config, int *color) {
 }
 
 void Layer::LoadKeys(const JsonArray &config, logic::feature::StringMap &keys) {
-  DEBUG_VERBOSE("config::file::Layer::LoadKeys: %d keys", config.size());
+  DEBUG_VERBOSE("config::loader::Layer::LoadKeys: %d keys", config.size());
   for (JsonVariant v : config) {
     std::string switch_uid = "switch." + std::to_string(keys.size() + 1);
     std::string definition = v.as<std::string>();
     keys[switch_uid] = definition;
-    config::file::Key::Load(definition);
+    config::loader::Key::Load(definition);
     DEBUG_DEBUG("%s: %s", switch_uid.c_str(), v.as<std::string>().c_str());
   }
 }
 
 // void Layer::LoadCombos(const JsonObject &config, logic::feature::StringMap
 // &combos) {
-//   DEBUG_VERBOSE("config::file::Layer::LoadCombos");
+//   DEBUG_VERBOSE("config::loader::Layer::LoadCombos");
 
 //   DEBUG_DEBUG("Loading chords");
 //   for (JsonPair kvp : config["chords"].as<JsonObject>()) {
@@ -65,5 +65,5 @@ void Layer::LoadKeys(const JsonArray &config, logic::feature::StringMap &keys) {
 //     config::Key::Load(definition);
 //   }
 // }
-} // namespace file
+} // namespace loader
 } // namespace config

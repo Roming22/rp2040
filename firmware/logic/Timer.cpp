@@ -2,9 +2,12 @@
 #include "../logic/Events.h"
 #include "../utils/Debug.hpp"
 #include "../utils/Time.h"
+#include "quantum/Universe.h"
 
 namespace logic {
-Timer::Timer(const std::string &i_name, const int &delay_ms) : name(i_name) {
+Timer::Timer(const std::string &i_name, const int &delay_ms,
+             quantum::Timeline &i_timeline)
+    : name(i_name), timeline(i_timeline) {
   end_time = utils::Time::Now() + (delay_ms * 1E3);
 
   DEBUG_INFO("Timer %s @%d    Start: %d    End: %d", name.c_str(), this,
@@ -23,11 +26,13 @@ void Timer::Tick() {
   }
 }
 
-Timer *Timer::Start(const std::string &name, const int &delay_ms) {
+Timer *Timer::Start(const std::string &name, const int &delay_ms,
+                    quantum::Timeline &timeline) {
+  DEBUG_INFO("logic::Timer::Start %s", name.c_str());
   if (timers.count(name) > 0) {
     Stop(name);
   }
-  timers[name] = new Timer(name, delay_ms);
+  timers[name] = new Timer(name, delay_ms, timeline);
   return timers[name];
 }
 
@@ -42,15 +47,16 @@ void Timer::Stop(const std::string &name) {
   }
 }
 
-void Timer::add_event() {
+void Timer::send_event() {
   DEBUG_VERBOSE("logic::Timer::add_event %s @%d", name.c_str(), this);
-  Event::Add(name);
+  timeline.process_event(name);
+  logic::quantum::Universe::Resolve();
 }
 
 bool Timer::tick() {
   DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
   if (end_time <= utils::Time::Now()) {
-    add_event();
+    send_event();
     return true;
   }
   return false;

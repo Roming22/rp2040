@@ -14,10 +14,8 @@ namespace logic {
 namespace quantum {
 class Timeline {
 protected:
-  bool is_determined;
-  Timeline *next_timeline;
   Timeline *parent;
-  std::list<Timeline *> children;
+  std::vector<Timeline *> children;
   std::list<logic::feature::LayerPtr> active_layers;
 
 public:
@@ -28,7 +26,7 @@ public:
 
   Timeline(const std::string &i_history, Timeline *i_parent);
 
-  static void End(Timeline &timeline);
+  std::vector<Timeline *> &get_children();
 
   void add_layer(logic::feature::LayerPtr layer);
 
@@ -36,17 +34,17 @@ public:
 
   void remove_layer(const logic::feature::Layer &layer);
 
-  void add_event_action(const std::string event_id, const ActionFunc function);
+  void set_event_action(const std::string event_id, const ActionFunc function);
 
   void remove_event_action(const std::string event_id);
+
+  void clear_events_action();
 
   void add_commit_action(const ActionFunc function);
 
   void process_event(const std::string &event_id);
 
   Timeline &split(const std::string &id);
-
-  void mark_determined();
 
   void execute();
 

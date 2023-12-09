@@ -7,7 +7,7 @@
 #include <string>
 
 namespace config {
-namespace file {
+namespace loader {
 class Layer {
 protected:
   static void LoadLedColor(const JsonArray &config, int *color);
@@ -19,6 +19,6 @@ protected:
 public:
   static void Load(const std::string name, const JsonObject &config);
 };
-} // namespace file
+} // namespace loader
 } // namespace config
 #endif

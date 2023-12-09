@@ -4,12 +4,12 @@ layers:
       color: [127, 0, 0]
     keys: [
       # Left
-        TH_HD(TAB|LSFT),  TH_HD(D|LSFT),            TH_HD(C|LALT),            TH_HD(L|LCTL),
-        NONE,             TH_HD(T|LY_MO(systemL)),  TH_HD(A|LY_MO(fn_numL)),  TH_HD(E|LY_MO(symbolsL)),
+        TH(TAB|LSFT),  TH(D|LSFT),            TH(C|LALT),            TH(L|LCTL),
+        NONE,             TH(T|LY_MO(systemL)),  TH(A|LY_MO(fn_numL)),  TH(E|LY_MO(symbolsL)),
         NONE,             SPACE,                    LGUI,                     NONE,
       # Right
-        TH_HD(R|RCTL),            TH_HD(S|RALT),            TH_HD(H|RSFT),          TH_HD(RETURN|RSFT),
-        TH_HD(I|LY_MO(symbolsR)), TH_HD(O|LY_MO(fn_numR)),  TH_HD(N|LY_MO(systemR), NONE,
+        TH(R|RCTL),            TH(S|RALT),            TH(H|RSFT),          TH(RETURN|RSFT),
+        TH(I|LY_MO(symbolsR)), TH(O|LY_MO(fn_numR)),  TH(N|LY_MO(systemR), NONE,
         NONE,                     RGUI,                     MEH,                    NONE
       ]
     combos:
@@ -35,9 +35,9 @@ layers:
       color: [127, 21, 0]
     keys: [
       # Left
-        TRNS, "`",          "\\\\", "_",
-        TRNS, "#",          "$",    "!",
-        TRNS, LY_TO(alpha), TRNS,   TRNS,
+        TRNS, "`",            "\\\\",       "_",
+        TRNS, "#",            "$",          "!",
+        TRNS, LY_TO(), LY_TO(alpha), TRNS,
       # Right
         TRNS, "-",  "/",          "=",
         TRNS, ".",  ",",          "'",
@@ -59,13 +59,13 @@ layers:
       color: [127, 42, 0]
     keys: [
       # Left
-        TRNS, F1,           F3,   F5,
-        TRNS, F7,           F9,   F11,
-        TRNS, LY_TO(alpha), TRNS, TRNS,
+        TRNS, TH(F1|LSFT),  TH(F3|LALT),  TH(F5|LCTL),
+        TRNS, F7,           F9,           F11,
+        TRNS, LY_TO(alpha), TRNS,         TRNS,
       # Right
-        TRNS, "5",  "7",          "9",
-        TRNS, "0",  "2",          "4",
-        TRNS, TRNS, LY_TO(alpha), TRNS
+        TRNS, TH(5|RCTL), TH(7|RALT),   TH(9|RSFT),
+        TRNS, "0",        "2",          "4",
+        TRNS, TRNS,       LY_TO(alpha), TRNS
       ]
     combos:
       chords:

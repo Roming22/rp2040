@@ -12,7 +12,7 @@ void Keyboard::Setup() {
   DEBUG_VERBOSE("firmware::Keyboard::Setup");
   if (instance == nullptr) {
     instance = new Keyboard();
-    config::file::Keyboard::Load();
+    config::loader::Keyboard::Load();
   }
 }
 

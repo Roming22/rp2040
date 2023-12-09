@@ -3,7 +3,9 @@
 void setup() {
   Serial.begin(9600);
   Debug.timestampOn();
-  delay(1000);
+  while (!Serial) {
+    delay(50);
+  }
 
   DEBUG_INFO("\n\n\n\n\n\n\n\n\n\n");
   DEBUG_INFO("[LAYER]");

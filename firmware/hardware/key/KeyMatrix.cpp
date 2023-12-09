@@ -6,7 +6,7 @@ namespace hardware {
 namespace key {
 KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
                      const std::vector<unsigned int> &i_row_pins)
-    : last_poll(0), debounce_delay(10000) {
+    : last_poll(0), debounce_delay(15000) {
   col_pins = std::vector(i_col_pins);
   row_pins = std::vector(i_row_pins);
   size = col_pins.size() * row_pins.size();

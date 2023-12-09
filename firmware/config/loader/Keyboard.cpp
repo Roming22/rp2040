@@ -11,16 +11,15 @@
 #include "Layer.h"
 
 namespace config {
-namespace file {
+namespace loader {
 void Keyboard::Load() {
   hardware::usb::Key::Init();
-
   LoadHardware();
   LoadLayout();
 }
 
 void Keyboard::LoadHardware() {
-  DEBUG_INFO("config::file::Keyboard::LoadHardware");
+  DEBUG_INFO("config::loader::Keyboard::LoadHardware");
 
   const char *jsonString = HARDWARE_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(HARDWARE_CONFIG_JSON_SIZE);
@@ -79,9 +78,11 @@ void Keyboard::LoadHardware() {
         row_pins.push_back(item.as<unsigned int>());
       }
       if (Serial) {
+        DEBUG_INFO("Connected to USB");
         is_connected = false;
         hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
       } else {
+        DEBUG_INFO("Not connected to USB");
         hardware::board::DaughterBoard::Setup(col_pins, row_pins);
       }
     } else {
@@ -98,7 +99,7 @@ void Keyboard::LoadHardware() {
 }
 
 void Keyboard::LoadLayout() {
-  DEBUG_INFO("config::file::Keyboard::LoadLayout");
+  DEBUG_INFO("config::loader::Keyboard::LoadLayout");
 
   const char *jsonString = LAYOUT_CONFIG_JSON;
   DynamicJsonDocument jsonDoc(LAYOUT_CONFIG_JSON_SIZE);
@@ -108,7 +109,7 @@ void Keyboard::LoadLayout() {
   for (JsonPair kvp : jsonDoc["layers"].as<JsonObject>()) {
     const std::string layer_name = kvp.key().c_str();
     const JsonObject layer_config = kvp.value().as<JsonObject>();
-    config::file::Layer::Load(layer_name, layer_config);
+    config::loader::Layer::Load(layer_name, layer_config);
     if (default_layer == "") {
       default_layer = layer_name;
     }
@@ -135,5 +136,5 @@ void Keyboard::ParseJson(DynamicJsonDocument &jsonDoc,
     DEBUG_INFO("[INFO] Configuration parsed");
   }
 }
-} // namespace file
+} // namespace loader
 } // namespace config

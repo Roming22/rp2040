@@ -54,7 +54,6 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
   DEBUG_INFO("New Timeline %s events after load: %d (@%d)",
              new_timeline.history.c_str(), new_timeline.possible_events.size(),
              &new_timeline);
-  new_timeline.mark_determined();
 
   // On commit actions
   new_timeline.add_commit_action(
@@ -63,7 +62,7 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
       });
 
   // On release configuration
-  new_timeline.add_event_action(
+  new_timeline.set_event_action(
       release_event, [new_layer, release_event,
                       is_toggle](logic::quantum::Timeline &timeline) {
         new_layer->on_release(timeline, release_event, is_toggle);

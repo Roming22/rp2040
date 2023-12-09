@@ -2,16 +2,16 @@
 
 // #include "../key/Combo.h"
 // #include "../key/MultiTap.h"
-// #include "../key/TapHold.h"
 #include "../../logic/feature/Key.h"
 #include "../../utils/Debug.hpp"
 #include "../key/Keycode.h"
 #include "../key/Layer.h"
+#include "../key/TapHold.h"
 
 namespace config {
-namespace file {
+namespace loader {
 void Key::Load(const std::string &definition) {
-  DEBUG_VERBOSE("config::file::Key::Load: %s", definition.c_str());
+  DEBUG_VERBOSE("config::loader::Key::Load: %s", definition.c_str());
   if (logic::feature::Key::Has(definition)) {
     return;
   }
@@ -30,7 +30,7 @@ void Key::Load(const std::string &definition) {
 
 std::tuple<std::string, std::vector<std::string>>
 Key::ParseDefinition(const std::string &keycode) {
-  DEBUG_VERBOSE("config::file::Key::ParseDefinition");
+  DEBUG_VERBOSE("config::loader::Key::ParseDefinition");
   std::string func_name;
   std::vector<std::string> args;
 
@@ -83,10 +83,8 @@ std::map<std::string,
         {"LY_MO", &config::key::Layer::LoadMomentary},
         {"LY_TO", &config::key::Layer::LoadToggle},
         // {"MT", &MultiTap::Load},
-        // {"TH_HD", &TapHold::LoadHold},
-        // {"TH_NO", &TapHold::LoadNone},
-        // {"TH_TP", &TapHold::LoadTap},
+        {"TH", &config::key::TapHold::Load},
         // {"SQ", &Combo::Load},
 };
-} // namespace file
+} // namespace loader
 } // namespace config
