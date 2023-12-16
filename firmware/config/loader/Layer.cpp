@@ -56,7 +56,7 @@ void Layer::LoadCombos(const JsonObject &config, logic::feature::KeyMap &keys) {
   for (JsonPair kvp : config["chords"].as<JsonObject>()) {
     std::string switch_uids = kvp.key().c_str();
     std::string definition = kvp.value().as<std::string>();
-    config::loader::Chord::Load(switch_uids, definition);
+    config::loader::Chord::Load(switch_uids, definition, keys);
   }
 }
 
