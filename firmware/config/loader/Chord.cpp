@@ -13,10 +13,11 @@ void Chord::Load(const std::string switch_uids, const std::string &definition,
   DEBUG_INFO("config::loader::Chord::Load: %s", switch_uids.c_str());
 
   for (auto pair : GenerateConfiguration(switch_uids, definition)) {
+    const std::string switch_uid = "switch." + std::get<0>(pair);
     const std::string &keycode = std::get<1>(pair);
-    DEBUG_INFO("  - '%s: %s'", std::get<0>(pair).c_str(), keycode.c_str());
-    keys[std::get<0>(pair)].push_back(keycode);
-    // config::loader::Key::Load(keycode);
+    DEBUG_DEBUG("  - '%s: %s'", switch_uid.c_str(), keycode.c_str());
+    keys[switch_uid].push_back(keycode);
+    config::loader::Key::Load(keycode);
   }
 }
 
@@ -41,7 +42,7 @@ Chord::GenerateConfiguration(const std::string &switch_uids,
     chord << "CH(";
     for (auto it : switches) {
       if (_switch != it) {
-        chord << it << ",";
+        chord << it << "|";
       }
     }
     chord << definition << ")";

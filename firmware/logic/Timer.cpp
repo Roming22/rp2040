@@ -48,7 +48,10 @@ void Timer::Stop(const std::string &name) {
 }
 
 void Timer::send_event() {
-  DEBUG_VERBOSE("logic::Timer::add_event %s @%d", name.c_str(), this);
+  DEBUG_INFO("");
+  DEBUG_INFO("############################################################");
+  DEBUG_INFO("# Event %", name.c_str());
+  DEBUG_INFO("############################################################");
   timeline.process_event(name);
   logic::quantum::Universe::Resolve();
 }

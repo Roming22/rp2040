@@ -8,16 +8,21 @@ void setup() {
   }
 
   DEBUG_INFO("\n\n\n\n\n\n\n\n\n\n");
-  DEBUG_INFO("[LAYER]");
   DEBUG_INFO("#############################################################"
              "###################");
   DEBUG_INFO("# Rebooting");
+  DEBUG_INFO("#############################################################"
+             "###################");
 
   // Debug.setDebugLevel(DBG_VERBOSE);
   firmware::Keyboard::Setup();
 
   DEBUG_INFO("");
+  DEBUG_INFO("#############################################################"
+             "###################");
   DEBUG_INFO("# Looping");
+  DEBUG_INFO("#############################################################"
+             "###################");
 }
 
 void loop() { firmware::Keyboard::Tick(); }

@@ -116,7 +116,6 @@ void Timeline::add_commit_action(const ActionFunc function) {
 }
 
 void Timeline::process_event(const std::string &event_id) {
-  DEBUG_INFO("############################################################");
   DEBUG_INFO("logic::quantum::Timeline::process_event %s: %s", history.c_str(),
              event_id.c_str());
   if (children.size() > 0) {
@@ -129,6 +128,7 @@ void Timeline::process_event(const std::string &event_id) {
   if (item != possible_events.end()) {
     DEBUG_VERBOSE("Timeline: running lambdas");
     for (auto action : item->second) {
+      DEBUG_INFO("");
       action(*this);
     }
     DEBUG_VERBOSE("Timeline: lambda done");
@@ -161,6 +161,7 @@ void Timeline::execute() {
 }
 
 void Timeline::resolve() {
+  DEBUG_INFO("");
   DEBUG_INFO("logic::quantum::Timeline::resolve: %s (%d)", history.c_str(),
              children.size());
 

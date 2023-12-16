@@ -1,9 +1,9 @@
 #include "Key.h"
 
-// #include "../key/Combo.h"
 // #include "../key/MultiTap.h"
 #include "../../logic/feature/Key.h"
 #include "../../utils/Debug.hpp"
+#include "../key/Chord.h"
 #include "../key/Keycode.h"
 #include "../key/Layer.h"
 #include "../key/TapHold.h"
@@ -84,12 +84,12 @@ Key::ParseDefinition(const std::string &keycode) {
 std::map<std::string,
          std::function<logic::KeyFunc(const std::vector<std::string> &)>>
     Key::loader = {
-        {"KEYCODE", &key::Keycode::Load},
+        {"CH", &config::key::Chord::Load},
+        {"KEYCODE", &config::key::Keycode::Load},
         {"LY_MO", &config::key::Layer::LoadMomentary},
         {"LY_TO", &config::key::Layer::LoadToggle},
         // {"MT", &MultiTap::Load},
         {"TH", &config::key::TapHold::Load},
-        // {"SQ", &Combo::Load},
 };
 } // namespace loader
 } // namespace config

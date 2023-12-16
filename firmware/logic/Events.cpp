@@ -3,7 +3,7 @@
 
 namespace logic {
 void Event::Add(const std::string &id) {
-  DEBUG_INFO("logic::Event::Add %s", id.c_str());
+  DEBUG_DEBUG("logic::Event::Add %s", id.c_str());
   ids.push(id);
 }
 
@@ -14,7 +14,6 @@ bool Event::HasEvents() {
 
 std::string Event::Get() {
   DEBUG_VERBOSE("logic::Event::Get");
-  DEBUG_INFO("");
   std::string event_id = ids.front();
   ids.pop();
   return event_id;

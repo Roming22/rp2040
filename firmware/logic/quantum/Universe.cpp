@@ -10,6 +10,7 @@
 namespace logic {
 namespace quantum {
 void Universe::Setup(std::string layer_name) {
+  DEBUG_INFO("");
   DEBUG_INFO("logic::quantum::Universe::Setup %s", layer_name.c_str());
   // Activates the default layer.
   DEBUG_INFO("Universe: Loading %s", layer_name.c_str());
@@ -27,18 +28,17 @@ void Universe::StartTimeline(Timeline &timeline) {
   start_timeline = &timeline;
 }
 
-void Universe::Resolve() {
-  DEBUG_INFO("############################################################");
-  start_timeline->resolve();
-}
+void Universe::Resolve() { start_timeline->resolve(); }
 
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
   if (logic::Event::HasEvents()) {
     std::string event_id = logic::Event::Get();
-    DEBUG_DEBUG("Universe: processing the '%s' event", event_id.c_str());
-    start_timeline->process_event(event_id);
+    DEBUG_INFO("");
     DEBUG_INFO("############################################################");
+    DEBUG_INFO("# Event: %s", event_id.c_str());
+    DEBUG_INFO("############################################################");
+    start_timeline->process_event(event_id);
     start_timeline->resolve();
   }
 }
