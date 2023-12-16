@@ -11,10 +11,9 @@ namespace loader {
 class Layer {
 protected:
   static void LoadLedColor(const JsonArray &config, int *color);
-  static void LoadKeys(const JsonArray &config,
-                       logic::feature::StringMap &keys);
+  static void LoadKeys(const JsonArray &config, logic::feature::KeyMap &keys);
   static void LoadCombos(const JsonObject &config,
-                         logic::feature::StringMap &combos);
+                         logic::feature::KeyMap &keys);
 
 public:
   static void Load(const std::string name, const JsonObject &config);

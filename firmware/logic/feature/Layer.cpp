@@ -4,9 +4,8 @@
 
 namespace logic {
 namespace feature {
-Layer::Layer(const std::string &i_name, const int *i_color, StringMap &i_keys,
-             StringMap &i_combos)
-    : name(i_name), color(nullptr), keys(i_keys), combos(i_combos) {
+Layer::Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys)
+    : name(i_name), color(nullptr), keys(i_keys) {
   color = new int[4];
   std::memcpy(color, i_color, sizeof(int) * 4);
 }
@@ -16,9 +15,8 @@ bool Layer::operator==(const Layer &right) const {
   return (this == &right);
 }
 
-void Layer::Add(const std::string &name, const int *color, StringMap &keys,
-                StringMap &combos) {
-  layers[name] = new Layer(name, color, keys, combos);
+void Layer::Add(const std::string &name, const int *color, KeyMap &keys) {
+  layers[name] = new Layer(name, color, keys);
 }
 
 LayerPtr Layer::Get(const std::string &name) {
@@ -28,7 +26,7 @@ LayerPtr Layer::Get(const std::string &name) {
   return std::make_shared<Layer>(*layers[name]);
 }
 
-const StringMap &Layer::get_keys() const { return keys; }
+const KeyMap &Layer::get_keys() const { return keys; }
 
 void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
                     const std::string &switch_uid, const bool is_toggle) {
@@ -36,7 +34,7 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
              name.c_str());
   const std::string timeline_id =
       "layer." + name + (std::string(is_toggle ? ".toggle" : ".momentary"));
-  logic::quantum::Timeline &new_timeline = timeline.split(timeline_id);
+  logic::quantum::Timeline &new_timeline = timeline.split(timeline_id, 1);
   std::string press_event = switch_uid + std::string(".pressed");
   std::string release_event = switch_uid + std::string(".released");
 

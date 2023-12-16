@@ -3,17 +3,24 @@
 #include "../../utils/Debug.hpp"
 #include "../feature/Key.h"
 #include "Universe.h"
+#include <vector>
 
 namespace logic {
 namespace quantum {
-Timeline::Timeline(const std::string &i_history, Timeline *i_parent)
-    : history(i_history), parent(i_parent), children(), active_layers(),
-      commit_actions() {
+Timeline::Timeline(const std::string &i_history, Timeline *i_parent,
+                   const int i_complexity)
+    : history(i_history), parent(i_parent), complexity(i_complexity),
+      children(), active_layers(), commit_actions() {
   DEBUG_VERBOSE("logic::quantum::Timeline::Timeline");
   DEBUG_INFO("New Timeline: %s (@%d)", i_history.c_str(), this);
   if (parent != nullptr) {
     parent->children.push_back(this);
-    possible_events = parent->possible_events;
+    for (auto kvp : parent->possible_events) {
+      possible_events[kvp.first] = std::vector<ActionFunc>();
+      for (auto item : kvp.second) {
+        possible_events[kvp.first].push_back(item);
+      }
+    }
     for (auto item : parent->active_layers) {
       active_layers.push_back(item);
     }
@@ -29,12 +36,16 @@ void Timeline::add_layer(logic::feature::LayerPtr layer) {
 
   for (const auto &pair : layer->get_keys()) {
     const std::string &switch_uid = pair.first;
-    const std::string &definition = pair.second;
-    const logic::KeyFunc &action = logic::feature::Key::Get(definition);
+    const std::vector<std::string> &definitions = pair.second;
     std::string pressed_event = switch_uid + std::string(".pressed");
-    possible_events[pressed_event] = [action, switch_uid](Timeline &timeline) {
-      action(timeline, switch_uid);
-    };
+    possible_events[pressed_event] = std::vector<ActionFunc>();
+    for (auto definition : definitions) {
+      const logic::KeyFunc &action = logic::feature::Key::Get(definition);
+      possible_events[pressed_event].push_back(
+          [action, switch_uid](Timeline &timeline) {
+            action(timeline, switch_uid);
+          });
+    }
   }
   DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d",
              history.c_str(), active_layers.size());
@@ -80,7 +91,8 @@ void Timeline::set_event_action(const std::string event_id,
     }
     return;
   }
-  possible_events[event_id] = function;
+  possible_events[event_id] = std::vector<ActionFunc>();
+  possible_events[event_id].push_back(function);
 }
 
 void Timeline::remove_event_action(const std::string event_id) {
@@ -115,8 +127,10 @@ void Timeline::process_event(const std::string &event_id) {
   }
   auto item = possible_events.find(event_id);
   if (item != possible_events.end()) {
-    DEBUG_VERBOSE("Timeline: running lambda");
-    item->second(*this);
+    DEBUG_VERBOSE("Timeline: running lambdas");
+    for (auto action : item->second) {
+      action(*this);
+    }
     DEBUG_VERBOSE("Timeline: lambda done");
   } else {
     if (possible_events.find("ignore_unknown_events") ==
@@ -129,10 +143,10 @@ void Timeline::process_event(const std::string &event_id) {
   }
 }
 
-Timeline &Timeline::split(const std::string &id) {
+Timeline &Timeline::split(const std::string &id, const int complexity) {
   DEBUG_VERBOSE("logic::quantum::Timeline::split");
   const std::string new_history = history + "|" + id;
-  Timeline &new_timeline = *new Timeline(new_history, this);
+  Timeline &new_timeline = *new Timeline(new_history, this, complexity);
   DEBUG_VERBOSE("Split Timeline has %d events", possible_events.size());
   return new_timeline;
 }

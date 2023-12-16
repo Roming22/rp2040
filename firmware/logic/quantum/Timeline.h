@@ -15,16 +15,18 @@ namespace quantum {
 class Timeline {
 protected:
   Timeline *parent;
+  const int complexity;
   std::vector<Timeline *> children;
   std::list<logic::feature::LayerPtr> active_layers;
 
 public:
   std::string history;
 
-  std::map<std::string, ActionFunc> possible_events;
+  std::map<std::string, std::vector<ActionFunc>> possible_events;
   std::vector<ActionFunc> commit_actions;
 
-  Timeline(const std::string &i_history, Timeline *i_parent);
+  Timeline(const std::string &i_history, Timeline *i_parent,
+           const int complexity);
 
   std::vector<Timeline *> &get_children();
 
@@ -44,7 +46,7 @@ public:
 
   void process_event(const std::string &event_id);
 
-  Timeline &split(const std::string &id);
+  Timeline &split(const std::string &id, const int complexity);
 
   void execute();
 

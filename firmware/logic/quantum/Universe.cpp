@@ -13,7 +13,7 @@ void Universe::Setup(std::string layer_name) {
   DEBUG_INFO("logic::quantum::Universe::Setup %s", layer_name.c_str());
   // Activates the default layer.
   DEBUG_INFO("Universe: Loading %s", layer_name.c_str());
-  start_timeline = new Timeline(layer_name, nullptr);
+  start_timeline = new Timeline(layer_name, nullptr, 1);
   std::string switch_id("switch.1");
   logic::feature::Layer::OnPress(layer_name, *start_timeline, switch_id, true);
   start_timeline->resolve();

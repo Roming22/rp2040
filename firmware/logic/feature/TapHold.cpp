@@ -16,7 +16,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
   DEBUG_VERBOSE("logic::feature::TapHold::OnPress");
 
   logic::quantum::Timeline &timeline_taphold =
-      timeline.split(switch_uid + ".taphold");
+      timeline.split(switch_uid + ".taphold", 1);
 
   // Send timer event to the new timelines
   int delay_ms = TapHold::delay_ms;
@@ -39,7 +39,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
 
   // Selector timeline
   logic::quantum::Timeline *timeline_selector =
-      &timeline_taphold.split("timer");
+      &timeline_taphold.split("timer", 1);
   logic::Timer::Start(timer_event_id, delay_ms, *timeline_selector);
   timeline_selector->clear_events_action();
   timeline_selector->set_event_action("ignore_unknown_events", ActionFuncNoOp);
