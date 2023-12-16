@@ -18,7 +18,12 @@ void Key::Load(const std::string &definition) {
   const auto [name, args] = Key::ParseDefinition(definition);
   DEBUG_VERBOSE("Func name: %s", name.c_str());
   if (loader.count(name) == 0) {
-    DEBUG_ERROR("Unknown Key function: %s", name.c_str());
+    DEBUG_ERROR("Unknown Key function '%s' in '%s'. Args: '%s'", name.c_str(),
+                definition.c_str());
+    DEBUG_ERROR("Args:");
+    for (auto arg : args) {
+      DEBUG_ERROR("  - '%s'", arg.c_str());
+    }
 
     DEBUG_VERBOSE("Known functions: ");
     for (const auto &pair : loader) {
@@ -36,7 +41,7 @@ Key::ParseDefinition(const std::string &keycode) {
 
   // Find the index of the left parenthesis
   size_t left_parenthesis = keycode.find("(");
-  if (left_parenthesis == std::string::npos) {
+  if (left_parenthesis == std::string::npos || keycode == "(") {
     // No parentheses found, set default values
     func_name = "KEYCODE";
     args.push_back(keycode);

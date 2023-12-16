@@ -1,0 +1,57 @@
+layers:
+  alpha:
+    leds:
+      color: [127, 0, 0]
+    keys: [
+      # Left
+        TAB,  TH(D|LSFT), TH(C|LALT),     TH(L|LCTL),
+        NONE, T,          A,              TH(E|LY_MO(symbols)),
+        NONE, SPACE,      LGUI, NONE,
+      # Right
+        R,    S,    H,    RETURN,
+        I,    O,    N,    NONE,
+        NONE, RGUI, MEH,  NONE
+      ]
+    combos:
+      chords:
+        1*2: X
+        2*3: V
+        1*3: Z
+        1*2*3: ESC
+        5*6: F
+        6*7: U
+        5*7: B
+        5*6*7: M
+        12*13: K
+        13*14: Q
+        12*14: J
+        12*13*14: BSPACE
+        16*17: Y
+        17*18: G
+        16*18: P
+        18*17*16: W
+  symbols:
+    leds:
+      color: [127, 21, 0]
+    keys: [
+      # Left
+        TRNS, "`",            "\\\\",       "_",
+        TRNS, "#",            "$",          "!",
+        TRNS, LY_TO(), LY_TO(alpha), TRNS,
+      # Right
+        TRNS, "-",  "/",          "=",
+        TRNS, ".",  ",",          "'",
+        TRNS, TRNS, LY_TO(alpha), TRNS
+      ]
+    combos:
+      chords:
+        1*2: "<"
+        2*3: ">"
+        1*2*3: ESC
+        5*6: "{"
+        6*7: "}"
+        12*13: "["
+        13*14: "]"
+        12*13*14: BSPACE
+        16*17: "("
+        17*18: ")"

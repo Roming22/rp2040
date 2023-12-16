@@ -10,6 +10,7 @@ class Timeline;
 } // namespace quantum
 
 typedef std::function<void(logic::quantum::Timeline &)> ActionFunc;
+ActionFunc ActionFuncNoOp = [](logic::quantum::Timeline &) {};
 typedef std::function<void(logic::quantum::Timeline &,
                            const std::string &switch_uid)>
     KeyFunc;

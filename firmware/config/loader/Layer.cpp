@@ -1,8 +1,10 @@
 #include "Layer.h"
+
 #include "../../hardware/led/Pixels.h"
 #include "../../logic/feature/Layer.h"
 #include "../../logic/typedef.h"
 #include "../../utils/Debug.hpp"
+#include "Chord.h"
 #include "Key.h"
 
 namespace config {
@@ -17,7 +19,7 @@ void Layer::Load(const std::string name, const JsonObject &config) {
   LoadKeys(config["keys"].as<JsonArray>(), keys);
 
   logic::feature::StringMap combos;
-  // LoadCombos(config["combos"], combos);
+  LoadCombos(config["combos"], combos);
 
   logic::feature::Layer::Add(name, color, keys, combos);
 
@@ -46,24 +48,17 @@ void Layer::LoadKeys(const JsonArray &config, logic::feature::StringMap &keys) {
   }
 }
 
-// void Layer::LoadCombos(const JsonObject &config, logic::feature::StringMap
-// &combos) {
-//   DEBUG_VERBOSE("config::loader::Layer::LoadCombos");
+void Layer::LoadCombos(const JsonObject &config,
+                       logic::feature::StringMap &combos) {
+  DEBUG_VERBOSE("config::loader::Layer::LoadCombos");
 
-//   DEBUG_DEBUG("Loading chords");
-//   for (JsonPair kvp : config["chords"].as<JsonObject>()) {
-//     std::string definition = kvp.key().c_str();
-//     std::string key = kvp.value().as<std::string>();
-//     DEBUG_DEBUG("Chord %s: %s", definition.c_str(), key.c_str());
-//     config::Key::Load(definition);
-//   }
-//   DEBUG_DEBUG("Loading sequences");
-//   for (JsonPair kvp : config["sequences"].as<JsonObject>()) {
-//     std::string definition = kvp.key().c_str();
-//     std::string key = kvp.value().as<std::string>();
-//     DEBUG_DEBUG("Sequence: %s: %s", definition.c_str(), key.c_str());
-//     config::Key::Load(definition);
-//   }
-// }
+  DEBUG_DEBUG("Loading chords");
+  for (JsonPair kvp : config["chords"].as<JsonObject>()) {
+    std::string switch_uids = kvp.key().c_str();
+    std::string definition = kvp.value().as<std::string>();
+    config::loader::Chord::Load(switch_uids, definition);
+  }
+}
+
 } // namespace loader
 } // namespace config

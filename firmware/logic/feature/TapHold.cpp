@@ -42,8 +42,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       &timeline_taphold.split("timer");
   logic::Timer::Start(timer_event_id, delay_ms, *timeline_selector);
   timeline_selector->clear_events_action();
-  timeline_selector->set_event_action(
-      "ignore_unknown_events", [](logic::quantum::Timeline &timeline) {});
+  timeline_selector->set_event_action("ignore_unknown_events", ActionFuncNoOp);
   timeline_selector->set_event_action(
       release_event, [timer_event_id, timeline_selector,
                       timeline_hold](logic::quantum::Timeline &timeline) {
