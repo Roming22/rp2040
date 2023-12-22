@@ -9,6 +9,7 @@
 namespace logic {
 class Timer {
 private:
+  bool disabled;
   long end_time;
   quantum::Timeline &timeline;
   static std::map<std::string, Timer *> timers;

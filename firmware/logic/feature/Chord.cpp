@@ -4,37 +4,73 @@
 #include "../../utils/Debug.hpp"
 #include "../Timer.h"
 #include "Key.h"
+
 #include <sstream>
 
-#define DEFAULT_CHORD_DELAY 50
+// TODO: Improve Timeline instantiation to decrease this value
+// Try to use SharedPtr for ActionFuncs to decrease copy time.
+#define DEFAULT_CHORD_DELAY 250
 
 namespace logic {
 namespace feature {
+
 void Chord::OnPress(logic::quantum::Timeline &timeline,
                     const std::string &switch_uid,
                     const std::vector<std::string> &definition) {
-  std::vector<std::string> switches;
-  for (auto item : definition) {
-    switches.push_back(item);
-  }
-  std::string keycode = switches.back();
-  switches.pop_back();
-  std::ostringstream switches_ss;
-  for (auto item : switches) {
-    switches_ss << "." << item;
-  }
-  DEBUG_INFO("logic::feature::Chord::OnPress %s", keycode.c_str());
+  std::vector<std::string> chord_switches_uid;
+  chord_switches_uid.push_back(switch_uid.substr(switch_uid.find('.') + 1));
 
-  logic::quantum::Timeline &timeline_chord = timeline.split(
-      switch_uid + switches_ss.str() + ".chord", switches.size() + 1);
+  std::vector<std::string> switches_uid;
+  for (auto item : definition) {
+    chord_switches_uid.push_back(item);
+    switches_uid.push_back(item);
+  }
+  std::string key_definition = switches_uid.back();
+  chord_switches_uid.pop_back();
+  switches_uid.pop_back();
 
   // Send timer event to the new timeline
   int delay_ms = Chord::delay_ms;
   // if (definition.size() > 2) {
   //   delay_ms = std::stoi(definition[2]);
   // }
-  std::string timer_event_id = switch_uid + switches_ss.str() + ".chord.timer";
+
+  std::ostringstream switches_ss;
+  for (auto item : switches_uid) {
+    switches_ss << "." << item;
+    // TODO: ignore chord if is uses a switch that is already pressed
+  }
+
+  std::string chord_id = "chord" + switch_uid.substr(6) + switches_ss.str();
+
+  DEBUG_INFO("logic::feature::Chord::OnPress %s", chord_id.c_str());
+  logic::quantum::Timeline &timeline_chord =
+      timeline.split(chord_id, switches_uid.size() + 1);
+
+  // Execute key
+  Key::Get(key_definition)(timeline_chord, chord_id);
+  quantum::Timeline &timeline_key = *timeline_chord.get_children().back();
+
+  // Handle timer
+  std::string timer_event_id = chord_id + ".timer";
   logic::Timer::Start(timer_event_id, delay_ms, timeline_chord);
+  timeline_chord.add_commit_action([timer_event_id](quantum::Timeline &) {
+    logic::Timer::Stop(timer_event_id);
+  });
+  timeline_chord.add_end_action([timer_event_id](quantum::Timeline &) {
+    logic::Timer::Stop(timer_event_id);
+  });
+
+  // Add actions for the other switches in the Chord
+  for (auto switch_uid : switches_uid) {
+    std::string event = "switch." + switch_uid + ".pressed";
+    timeline_key.add_combo_event(
+        event, [event, chord_id, chord_switches_uid,
+                timer_event_id](quantum::Timeline &timeline) {
+          timeline.process_combo_event(event, chord_id, chord_switches_uid,
+                                       timer_event_id);
+        });
+  }
 }
 
 int Chord::delay_ms = DEFAULT_CHORD_DELAY;

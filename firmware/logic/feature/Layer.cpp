@@ -50,7 +50,7 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
     new_timeline.merge_layers();
   }
   DEBUG_INFO("New Timeline %s events after load: %d (@%d)",
-             new_timeline.history.c_str(), new_timeline.possible_events.size(),
+             new_timeline.history.c_str(), new_timeline.layer_events.size(),
              &new_timeline);
 
   // On commit actions

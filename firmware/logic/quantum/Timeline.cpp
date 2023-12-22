@@ -1,34 +1,45 @@
 #include "Timeline.h"
 
 #include "../../utils/Debug.hpp"
+#include "../Timer.h"
 #include "../feature/Key.h"
 #include "Universe.h"
-#include <vector>
 
 namespace logic {
 namespace quantum {
 Timeline::Timeline(const std::string &i_history, Timeline *i_parent,
                    const int i_complexity)
-    : history(i_history), parent(i_parent), complexity(i_complexity),
-      children(), active_layers(), commit_actions() {
+    : history(i_history), pruned(false), parent(i_parent),
+      complexity(i_complexity), children(), active_layers(), commit_actions(),
+      combo_events() {
   DEBUG_VERBOSE("logic::quantum::Timeline::Timeline");
   DEBUG_INFO("New Timeline: %s (@%d)", i_history.c_str(), this);
   if (parent != nullptr) {
-    parent->children.push_back(this);
-    for (auto kvp : parent->possible_events) {
-      possible_events[kvp.first] = std::vector<ActionFunc>();
-      for (auto item : kvp.second) {
-        possible_events[kvp.first].push_back(item);
+    // Ordering is very important when dealing with combos
+    // Sequences must be before Chords to override them
+    auto child = parent->children.begin();
+    for (; child != parent->children.end(); ++child) {
+      if (complexity > (*child)->complexity) {
+        break;
       }
     }
+    parent->children.insert(child, this);
+    for (auto kvp : parent->layer_events) {
+      layer_events[kvp.first] = std::vector<ActionFunc>();
+      for (auto item : kvp.second) {
+        layer_events[kvp.first].push_back(item);
+      }
+    }
+    // The combo_events does not need to copied as a Timeline with an
+    // active combo cannot be split.
     for (auto item : parent->active_layers) {
       active_layers.push_back(item);
     }
   }
-  DEBUG_VERBOSE("New Timeline has %d events", possible_events.size());
+  DEBUG_INFO("New Timeline has %d events", layer_events.size());
 }
 
-std::vector<Timeline *> &Timeline::get_children() { return children; }
+std::list<Timeline *> &Timeline::get_children() { return children; }
 
 void Timeline::add_layer(logic::feature::LayerPtr layer) {
   DEBUG_INFO("logic::quantum::Timeline::add_layer");
@@ -38,10 +49,10 @@ void Timeline::add_layer(logic::feature::LayerPtr layer) {
     const std::string &switch_uid = pair.first;
     const std::vector<std::string> &definitions = pair.second;
     std::string pressed_event = switch_uid + std::string(".pressed");
-    possible_events[pressed_event] = std::vector<ActionFunc>();
+    layer_events[pressed_event] = std::vector<ActionFunc>();
     for (auto definition : definitions) {
       const logic::KeyFunc &action = logic::feature::Key::Get(definition);
-      possible_events[pressed_event].push_back(
+      layer_events[pressed_event].push_back(
           [action, switch_uid](Timeline &timeline) {
             action(timeline, switch_uid);
           });
@@ -50,7 +61,7 @@ void Timeline::add_layer(logic::feature::LayerPtr layer) {
   DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d",
              history.c_str(), active_layers.size());
   DEBUG_INFO("logic::quantum::Timeline events %s after load: %d (@%d)",
-             history.c_str(), possible_events.size(), this);
+             history.c_str(), layer_events.size(), this);
 }
 
 void Timeline::merge_layers() {
@@ -83,7 +94,7 @@ void Timeline::remove_layer(const logic::feature::Layer &layer) {
 
 void Timeline::set_event_action(const std::string event_id,
                                 const ActionFunc function) {
-  DEBUG_INFO("logic::quantum::Timeline::add_event_function %s: %s",
+  DEBUG_INFO("logic::quantum::Timeline::set_event_function %s: %s",
              history.c_str(), event_id.c_str());
   if (children.size() > 0) {
     for (auto child : children) {
@@ -91,23 +102,23 @@ void Timeline::set_event_action(const std::string event_id,
     }
     return;
   }
-  possible_events[event_id] = std::vector<ActionFunc>();
-  possible_events[event_id].push_back(function);
+  layer_events[event_id] = std::vector<ActionFunc>();
+  layer_events[event_id].push_back(function);
 }
 
 void Timeline::remove_event_action(const std::string event_id) {
   DEBUG_INFO("logic::quantum::Timeline::remove_event_function %s: %s",
              history.c_str(), event_id.c_str());
-  auto item = possible_events.find(event_id);
-  if (item != possible_events.end()) {
-    possible_events.erase(item);
+  auto item = layer_events.find(event_id);
+  if (item != layer_events.end()) {
+    layer_events.erase(item);
   }
 }
 
 void Timeline::clear_events_action() {
   DEBUG_INFO("logic::quantum::Timeline::clear_event_function %s",
              history.c_str());
-  possible_events.clear();
+  layer_events.clear();
 }
 
 void Timeline::add_commit_action(const ActionFunc function) {
@@ -115,17 +126,36 @@ void Timeline::add_commit_action(const ActionFunc function) {
   this->commit_actions.push_back(function);
 }
 
+void Timeline::add_end_action(const ActionFunc function) {
+  DEBUG_INFO("logic::quantum::Timeline::add_end_action %s", history.c_str());
+  this->end_actions.push_back(function);
+}
+
 void Timeline::process_event(const std::string &event_id) {
+  if (pruned) {
+    return;
+  }
+  DEBUG_INFO("");
   DEBUG_INFO("logic::quantum::Timeline::process_event %s: %s", history.c_str(),
              event_id.c_str());
   if (children.size() > 0) {
-    for (int it = 0; it < children.size(); ++it) {
-      children[it]->process_event(event_id);
+    for (auto child : children) {
+      child->process_event(event_id);
     }
     return;
   }
-  auto item = possible_events.find(event_id);
-  if (item != possible_events.end()) {
+
+  // Select which the map of events to use
+  std::map<std::string, std::vector<ActionFunc>> *valid_events;
+  if (combo_events.size() > 0) {
+    valid_events = &combo_events;
+  } else {
+    valid_events = &layer_events;
+  }
+
+  // Activate the event or end timeline
+  auto item = valid_events->find(event_id);
+  if (item != valid_events->end()) {
     DEBUG_VERBOSE("Timeline: running lambdas");
     for (auto action : item->second) {
       DEBUG_INFO("");
@@ -133,12 +163,70 @@ void Timeline::process_event(const std::string &event_id) {
     }
     DEBUG_VERBOSE("Timeline: lambda done");
   } else {
-    if (possible_events.find("ignore_unknown_events") ==
-        possible_events.end()) {
-      end();
-      DEBUG_INFO("Timeline ended");
+    if (valid_events->find("ignore_unknown_events") == valid_events->end()) {
+      DEBUG_INFO("Timeline '%s' ended because of unknown event '%s'",
+                 history.c_str(), event_id.c_str());
+      for (const auto pair : *valid_events) {
+        DEBUG_DEBUG("  - %s", pair.first.c_str());
+      }
+      prune();
     } else {
-      DEBUG_INFO("Event ignored");
+      DEBUG_INFO("Unknown event '%s' ignored", event_id.c_str());
+    }
+  }
+}
+void Timeline::add_combo_event(const std::string event_id,
+                               const ActionFunc function) {
+  DEBUG_INFO("logic::quantum::Timeline::add_combo_event %s %s", history.c_str(),
+             event_id.c_str());
+  combo_events[event_id] = std::vector<ActionFunc>();
+  combo_events[event_id].push_back(function);
+}
+
+void Timeline::process_combo_event(const std::string &event_id,
+                                   const std::string &chord_id,
+                                   const std::vector<std::string> &switches_uid,
+                                   const std::string &timer_id) {
+  if (pruned) {
+    return;
+  }
+  DEBUG_INFO("logic::quantum::Timeline::process_combo_event '%s'",
+             history.c_str());
+  combo_events.erase(event_id);
+  if (combo_events.size() == 0) {
+    Timer::Stop(timer_id);
+    // Prune any sibling timeline with a complexity less than the current
+    // timeline
+    // Warning: Sequences must be processed first to override Chords
+    if (parent != nullptr) {
+      std::vector<Timeline *> end_list;
+      for (auto sibling = parent->parent->children.rbegin();
+           sibling != parent->parent->children.rend() &&
+           (*sibling)->complexity <= parent->complexity;
+           ++sibling) {
+        if (*sibling != parent) {
+          (*sibling)->prune();
+        }
+      }
+    }
+
+    // Create a release event for each switch belonging to the combo
+    for (auto switch_uid : switches_uid) {
+      std::string release_event_id = "switch." + switch_uid + ".released";
+      set_event_action(release_event_id, [release_event_id, chord_id,
+                                          switch_uid, switches_uid,
+                                          this](Timeline &timeline) {
+        // Execute release action
+        timeline.process_event(chord_id + ".released");
+        // Ignore the release event from any other switch from the combo
+        for (auto other_switch_uid : switches_uid) {
+          if (switch_uid != other_switch_uid) {
+            timeline.set_event_action(
+                "switch." + other_switch_uid + ".released", ActionFuncNoOp);
+          }
+        }
+        timeline.remove_event_action(release_event_id);
+      });
     }
   }
 }
@@ -147,7 +235,7 @@ Timeline &Timeline::split(const std::string &id, const int complexity) {
   DEBUG_VERBOSE("logic::quantum::Timeline::split");
   const std::string new_history = history + "|" + id;
   Timeline &new_timeline = *new Timeline(new_history, this, complexity);
-  DEBUG_VERBOSE("Split Timeline has %d events", possible_events.size());
+  DEBUG_VERBOSE("Split Timeline has %d events", layer_events.size());
   return new_timeline;
 }
 
@@ -164,6 +252,8 @@ void Timeline::resolve() {
   DEBUG_INFO("");
   DEBUG_INFO("logic::quantum::Timeline::resolve: %s (%d)", history.c_str(),
              children.size());
+
+  this->clean();
 
   if (children.size() > 1) {
     utils::Memory::PrintMemoryUsage();
@@ -192,18 +282,33 @@ void Timeline::resolve() {
   DEBUG_INFO("");
 }
 
-void Timeline::end() {
-  DEBUG_INFO("logic::quantum::Timeline::end '%s'", history.c_str());
-  if (parent != nullptr) {
-    for (auto child = parent->children.begin(); child != parent->children.end();
-         ++child) {
-      if (*child == this) {
-        parent->children.erase(child);
-        break;
-      }
-    }
-    delete this;
+void Timeline::prune() {
+  DEBUG_INFO("logic::quantum::Timeline::prune '%s'", history.c_str());
+  pruned = true;
+
+  // Propagate timeline termination downwards.
+  for (auto child : children) {
+    child->prune();
   }
+}
+
+bool Timeline::clean() {
+  DEBUG_INFO("logic::quantum::Timeline::clean '%s'", history.c_str());
+  // Propagate to all children
+  for (auto child = children.begin(); child != children.end();) {
+    if ((*child)->clean()) {
+      child = children.erase(child);
+      pruned = children.empty();
+    } else {
+      child++;
+    }
+  }
+
+  if (pruned) {
+    delete this;
+    return true;
+  }
+  return false;
 }
 } // namespace quantum
 } // namespace logic

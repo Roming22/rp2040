@@ -14,21 +14,24 @@ namespace logic {
 namespace quantum {
 class Timeline {
 protected:
+  bool pruned;
   Timeline *parent;
   const int complexity;
-  std::vector<Timeline *> children;
+  std::list<Timeline *> children;
   std::list<logic::feature::LayerPtr> active_layers;
 
 public:
   std::string history;
 
-  std::map<std::string, std::vector<ActionFunc>> possible_events;
+  std::map<std::string, std::vector<ActionFunc>> layer_events;
+  std::map<std::string, std::vector<ActionFunc>> combo_events;
   std::vector<ActionFunc> commit_actions;
+  std::vector<ActionFunc> end_actions;
 
   Timeline(const std::string &i_history, Timeline *i_parent,
            const int complexity);
 
-  std::vector<Timeline *> &get_children();
+  std::list<Timeline *> &get_children();
 
   void add_layer(logic::feature::LayerPtr layer);
 
@@ -44,7 +47,16 @@ public:
 
   void add_commit_action(const ActionFunc function);
 
+  void add_end_action(const ActionFunc function);
+
   void process_event(const std::string &event_id);
+
+  void add_combo_event(const std::string event_id, const ActionFunc function);
+
+  void process_combo_event(const std::string &event_id,
+                           const std::string &chord_id,
+                           const std::vector<std::string> &switches_uid,
+                           const std::string &timer_id);
 
   Timeline &split(const std::string &id, const int complexity);
 
@@ -52,7 +64,9 @@ public:
 
   void resolve();
 
-  void end();
+  void prune();
+
+  bool clean();
 };
 } // namespace quantum
 } // namespace logic

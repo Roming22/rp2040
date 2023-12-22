@@ -47,14 +47,14 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       release_event, [timer_event_id, timeline_selector,
                       timeline_hold](logic::quantum::Timeline &timeline) {
         logic::Timer::Stop(timer_event_id);
-        timeline_hold->end();
-        timeline_selector->end();
+        timeline_hold->prune();
+        timeline_selector->prune();
       });
   timeline_selector->set_event_action(
       timer_event_id, [timer_event_id, timeline_selector,
                        timeline_tap](logic::quantum::Timeline &timeline_hold) {
-        timeline_tap->end();
-        timeline_selector->end();
+        timeline_tap->prune();
+        timeline_selector->prune();
       });
 }
 

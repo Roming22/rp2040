@@ -4,40 +4,40 @@ layers:
       color: [127, 0, 0]
     keys: [
       # Left
-        TH(TAB|LSFT),  TH(D|LSFT),            TH(C|LALT),            TH(L|LCTL),
-        NONE,             TH(T|LY_MO(systemL)),  TH(A|LY_MO(fn_numL)),  TH(E|LY_MO(symbolsL)),
-        NONE,             SPACE,                    LGUI,                     NONE,
+        TH(TAB|LSFT), TH(D|LSFT),           TH(C|LALT),           TH(L|LCTL),
+        NONE,         TH(T|LY_MO(systemL)), TH(A|LY_MO(fn_numL)), TH(E|LY_MO(symbolsL)),
+        NONE,         SPACE,                LGUI,                 NONE,
       # Right
-        TH(R|RCTL),            TH(S|RALT),            TH(H|RSFT),          TH(RETURN|RSFT),
-        TH(I|LY_MO(symbolsR)), TH(O|LY_MO(fn_numR)),  TH(N|LY_MO(systemR), NONE,
-        NONE,                     RGUI,                     MEH,                    NONE
+        TH(R|RCTL),             TH(S|RALT),           TH(H|RSFT),           TH(RETURN|RSFT),
+        TH(I|LY_MO(symbolsR)),  TH(O|LY_MO(fn_numR)), TH(N|LY_MO(systemR),  NONE,
+        NONE,                   RGUI,                 MEH,                  NONE
       ]
     combos:
       chords:
-        1+2: X
-        2+3: V
-        1+3: Z
-        1+2+3: ESC
-        5+6: F
-        6+7: U
-        5+7: B
-        5+6+7: M
-        12+13: K
-        13+14: Q
-        12+14: J
-        12+13+14: BSPACE
-        16+17: Y
-        17+18: G
-        16+18: P
-        18+17+16: W
+        2+3: X
+        3+4: V
+        2+4: Z
+        2+3+4: ESC
+        6+7: F
+        7+8: U
+        6+8: B
+        6+7+8: M
+        14+15: Q
+        15+16: K
+        14+16: J
+        14+15+16: BSPACE
+        18+19: G
+        19+20: Y
+        18+20: P
+        20+19+18: W
   symbols:
     leds:
       color: [127, 21, 0]
     keys: [
       # Left
-        TRNS, "`",            "\\\\",       "_",
-        TRNS, "#",            "$",          "!",
-        TRNS, LY_TO(), LY_TO(alpha), TRNS,
+        TRNS, "`",      "\\\\",       "_",
+        TRNS, "#",      "$",          "!",
+        TRNS, LY_TO(),  LY_TO(alpha), TRNS,
       # Right
         TRNS, "-",  "/",          "=",
         TRNS, ".",  ",",          "'",
@@ -45,16 +45,16 @@ layers:
       ]
     combos:
       chords:
-        1+2: "<"
-        2+3: ">"
-        1+2+3: ESC
-        5+6: "{"
-        6+7: "}"
-        12+13: "["
-        13+14: "]"
-        12+13+14: BSPACE
-        16+17: "("
-        17+18: ")"
+        2+3: "<"
+        3+4: ">"
+        2+3+4: ESC
+        6+7: "{"
+        7+8: "}"
+        14+15: "]"
+        15+16: "["
+        14+15+16: BSPACE
+        18+19: ")"
+        19+20: "("
   fn_num:
     leds:
       color: [127, 42, 0]
@@ -70,18 +70,18 @@ layers:
       ]
     combos:
       chords:
-        1+2: F2
-        2+3: F4
-        1+3: F6
-        1+2+3: ESC
-        5+6: F8
-        6+7: F10
-        5+7: F12
-        12+13: "6"
-        13+14: "7"
-        12+13+14: BSPACE
-        16+17: "1"
-        17+18: "3"
+        2+3: F2
+        3+4: F4
+        2+4: F6
+        2+3+4: ESC
+        6+7: F8
+        7+8: F10
+        6+8: F12
+        14+15: "8"
+        15+16: "6"
+        14+15+16: BSPACE
+        18+19: "3"
+        19+20: "1"
   system:
     leds:
       color: [127, 0, 127]
