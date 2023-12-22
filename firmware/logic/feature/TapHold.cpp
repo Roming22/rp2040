@@ -43,19 +43,21 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
   logic::Timer::Start(timer_event_id, delay_ms, *timeline_selector);
   timeline_selector->clear_events_action();
   timeline_selector->set_event_action("ignore_unknown_events", ActionFuncNoOp);
-  timeline_selector->set_event_action(
-      release_event, [timer_event_id, timeline_selector,
-                      timeline_hold](logic::quantum::Timeline &timeline) {
+  ActionFuncPtr tap_action = std::make_shared<ActionFunc>(
+      [timer_event_id, timeline_selector,
+       timeline_hold](logic::quantum::Timeline &timeline) {
         logic::Timer::Stop(timer_event_id);
         timeline_hold->prune();
         timeline_selector->prune();
       });
-  timeline_selector->set_event_action(
-      timer_event_id, [timer_event_id, timeline_selector,
-                       timeline_tap](logic::quantum::Timeline &timeline_hold) {
+  timeline_selector->set_event_action(release_event, tap_action);
+  ActionFuncPtr hold_action = std::make_shared<ActionFunc>(
+      [timer_event_id, timeline_selector,
+       timeline_tap](logic::quantum::Timeline &timeline_hold) {
         timeline_tap->prune();
         timeline_selector->prune();
       });
+  timeline_selector->set_event_action(timer_event_id, hold_action);
 }
 
 int TapHold::delay_ms = DEFAULT_TAPHOLD_DELAY;

@@ -1,6 +1,7 @@
 #include "Universe.h"
 #include "../../utils/Debug.hpp"
 #include "../../utils/Memory.h"
+#include "../../utils/Time.h"
 #include "../Events.h"
 #include "../feature/Layer.h"
 #include "Timeline.h"
@@ -36,7 +37,7 @@ void Universe::Tick() {
     std::string event_id = logic::Event::Get();
     DEBUG_INFO("");
     DEBUG_INFO("############################################################");
-    DEBUG_INFO("# Event: %s", event_id.c_str());
+    DEBUG_INFO("# Event: %s @ %d", event_id.c_str(), utils::Time::Now());
     DEBUG_INFO("############################################################");
     start_timeline->process_event(event_id);
     start_timeline->resolve();

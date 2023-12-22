@@ -2,6 +2,7 @@
 #define MYMK_LOGIC_TYPEDEF
 
 #include <functional>
+#include <memory>
 #include <string>
 
 namespace logic {
@@ -10,7 +11,10 @@ class Timeline;
 } // namespace quantum
 
 typedef std::function<void(logic::quantum::Timeline &)> ActionFunc;
-ActionFunc ActionFuncNoOp = [](logic::quantum::Timeline &) {};
+typedef std::shared_ptr<ActionFunc> ActionFuncPtr;
+ActionFuncPtr ActionFuncNoOp =
+    std::make_shared<ActionFunc>([](logic::quantum::Timeline &) {});
+
 typedef std::function<void(logic::quantum::Timeline &,
                            const std::string &switch_uid)>
     KeyFunc;

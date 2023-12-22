@@ -25,7 +25,7 @@ Timeline::Timeline(const std::string &i_history, Timeline *i_parent,
     }
     parent->children.insert(child, this);
     for (auto kvp : parent->layer_events) {
-      layer_events[kvp.first] = std::vector<ActionFunc>();
+      layer_events[kvp.first] = std::vector<ActionFuncPtr>();
       for (auto item : kvp.second) {
         layer_events[kvp.first].push_back(item);
       }
@@ -49,13 +49,13 @@ void Timeline::add_layer(logic::feature::LayerPtr layer) {
     const std::string &switch_uid = pair.first;
     const std::vector<std::string> &definitions = pair.second;
     std::string pressed_event = switch_uid + std::string(".pressed");
-    layer_events[pressed_event] = std::vector<ActionFunc>();
+    layer_events[pressed_event] = std::vector<ActionFuncPtr>();
     for (auto definition : definitions) {
       const logic::KeyFunc &action = logic::feature::Key::Get(definition);
-      layer_events[pressed_event].push_back(
+      layer_events[pressed_event].push_back(std::make_shared<ActionFunc>(
           [action, switch_uid](Timeline &timeline) {
             action(timeline, switch_uid);
-          });
+          }));
     }
   }
   DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d",
@@ -93,7 +93,7 @@ void Timeline::remove_layer(const logic::feature::Layer &layer) {
 }
 
 void Timeline::set_event_action(const std::string event_id,
-                                const ActionFunc function) {
+                                const ActionFuncPtr function) {
   DEBUG_INFO("logic::quantum::Timeline::set_event_function %s: %s",
              history.c_str(), event_id.c_str());
   if (children.size() > 0) {
@@ -102,7 +102,7 @@ void Timeline::set_event_action(const std::string event_id,
     }
     return;
   }
-  layer_events[event_id] = std::vector<ActionFunc>();
+  layer_events[event_id] = std::vector<ActionFuncPtr>();
   layer_events[event_id].push_back(function);
 }
 
@@ -146,7 +146,7 @@ void Timeline::process_event(const std::string &event_id) {
   }
 
   // Select which the map of events to use
-  std::map<std::string, std::vector<ActionFunc>> *valid_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> *valid_events;
   if (combo_events.size() > 0) {
     valid_events = &combo_events;
   } else {
@@ -159,7 +159,7 @@ void Timeline::process_event(const std::string &event_id) {
     DEBUG_VERBOSE("Timeline: running lambdas");
     for (auto action : item->second) {
       DEBUG_INFO("");
-      action(*this);
+      (*action)(*this);
     }
     DEBUG_VERBOSE("Timeline: lambda done");
   } else {
@@ -176,10 +176,10 @@ void Timeline::process_event(const std::string &event_id) {
   }
 }
 void Timeline::add_combo_event(const std::string event_id,
-                               const ActionFunc function) {
+                               const ActionFuncPtr function) {
   DEBUG_INFO("logic::quantum::Timeline::add_combo_event %s %s", history.c_str(),
              event_id.c_str());
-  combo_events[event_id] = std::vector<ActionFunc>();
+  combo_events[event_id] = std::vector<ActionFuncPtr>();
   combo_events[event_id].push_back(function);
 }
 
@@ -213,20 +213,21 @@ void Timeline::process_combo_event(const std::string &event_id,
     // Create a release event for each switch belonging to the combo
     for (auto switch_uid : switches_uid) {
       std::string release_event_id = "switch." + switch_uid + ".released";
-      set_event_action(release_event_id, [release_event_id, chord_id,
-                                          switch_uid, switches_uid,
-                                          this](Timeline &timeline) {
-        // Execute release action
-        timeline.process_event(chord_id + ".released");
-        // Ignore the release event from any other switch from the combo
-        for (auto other_switch_uid : switches_uid) {
-          if (switch_uid != other_switch_uid) {
-            timeline.set_event_action(
-                "switch." + other_switch_uid + ".released", ActionFuncNoOp);
-          }
-        }
-        timeline.remove_event_action(release_event_id);
-      });
+      ActionFuncPtr release_action = std::make_shared<ActionFunc>(
+          [release_event_id, chord_id, switch_uid, switches_uid,
+           this](Timeline &timeline) {
+            // Execute release action
+            timeline.process_event(chord_id + ".released");
+            // Ignore the release event from any other switch from the combo
+            for (auto other_switch_uid : switches_uid) {
+              if (switch_uid != other_switch_uid) {
+                timeline.set_event_action(
+                    "switch." + other_switch_uid + ".released", ActionFuncNoOp);
+              }
+            }
+            timeline.remove_event_action(release_event_id);
+          });
+      set_event_action(release_event_id, release_action);
     }
   }
 }

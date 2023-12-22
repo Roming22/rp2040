@@ -23,8 +23,8 @@ protected:
 public:
   std::string history;
 
-  std::map<std::string, std::vector<ActionFunc>> layer_events;
-  std::map<std::string, std::vector<ActionFunc>> combo_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> layer_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> combo_events;
   std::vector<ActionFunc> commit_actions;
   std::vector<ActionFunc> end_actions;
 
@@ -39,7 +39,8 @@ public:
 
   void remove_layer(const logic::feature::Layer &layer);
 
-  void set_event_action(const std::string event_id, const ActionFunc function);
+  void set_event_action(const std::string event_id,
+                        const ActionFuncPtr function);
 
   void remove_event_action(const std::string event_id);
 
@@ -51,7 +52,8 @@ public:
 
   void process_event(const std::string &event_id);
 
-  void add_combo_event(const std::string event_id, const ActionFunc function);
+  void add_combo_event(const std::string event_id,
+                       const ActionFuncPtr function);
 
   void process_combo_event(const std::string &event_id,
                            const std::string &chord_id,

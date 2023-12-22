@@ -60,11 +60,12 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
       });
 
   // On release configuration
-  new_timeline.set_event_action(
-      release_event, [new_layer, release_event,
-                      is_toggle](logic::quantum::Timeline &timeline) {
+  ActionFuncPtr release_action =
+      std::make_shared<ActionFunc>([new_layer, release_event, is_toggle](
+                                       logic::quantum::Timeline &timeline) {
         new_layer->on_release(timeline, release_event, is_toggle);
       });
+  new_timeline.set_event_action(release_event, release_action);
 }
 
 void Layer::on_commit(logic::quantum::Timeline &timeline) const {

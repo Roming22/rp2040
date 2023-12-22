@@ -3,8 +3,6 @@
 #include "../../utils/Debug.hpp"
 #include "../quantum/Timeline.h"
 
-#include <sstream>
-
 namespace logic {
 namespace feature {
 void Keycode::OnPress(logic::quantum::Timeline &timeline,
@@ -33,9 +31,9 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
   });
 
   // On release configuration
-  timeline_key.set_event_action(
-      release_event, [release_event, switch_uid,
-                      definition](logic::quantum::Timeline &timeline) {
+  ActionFuncPtr release_action =
+      std::make_shared<ActionFunc>([release_event, switch_uid, definition](
+                                       logic::quantum::Timeline &timeline) {
         DEBUG_INFO("logic::feature::Keycode::OnRelease %s",
                    timeline.history.c_str());
         timeline.add_commit_action(
@@ -48,6 +46,7 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
             });
         timeline.remove_event_action(release_event);
       });
+  timeline_key.set_event_action(release_event, release_action);
 }
 } // namespace feature
 } // namespace logic

@@ -47,7 +47,7 @@ void Timer::Stop(const std::string &name) {
 void Timer::send_event() {
   DEBUG_INFO("");
   DEBUG_INFO("############################################################");
-  DEBUG_INFO("# Event %s", name.c_str());
+  DEBUG_INFO("# Event: %s @ %d", name.c_str(), utils::Time::Now());
   DEBUG_INFO("############################################################");
   timeline.process_event(name);
   logic::quantum::Universe::Resolve();
