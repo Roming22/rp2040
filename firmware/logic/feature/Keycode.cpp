@@ -2,6 +2,7 @@
 #include "../../hardware/usb/Key.h"
 #include "../../utils/Debug.hpp"
 #include "../quantum/Timeline.h"
+#include <memory>
 
 namespace logic {
 namespace feature {
@@ -14,7 +15,7 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
   }
 
   const std::string timeline_id = "keycode" + definition_ss.str();
-  logic::quantum::Timeline &timeline_key = timeline.split(timeline_id, 1);
+  logic::quantum::Timeline::Ptr timeline_key = timeline.split(timeline_id);
 
   DEBUG_INFO("logic::feature::Keycode::OnPress %s", timeline_id.c_str());
 
@@ -22,31 +23,33 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
   std::string release_event = switch_uid + std::string(".released");
 
   // On commit actions
-  timeline_key.add_commit_action([definition](
-                                     logic::quantum::Timeline &timeline) {
-    DEBUG_INFO("logic::feature::Keycode pressed: %s", timeline.history.c_str());
-    for (auto keycode : definition) {
-      hardware::usb::Key::Press(keycode);
-    }
-  });
+  ActionFuncPtr commit_action(
+      new ActionFunc([definition](logic::quantum::Timeline &timeline) {
+        DEBUG_INFO("logic::feature::Keycode pressed: %s",
+                   timeline.name.c_str());
+        for (auto keycode : definition) {
+          hardware::usb::Key::Press(keycode);
+        }
+      }));
+  timeline_key->add_commit_action(commit_action);
 
   // On release configuration
-  ActionFuncPtr release_action =
-      std::make_shared<ActionFunc>([release_event, switch_uid, definition](
-                                       logic::quantum::Timeline &timeline) {
+  ActionFuncPtr release_action(
+      new ActionFunc([release_event, switch_uid,
+                      definition](logic::quantum::Timeline &timeline) {
         DEBUG_INFO("logic::feature::Keycode::OnRelease %s",
-                   timeline.history.c_str());
-        timeline.add_commit_action(
-            [definition](logic::quantum::Timeline &timeline) {
-              DEBUG_INFO("logic::feature::Keycode released %s",
-                         timeline.history.c_str());
+                   timeline.name.c_str());
+        timeline.add_commit_action(ActionFuncPtr(
+            new ActionFunc([definition](logic::quantum::Timeline &timeline) {
+              DEBUG_INFO("logic::feature::Keycode released% s ",
+                         timeline.name.c_str());
               for (auto keycode : definition) {
                 hardware::usb::Key::Release(keycode);
               }
-            });
+            })));
         timeline.remove_event_action(release_event);
-      });
-  timeline_key.set_event_action(release_event, release_action);
+      }));
+  timeline_key->set_event_action(release_event, release_action);
 }
 } // namespace feature
 } // namespace logic

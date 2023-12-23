@@ -1,11 +1,17 @@
 #include "Layer.h"
 
+#include "../../hardware/led/Pixels.h"
+#include "../../utils/Debug.hpp"
+#include "../quantum/Timeline.h"
+
 #include <cstring>
+#include <memory>
 
 namespace logic {
 namespace feature {
 Layer::Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys)
     : name(i_name), color(nullptr), keys(i_keys) {
+  DEBUG_INFO("[CREATE %d] logic::feature::Layer %s", this, name.c_str());
   color = new int[4];
   std::memcpy(color, i_color, sizeof(int) * 4);
 }
@@ -16,14 +22,16 @@ bool Layer::operator==(const Layer &right) const {
 }
 
 void Layer::Add(const std::string &name, const int *color, KeyMap &keys) {
-  layers[name] = new Layer(name, color, keys);
+  layers[name] = LayerPtr(new Layer(name, color, keys));
 }
 
 LayerPtr Layer::Get(const std::string &name) {
-  if (layers.count(name) == 0) {
+  auto item = layers.find(name);
+  if (item == layers.end()) {
     DEBUG_ERROR("Unknown layer: '%s'", name.c_str());
+    exit(1);
   }
-  return std::make_shared<Layer>(*layers[name]);
+  return item->second;
 }
 
 const KeyMap &Layer::get_keys() const { return keys; }
@@ -34,42 +42,41 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
              name.c_str());
   const std::string timeline_id =
       "layer." + name + (std::string(is_toggle ? ".toggle" : ".momentary"));
-  logic::quantum::Timeline &new_timeline = timeline.split(timeline_id, 1);
-  std::string press_event = switch_uid + std::string(".pressed");
+  logic::quantum::Timeline::Ptr new_timeline = timeline.split(timeline_id);
   std::string release_event = switch_uid + std::string(".released");
 
   // On press actions
-  if (name == "" and is_toggle) {
-    // Commit the layer and exit
-    new_timeline.merge_layers();
-    return;
+  LayerPtr new_layer;
+  ActionFuncPtr release_action;
+  if (name != "") {
+    new_layer = Get(name);
+    new_timeline->add_layer(new_layer);
+    ActionFuncPtr commit_action(
+        new ActionFunc([new_layer](logic::quantum::Timeline &timeline) {
+          new_layer->activate(timeline);
+        }));
+    new_timeline->add_commit_action(commit_action);
   }
-  LayerPtr new_layer = Get(name);
-  new_timeline.add_layer(new_layer);
   if (is_toggle) {
-    new_timeline.merge_layers();
+    new_timeline->merge_layers();
+    release_action = ActionFuncPtr(
+        new ActionFunc([release_event](logic::quantum::Timeline &timeline) {
+          timeline.remove_event_action(release_event);
+        }));
+  } else {
+    release_action = ActionFuncPtr(new ActionFunc(
+        [new_layer, release_event](logic::quantum::Timeline &timeline) {
+          DEBUG_INFO("logic::feature::Layer::deactivate %s: %s",
+                     new_layer->name.c_str(), release_event.c_str());
+          timeline.remove_layer(*new_layer);
+          timeline.remove_event_action(release_event);
+        }));
   }
-  DEBUG_INFO("New Timeline %s events after load: %d (@%d)",
-             new_timeline.history.c_str(), new_timeline.layer_events.size(),
-             &new_timeline);
-
-  // On commit actions
-  new_timeline.add_commit_action(
-      [new_layer](logic::quantum::Timeline &timeline) {
-        new_layer->on_commit(timeline);
-      });
-
-  // On release configuration
-  ActionFuncPtr release_action =
-      std::make_shared<ActionFunc>([new_layer, release_event, is_toggle](
-                                       logic::quantum::Timeline &timeline) {
-        new_layer->on_release(timeline, release_event, is_toggle);
-      });
-  new_timeline.set_event_action(release_event, release_action);
+  new_timeline->set_event_action(release_event, release_action);
 }
 
-void Layer::on_commit(logic::quantum::Timeline &timeline) const {
-  DEBUG_INFO("logic::feature::Layer::on_commit");
+void Layer::activate(logic::quantum::Timeline &timeline) const {
+  DEBUG_INFO("logic::feature::Layer::activate");
   // Set LEDs
   DEBUG_VERBOSE("Set pixels to [%d, %d, %d]", color[0], color[1], color[2]);
   if (color[0] < 0) {
@@ -78,17 +85,6 @@ void Layer::on_commit(logic::quantum::Timeline &timeline) const {
   hardware::led::Pixels::Set(0, color[0], color[1], color[2]);
 }
 
-void Layer::on_release(logic::quantum::Timeline &timeline,
-                       const std::string &release_event, const bool is_toggle) {
-  DEBUG_DEBUG("logic::feature::Layer::on_release %s: %s", name.c_str(),
-              release_event.c_str());
-  if (!is_toggle) {
-    // Remove layer on release
-    timeline.remove_layer(*this);
-  }
-  timeline.remove_event_action(release_event);
-}
-
-std::map<const std::string, const Layer *> Layer::layers;
+std::map<const std::string, LayerPtr> Layer::layers;
 } // namespace feature
 } // namespace logic

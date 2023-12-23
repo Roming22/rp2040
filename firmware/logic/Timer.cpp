@@ -3,54 +3,53 @@
 #include "../utils/Debug.hpp"
 #include "../utils/Time.h"
 #include "quantum/Universe.h"
+#include "typedef.h"
 
 namespace logic {
 Timer::Timer(const std::string &i_name, const int &delay_ms,
-             quantum::Timeline &i_timeline)
+             quantum::Timeline *i_timeline)
     : name(i_name), timeline(i_timeline), disabled(false) {
   end_time = utils::Time::Now() + (delay_ms * 1E3);
 
-  DEBUG_INFO("Timer %s @%d    Start: %d    End: %d", name.c_str(), this,
-             utils::Time::Now(), end_time);
+  DEBUG_INFO("[CREATE %d] logic::Timer %s    Start: %d    End: %d", this,
+             name.c_str(), utils::Time::Now(), end_time);
 };
 
 void Timer::Tick() {
-  std::vector<std::string> to_delete;
+  std::vector<quantum::Timeline *> to_delete;
   for (auto pair : timers) {
     if (pair.second->tick()) {
-      to_delete.push_back(pair.second->name);
-      delete pair.second;
+      to_delete.push_back(pair.first);
     }
   }
-  for (const std::string name : to_delete) {
-    timers.erase(name);
+  if (!to_delete.empty()) {
+    logic::quantum::Universe::Resolve();
+  }
+  for (auto item : to_delete) {
+    timers.erase(item);
   }
 }
 
-Timer *Timer::Start(const std::string &name, const int &delay_ms,
-                    quantum::Timeline &timeline) {
+Timer::Ptr Timer::Start(const std::string &name, const int &delay_ms,
+                        quantum::Timeline *timeline) {
   DEBUG_INFO("logic::Timer::Start %s", name.c_str());
-  timers[name] = new Timer(name, delay_ms, timeline);
-  return timers[name];
+  timers[timeline] = Timer::Ptr(new Timer(name, delay_ms, timeline));
+  DEBUG_INFO("Adding timer %d to map", timeline);
+  return timers[timeline];
 }
 
-void Timer::Stop(const std::string &name) {
-  DEBUG_INFO("logic::Timer::Stop %s", name.c_str());
-  if (timers.count(name) > 0) {
-    Timer &timer = *timers[name];
-    timer.disabled = true;
-  } else {
-    DEBUG_WARNING("Timer not found in map: %s", name.c_str());
-  }
+void Timer::stop() {
+  DEBUG_INFO("logic::Timer::stop %s", timeline->name.c_str());
+  disabled = true;
 }
 
 void Timer::send_event() {
   DEBUG_INFO("");
   DEBUG_INFO("############################################################");
-  DEBUG_INFO("# Event: %s @ %d", name.c_str(), utils::Time::Now());
+  DEBUG_INFO("# @%dms Event: %s ", utils::Time::Now(), name.c_str());
   DEBUG_INFO("############################################################");
-  timeline.process_event(name);
-  logic::quantum::Universe::Resolve();
+  utils::Memory::PrintMemoryUsage();
+  timeline->process_event(name);
 }
 
 bool Timer::tick() {
@@ -65,5 +64,6 @@ bool Timer::tick() {
   return false;
 }
 
-std::map<std::string, Timer *> Timer::timers = std::map<std::string, Timer *>();
+std::map<quantum::Timeline *, Timer::Ptr> Timer::timers =
+    std::map<quantum::Timeline *, Timer::Ptr>();
 } // namespace logic

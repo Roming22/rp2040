@@ -10,11 +10,11 @@ namespace logic {
 namespace quantum {
 class Universe {
 protected:
-  static Timeline
-      *start_timeline; // Starting state of the universe.
-                       // As soon as the next state is determined (i.e. there is
-                       // but one next state possible, a.k.a "nexus") the start
-                       // state is moved to that next state.
+  static Timeline::Ptr
+      start_timeline; // Starting state of the universe.
+                      // As soon as the next state is determined (i.e. there is
+                      // but one next state possible, a.k.a "nexus") the start
+                      // state is moved to that next state.
 
 public:
   static void Setup(std::string layer_name);
@@ -23,7 +23,7 @@ public:
 
   static void Tick();
 
-  static void StartTimeline(Timeline &timeline);
+  static void StartTimeline(Timeline::Ptr &timeline);
 };
 } // namespace quantum
 } // namespace logic

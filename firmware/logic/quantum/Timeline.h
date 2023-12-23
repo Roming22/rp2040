@@ -1,37 +1,49 @@
 #ifndef MYMK_LOGIC_QUANTUM_TIMELINE
 #define MYMK_LOGIC_QUANTUM_TIMELINE
 
+#include "../../logic/Timer.h"
 #include "../../logic/feature/Layer.h"
 #include "../typedef.h"
 
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace logic {
 namespace quantum {
 class Timeline {
+public:
+  typedef std::shared_ptr<Timeline> Ptr;
+
 protected:
   bool pruned;
   Timeline *parent;
-  const int complexity;
-  std::list<Timeline *> children;
+  int complexity;
+  std::list<Ptr> children;
   std::list<logic::feature::LayerPtr> active_layers;
 
 public:
-  std::string history;
+  std::string name;
 
   std::map<std::string, std::vector<ActionFuncPtr>> layer_events;
   std::map<std::string, std::vector<ActionFuncPtr>> combo_events;
-  std::vector<ActionFunc> commit_actions;
-  std::vector<ActionFunc> end_actions;
+  std::vector<ActionFuncPtr> commit_actions;
+  std::vector<ActionFuncPtr> end_actions; // TODO remove
+  std::vector<logic::Timer::Ptr> timers;
 
-  Timeline(const std::string &i_history, Timeline *i_parent,
-           const int complexity);
+  Timeline(const std::string &i_name);
+  Timeline(const logic::quantum::Timeline &);
+  ~Timeline() {
+    DEBUG_INFO("[DELETE @%d] logic::quantum::Timeline", this);
+    stop_timers();
+  };
 
-  std::list<Timeline *> &get_children();
+  void set_complexity(const int complexity);
+  void set_name(const std::string name);
+  std::list<Ptr> &get_children();
 
   void add_layer(logic::feature::LayerPtr layer);
 
@@ -46,9 +58,13 @@ public:
 
   void clear_events_action();
 
-  void add_commit_action(const ActionFunc function);
+  void add_commit_action(const ActionFuncPtr function);
 
-  void add_end_action(const ActionFunc function);
+  void add_timer(const std::string timer, int delay_ms);
+
+  void stop_timers();
+
+  // void add_end_action(const ActionFuncPtr function);
 
   void process_event(const std::string &event_id);
 
@@ -60,7 +76,7 @@ public:
                            const std::vector<std::string> &switches_uid,
                            const std::string &timer_id);
 
-  Timeline &split(const std::string &id, const int complexity);
+  Timeline::Ptr split(const std::string &id);
 
   void execute();
 

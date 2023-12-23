@@ -6,6 +6,7 @@
 #include "../feature/Layer.h"
 #include "Timeline.h"
 
+#include <memory>
 #include <string>
 
 namespace logic {
@@ -15,7 +16,7 @@ void Universe::Setup(std::string layer_name) {
   DEBUG_INFO("logic::quantum::Universe::Setup %s", layer_name.c_str());
   // Activates the default layer.
   DEBUG_INFO("Universe: Loading %s", layer_name.c_str());
-  start_timeline = new Timeline(layer_name, nullptr, 1);
+  start_timeline = Timeline::Ptr(new Timeline(layer_name));
   std::string switch_id("switch.1");
   logic::feature::Layer::OnPress(layer_name, *start_timeline, switch_id, true);
   start_timeline->resolve();
@@ -23,10 +24,10 @@ void Universe::Setup(std::string layer_name) {
   start_timeline->process_event(release_event);
 }
 
-void Universe::StartTimeline(Timeline &timeline) {
+void Universe::StartTimeline(Timeline::Ptr &timeline) {
   DEBUG_INFO("logic::quantum::Universe::StartTimeline %s",
-             timeline.history.c_str());
-  start_timeline = &timeline;
+             timeline->name.c_str());
+  start_timeline = timeline;
 }
 
 void Universe::Resolve() { start_timeline->resolve(); }
@@ -37,13 +38,14 @@ void Universe::Tick() {
     std::string event_id = logic::Event::Get();
     DEBUG_INFO("");
     DEBUG_INFO("############################################################");
-    DEBUG_INFO("# Event: %s @ %d", event_id.c_str(), utils::Time::Now());
+    DEBUG_INFO("# @%dms Event: %s", utils::Time::Now(), event_id.c_str());
     DEBUG_INFO("############################################################");
+    utils::Memory::PrintMemoryUsage();
     start_timeline->process_event(event_id);
     start_timeline->resolve();
   }
 }
 
-Timeline *Universe::start_timeline = nullptr;
+Timeline::Ptr Universe::start_timeline = nullptr;
 } // namespace quantum
 } // namespace logic

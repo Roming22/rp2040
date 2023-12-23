@@ -5,6 +5,7 @@
 #include "../Timer.h"
 #include "Key.h"
 
+#include <memory>
 #include <sstream>
 
 #define DEFAULT_CHORD_DELAY 120
@@ -42,33 +43,30 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
   std::string chord_id = "chord" + switch_uid.substr(6) + switches_ss.str();
 
   DEBUG_INFO("logic::feature::Chord::OnPress %s", chord_id.c_str());
-  logic::quantum::Timeline &timeline_chord =
-      timeline.split(chord_id, switches_uid.size() + 1);
 
   // Execute key
-  Key::Get(key_definition)(timeline_chord, chord_id);
-  quantum::Timeline &timeline_key = *timeline_chord.get_children().back();
+  Key::Get(key_definition)(timeline, chord_id);
+  quantum::Timeline::Ptr timeline_chord = timeline.get_children().back();
+  timeline_chord->set_complexity(switches_uid.size() + 1);
+  timeline_chord->set_name(timeline_chord->name + "." + chord_id);
 
   // Handle timer
   std::string timer_event_id = chord_id + ".timer";
-  logic::Timer::Start(timer_event_id, delay_ms, timeline_chord);
-  timeline_chord.add_commit_action([timer_event_id](quantum::Timeline &) {
-    logic::Timer::Stop(timer_event_id);
-  });
-  timeline_chord.add_end_action([timer_event_id](quantum::Timeline &) {
-    logic::Timer::Stop(timer_event_id);
-  });
+  timeline_chord->add_timer(timer_event_id, delay_ms);
+  ActionFuncPtr chord_action(new ActionFunc(
+      [](quantum::Timeline &timeline) { timeline.stop_timers(); }));
+  timeline_chord->add_commit_action(chord_action);
 
   // Add actions for the other switches in the Chord
   for (auto switch_uid : switches_uid) {
     std::string event = "switch." + switch_uid + ".pressed";
-    ActionFuncPtr combo_action = std::make_shared<ActionFunc>(
-        [event, chord_id, chord_switches_uid,
-         timer_event_id](quantum::Timeline &timeline) {
+    ActionFuncPtr combo_action(
+        new ActionFunc([event, chord_id, chord_switches_uid,
+                        timer_event_id](quantum::Timeline &timeline) {
           timeline.process_combo_event(event, chord_id, chord_switches_uid,
                                        timer_event_id);
-        });
-    timeline_key.add_combo_event(event, combo_action);
+        }));
+    timeline_chord->add_combo_event(event, combo_action);
   }
 }
 
