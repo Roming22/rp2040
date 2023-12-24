@@ -1,7 +1,9 @@
 #include "Timer.h"
+
 #include "../logic/Events.h"
 #include "../utils/Debug.hpp"
 #include "../utils/Time.h"
+#include "ObjectManager.h"
 #include "quantum/Universe.h"
 #include "typedef.h"
 
@@ -9,16 +11,23 @@ namespace logic {
 Timer::Timer(const std::string &i_name, const int &delay_ms,
              quantum::Timeline *i_timeline)
     : name(i_name), timeline(i_timeline), active(true) {
+  // TODO sort timers by end_time
+  // This will allow to exit the Tick loop early, as well
+  // as ensure the ordering of the events.
   timers.push_back(this);
   end_time = utils::Time::Now() + (delay_ms * 1E3);
 
-  DEBUG_INFO("[CREATE %d] logic::Timer %s    Start: %d    End: %d", this,
-             name.c_str(), utils::Time::Now(), end_time);
+  DEBUG_INFO(
+      "[CREATE %d] logic::Timer %s    Start: %d    End: %d    Timeline: %d",
+      this, name.c_str(), utils::Time::Now(), end_time, timeline);
+  logic::ObjectManager::Register("logic::Timer");
 };
 
 Timer::~Timer() {
-  DEBUG_INFO("[DELETE %d] logic::Timer", this);
+  DEBUG_INFO("[DELETE %d] logic::Timer (%d)", this, timers.size());
   unregister();
+  logic::ObjectManager::Unregister("logic::Timer");
+  DEBUG_DEBUG("Deleted %d", timers.size());
 }
 
 void Timer::Tick() {
@@ -57,7 +66,8 @@ void Timer::stop() {
 void Timer::send_event() {
   DEBUG_INFO("");
   DEBUG_INFO("############################################################");
-  DEBUG_INFO("# @%dms Event: %s ", utils::Time::Now(), name.c_str());
+  DEBUG_INFO("# @%dms Timer Event %d %s for %d", utils::Time::Now(), this,
+             name.c_str(), timeline);
   DEBUG_INFO("############################################################");
   utils::Memory::PrintMemoryUsage();
   timeline->process_event(name);

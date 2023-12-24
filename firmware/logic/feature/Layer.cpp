@@ -2,6 +2,7 @@
 
 #include "../../hardware/led/Pixels.h"
 #include "../../utils/Debug.hpp"
+#include "../ObjectManager.h"
 #include "../quantum/Timeline.h"
 
 #include <cstring>
@@ -14,6 +15,11 @@ Layer::Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys)
   DEBUG_INFO("[CREATE %d] logic::feature::Layer %s", this, name.c_str());
   color = new int[4];
   std::memcpy(color, i_color, sizeof(int) * 4);
+  logic::ObjectManager::Register("logic::feature::Layer");
+}
+Layer::~Layer() {
+  DEBUG_INFO("[DELETE %d] logic::feature::Layer %s", this);
+  logic::ObjectManager::Unregister("logic::feature::Layer");
 }
 bool Layer::operator==(const Layer &right) const {
   DEBUG_INFO("Layer %s (%d_ == %s (%d)", name.c_str(), this, right.name.c_str(),

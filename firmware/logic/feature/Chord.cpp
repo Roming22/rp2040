@@ -8,7 +8,7 @@
 #include <memory>
 #include <sstream>
 
-#define DEFAULT_CHORD_DELAY 120
+#define DEFAULT_CHORD_DELAY 70
 
 namespace logic {
 namespace feature {
@@ -60,11 +60,11 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
   // Add actions for the other switches in the Chord
   for (auto switch_uid : switches_uid) {
     std::string event = "switch." + switch_uid + ".pressed";
-    ActionFuncPtr combo_action(new ActionFunc(
+    ActionFuncPtr switch_action(new ActionFunc(
         [event, chord_id, chord_switches_uid](quantum::Timeline &timeline) {
           timeline.process_combo_event(event, chord_id, chord_switches_uid);
         }));
-    timeline_chord->add_combo_event(event, combo_action);
+    timeline_chord->add_combo_event(event, switch_action);
   }
 }
 

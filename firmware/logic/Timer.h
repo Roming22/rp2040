@@ -18,6 +18,7 @@ public:
   typedef std::shared_ptr<Timer> Ptr;
 
 private:
+  const std::string name;
   bool active;
   long end_time;
   quantum::Timeline *timeline;
@@ -30,7 +31,6 @@ private:
   bool tick();
 
 public:
-  std::string name;
   ~Timer();
   static void Tick();
 

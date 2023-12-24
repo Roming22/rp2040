@@ -34,11 +34,12 @@ void Universe::Resolve() { start_timeline->resolve(); }
 
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
-  if (logic::Event::HasEvents()) {
+  while (logic::Event::HasEvents()) {
     std::string event_id = logic::Event::Get();
     DEBUG_INFO("");
     DEBUG_INFO("############################################################");
-    DEBUG_INFO("# @%dms Event: %s", utils::Time::Now(), event_id.c_str());
+    DEBUG_INFO("# @%dms Universe Event %s for %d", utils::Time::Now(),
+               event_id.c_str(), start_timeline.get());
     DEBUG_INFO("############################################################");
     utils::Memory::PrintMemoryUsage();
     start_timeline->process_event(event_id);

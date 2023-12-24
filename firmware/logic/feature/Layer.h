@@ -25,7 +25,7 @@ protected:
 public:
   const std::string name;
   Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys);
-  ~Layer() { DEBUG_INFO("[DELETE %d] logic::feature::Layer %s", this); }
+  ~Layer();
   bool operator==(const Layer &right) const;
 
   static void Add(const std::string &name, const int *color, KeyMap &keys);

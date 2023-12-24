@@ -4,9 +4,9 @@ layers:
       color: [127, 0, 0]
     keys: [
       # Left
-        TH(TAB|LSFT), TH(D|LSFT), TH(C|LALT), TH(L|LCTL),
-        NONE,         T,          A,          TH(E|LY_MO(symbols)),
-        NONE,         SPACE,      LGUI,       NONE,
+        TAB,  D,      C,    L,
+        NONE, T,      A,    E,
+        NONE, SPACE,  LY_MO(symbols), NONE,
       # Right
         R,    S,    H,    RETURN,
         I,    O,    N,    NONE,
@@ -14,10 +14,10 @@ layers:
       ]
     combos:
       chords:
-        # 2+3: X
-        # 3+4: V
-        # 2+4: Z
-        # 2+3+4: ESC
+        2+3: X
+        3+4: V
+        2+4: Z
+        2+3+4: BSPC
         6+7: F
         7+8: U
         6+8: B
@@ -35,9 +35,9 @@ layers:
       color: [127, 21, 0]
     keys: [
       # Left
-        TRNS, "`",      "\\\\",       "_",
-        TRNS, "#",      "$",          "!",
-        TRNS, LY_TO(),  LY_TO(alpha), TRNS,
+        TRNS, "`",            "\\\\",       "_",
+        TRNS, "#",            "$",          "!",
+        TRNS, LY_TO(), LY_TO(alpha), TRNS,
       # Right
         TRNS, "-",  "/",          "=",
         TRNS, ".",  ",",          "'",

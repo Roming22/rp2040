@@ -34,7 +34,6 @@ public:
   std::vector<logic::Timer::Ptr> timers;
 
   Timeline(const std::string &i_name);
-  Timeline(const logic::quantum::Timeline &);
   ~Timeline();
 
   void set_complexity(const int complexity);
@@ -49,7 +48,6 @@ public:
   void set_event_action(const std::string event_id,
                         const ActionFuncPtr function);
   void remove_event_action(const std::string event_id);
-  void clear_events_action();
   void add_commit_action(const ActionFuncPtr function);
 
   void add_timer(const std::string timer, int delay_ms);
@@ -61,7 +59,7 @@ public:
   void add_combo_event(const std::string event_id,
                        const ActionFuncPtr function);
   void process_combo_event(const std::string &event_id,
-                           const std::string &chord_id,
+                           const std::string &combo_id,
                            const std::vector<std::string> &switches_uid);
 
   Timeline::Ptr split(const std::string &id);
