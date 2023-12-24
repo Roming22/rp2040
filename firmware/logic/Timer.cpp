@@ -48,7 +48,7 @@ void Timer::Tick() {
 Timer::Ptr Timer::Start(const std::string &name, const int &delay_ms,
                         quantum::Timeline *timeline) {
   DEBUG_INFO("logic::Timer::Start %s", name.c_str());
-  return Timer::Ptr(new Timer(name, delay_ms, timeline));
+  return Ptr(new Timer(name, delay_ms, timeline));
 }
 
 void Timer::unregister() {

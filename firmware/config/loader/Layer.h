@@ -10,7 +10,8 @@ namespace config {
 namespace loader {
 class Layer {
 protected:
-  static void LoadLedColor(const JsonArray &config, int *color);
+  static void LoadLedColor(const JsonArray &config,
+                           hardware::led::Pixels::ColorPtr color);
   static void LoadKeys(const JsonArray &config, logic::feature::KeyMap &keys);
   static void LoadCombos(const JsonObject &config,
                          logic::feature::KeyMap &keys);

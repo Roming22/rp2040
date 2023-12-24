@@ -1,16 +1,24 @@
 #include "Key.h"
 
+#include "../../logic/ObjectManager.h"
+
 #include <Keyboard.h>
 
 namespace hardware {
 namespace usb {
-Key::Key(const char key) : keycode(key), count(0) {}
+std::map<const char, Key::Ptr> Key::map;
+
+Key::Key(const char key) : keycode(key), count(0) {
+  logic::ObjectManager::Register("hardware::usb::Key");
+}
+
+Key::Ptr Key::New(const char key) { return Ptr(new Key(key)); }
 
 void Key::Init() {
   DEBUG_VERBOSE("hardware::usb::Key:Init");
   for (auto pair : definition2code) {
     if (Key::map.count(pair.second) == 0) {
-      Key::map[pair.second] = new Key(pair.second);
+      Key::map[pair.second] = New(pair.second);
     } else {
       DEBUG_DEBUG("%s is a duplicate", pair.first.c_str());
     }
@@ -47,7 +55,6 @@ void Key::Release(const std::string key_definition) {
   }
 }
 
-std::map<const char, Key *> Key::map;
 std::map<const std::string, const char> Key::definition2code = {
     // Alphas
     {"A", 'a'},

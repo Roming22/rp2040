@@ -5,16 +5,12 @@
 #include "../ObjectManager.h"
 #include "../quantum/Timeline.h"
 
-#include <cstring>
-#include <memory>
-
 namespace logic {
 namespace feature {
-Layer::Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys)
-    : name(i_name), color(nullptr), keys(i_keys) {
+Layer::Layer(const std::string &i_name,
+             const hardware::led::Pixels::ColorPtr i_color, KeyMap &i_keys)
+    : name(i_name), color(i_color), keys(i_keys) {
   DEBUG_INFO("[CREATE %d] logic::feature::Layer %s", this, name.c_str());
-  color = new int[4];
-  std::memcpy(color, i_color, sizeof(int) * 4);
   logic::ObjectManager::Register("logic::feature::Layer");
 }
 Layer::~Layer() {
@@ -27,8 +23,15 @@ bool Layer::operator==(const Layer &right) const {
   return (this == &right);
 }
 
-void Layer::Add(const std::string &name, const int *color, KeyMap &keys) {
-  layers[name] = Layer::Ptr(new Layer(name, color, keys));
+Layer::Ptr Layer::New(const std::string &name,
+                      const hardware::led::Pixels::ColorPtr color,
+                      KeyMap &keys) {
+  return Ptr(new Layer(name, color, keys));
+}
+
+void Layer::Add(const std::string &name,
+                const hardware::led::Pixels::ColorPtr color, KeyMap &keys) {
+  layers[name] = Layer::New(name, color, keys);
 }
 
 Layer::Ptr Layer::Get(const std::string &name) {
@@ -58,25 +61,25 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
     new_layer = Get(name);
     new_timeline->add_layer(new_layer);
     ActionFuncPtr commit_action(
-        new ActionFunc([new_layer](logic::quantum::Timeline &timeline) {
+        NewActionFunc([new_layer](logic::quantum::Timeline &timeline) {
           new_layer->activate(timeline);
         }));
     new_timeline->add_commit_action(commit_action);
   }
   if (is_toggle) {
     new_timeline->merge_layers();
-    release_action = ActionFuncPtr(
-        new ActionFunc([release_event](logic::quantum::Timeline &timeline) {
+    release_action =
+        NewActionFunc([release_event](logic::quantum::Timeline &timeline) {
           timeline.remove_event_action(release_event);
-        }));
+        });
   } else {
-    release_action = ActionFuncPtr(new ActionFunc(
+    release_action = NewActionFunc(
         [new_layer, release_event](logic::quantum::Timeline &timeline) {
           DEBUG_INFO("logic::feature::Layer::deactivate %s: %s",
                      new_layer->name.c_str(), release_event.c_str());
           timeline.remove_layer(*new_layer);
           timeline.remove_event_action(release_event);
-        }));
+        });
   }
   new_timeline->set_event_action(release_event, release_action);
 }
@@ -84,11 +87,12 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
 void Layer::activate(logic::quantum::Timeline &timeline) const {
   DEBUG_INFO("logic::feature::Layer::activate");
   // Set LEDs
-  DEBUG_VERBOSE("Set pixels to [%d, %d, %d]", color[0], color[1], color[2]);
-  if (color[0] < 0) {
+  DEBUG_VERBOSE("Set pixels to [%d, %d, %d]", (*color)[0], (*color)[1],
+                (*color)[2]);
+  if ((*color)[0] < 0) {
     return;
   }
-  hardware::led::Pixels::Set(0, color[0], color[1], color[2]);
+  hardware::led::Pixels::Set(0, (*color)[0], (*color)[1], (*color)[2]);
 }
 
 std::map<const std::string, Layer::Ptr> Layer::layers;

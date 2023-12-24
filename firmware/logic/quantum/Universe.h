@@ -6,6 +6,8 @@
 
 #include "Timeline.h"
 
+#include <string>
+
 namespace logic {
 namespace quantum {
 class Universe {

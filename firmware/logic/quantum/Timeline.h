@@ -36,6 +36,8 @@ public:
   Timeline(const std::string &i_name);
   ~Timeline();
 
+  static Ptr New(const std::string &name);
+
   void set_complexity(const int complexity);
   void set_name(const std::string name);
   std::list<Ptr> &get_children();

@@ -1,12 +1,19 @@
 #ifndef MYMK_KEYBOARD
 #define MYMK_KEYBOARD
 
+#include <memory>
+
 namespace firmware {
 class Keyboard {
+public:
+  typedef std::shared_ptr<Keyboard> Ptr;
+
 private:
-  static Keyboard *instance;
   // Singleton
+  static Ptr instance;
   Keyboard(){};
+
+  static Ptr New();
 
 public:
   // Singleton

@@ -1,18 +1,11 @@
 #include "Timeline.h"
 
 #include "../../utils/Debug.hpp"
+#include "../../utils/Memory.h"
 #include "../ObjectManager.h"
 #include "../Timer.h"
 #include "../feature/Key.h"
 #include "Universe.h"
-
-#include <cstddef>
-#include <iterator>
-#include <list>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace logic {
 namespace quantum {
@@ -28,6 +21,10 @@ Timeline::~Timeline() {
   stop_timers();
   ObjectManager::Unregister("logic::quantum::Timeline");
 };
+
+Timeline::Ptr Timeline::New(const std::string &name) {
+  return Ptr(new Timeline(name));
+}
 
 void Timeline::set_complexity(const int i_complexity) {
   complexity = i_complexity;
@@ -68,10 +65,10 @@ void Timeline::add_layer(logic::feature::Layer::Ptr layer) {
     layer_events[pressed_event] = std::vector<ActionFuncPtr>();
     for (auto definition : definitions) {
       const logic::KeyFunc &action = logic::feature::Key::Get(definition);
-      layer_events[pressed_event].push_back(ActionFuncPtr(
-          new ActionFunc([action, switch_uid](Timeline &timeline) {
+      layer_events[pressed_event].push_back(
+          NewActionFunc([action, switch_uid](Timeline &timeline) {
             action(timeline, switch_uid);
-          })));
+          }));
     }
   }
   DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d", name.c_str(),
@@ -253,8 +250,8 @@ void Timeline::process_combo_event(
       DEBUG_INFO("COMBO release id %s (trigger: %s)", release_event_id.c_str(),
                  release_combo_id.c_str());
       ActionFuncPtr release_action(
-          new ActionFunc([release_combo_id, release_event_id, switch_uid,
-                          switches_uid, this](Timeline &timeline) {
+          NewActionFunc([release_combo_id, release_event_id, switch_uid,
+                         switches_uid, this](Timeline &timeline) {
             // DEBUG_INFO("Combo release event");
             // DEBUG_INFO("[PROCESS PRE] Known events:");
             // for (const auto pair : timeline.layer_events) {
@@ -287,7 +284,7 @@ Timeline::Ptr Timeline::split(const std::string &id) {
   DEBUG_INFO("*** logic::quantum::Timeline::split %s + %s", name.c_str(),
              id.c_str());
   const std::string new_name = name + "|" + id;
-  Ptr child(new Timeline(new_name));
+  Ptr child(New(new_name));
   utils::Memory::PrintMemoryUsage();
 
   child->parent = this;

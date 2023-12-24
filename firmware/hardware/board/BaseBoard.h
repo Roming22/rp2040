@@ -1,6 +1,7 @@
 #ifndef MYMK_HARDWARE_BOARD_BASEBOARD
 #define MYMK_HARDWARE_BOARD_BASEBOARD
 
+#include "../../logic/ObjectManager.h"
 #include "../key/KeyMatrix.h"
 #include "../key/KeySwitch.h"
 
@@ -10,8 +11,9 @@ namespace hardware {
 namespace board {
 class BaseBoard {
 protected:
-  static BaseBoard *instance;
-  hardware::key::KeySwitch *key_switch;
+  typedef std::shared_ptr<BaseBoard> Ptr;
+  static BaseBoard::Ptr instance;
+  hardware::key::KeySwitch::Ptr key_switch;
   bool is_connected;
   bool is_motherboard;
 
@@ -20,7 +22,8 @@ public:
             const std::vector<unsigned int> &i_row_pins,
             const bool i_is_connected)
       : is_connected(i_is_connected) {
-    key_switch = new hardware::key::KeyMatrix(i_col_pins, i_row_pins);
+    key_switch = hardware::key::KeyMatrix::New(i_col_pins, i_row_pins);
+    logic::ObjectManager::Register("hardware::board::baseboard");
   }
 
   void load_switch_events(std::vector<int> &switch_events);

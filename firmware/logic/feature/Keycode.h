@@ -4,6 +4,7 @@
 #include "../../logic/quantum/Timeline.h"
 
 #include <string>
+#include <vector>
 
 namespace logic {
 namespace feature {

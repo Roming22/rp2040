@@ -1,10 +1,9 @@
 #include "TapHold.h"
+
 #include "../../config/key/Keycode.h"
 #include "../../utils/Debug.hpp"
 #include "../Timer.h"
 #include "Key.h"
-#include <string>
-#include <vector>
 
 #define DEFAULT_TAPHOLD_DELAY 250
 
@@ -44,7 +43,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
   // Timeline selection
   DEBUG_INFO("timelines %d & %d", timeline_tap, timeline_hold);
   const ActionFuncPtr release_action(
-      new ActionFunc([timeline_hold](quantum::Timeline &) {
+      NewActionFunc([timeline_hold](quantum::Timeline &) {
         DEBUG_INFO("About to prune %d: %s", timeline_hold,
                    timeline_hold->name.c_str());
         timeline_hold->prune();
@@ -52,7 +51,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
       }));
   timeline_tap->set_event_action(release_event, release_action);
   const ActionFuncPtr timer_action(
-      new ActionFunc([timeline_tap](quantum::Timeline &) {
+      NewActionFunc([timeline_tap](quantum::Timeline &) {
         DEBUG_INFO("About to prune %d: %s", timeline_tap,
                    timeline_tap->name.c_str());
         timeline_tap->prune();

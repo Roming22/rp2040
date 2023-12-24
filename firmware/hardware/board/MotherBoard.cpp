@@ -1,13 +1,20 @@
 #include "MotherBoard.h"
+
 #include "../../logic/Events.h"
 #include "../../utils/Debug.hpp"
 
 namespace hardware {
 namespace board {
+MotherBoard::Ptr MotherBoard::New(const std::vector<unsigned int> &col_pins,
+                                  const std::vector<unsigned int> &row_pins,
+                                  const bool is_connected) {
+  return Ptr(new MotherBoard(col_pins, row_pins, is_connected));
+}
+
 void MotherBoard::Setup(const std::vector<unsigned int> &i_col_pins,
                         const std::vector<unsigned int> &i_row_pins,
                         const bool i_is_connected) {
-  instance = new MotherBoard(i_col_pins, i_row_pins, i_is_connected);
+  instance = New(i_col_pins, i_row_pins, i_is_connected);
 }
 
 void MotherBoard::receive_switch_events(std::vector<int> &switch_events) {

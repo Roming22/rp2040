@@ -1,4 +1,5 @@
 #include "Events.h"
+
 #include "../utils/Debug.hpp"
 
 namespace logic {

@@ -6,7 +6,7 @@
 #include "../../utils/Debug.hpp"
 #include "Chord.h"
 #include "Key.h"
-#include <string>
+
 #include <vector>
 
 namespace config {
@@ -14,7 +14,8 @@ namespace loader {
 void Layer::Load(const std::string name, const JsonObject &config) {
   DEBUG_INFO("config::loader::Layer::Load: %s", name.c_str());
 
-  int color[] = {-1, -1, -1, 0};
+  hardware::led::Pixels::ColorPtr color =
+      hardware::led::Pixels::NewColorPtr(-1, -1, -1, 0);
   LoadLedColor(config["leds"]["color"].as<JsonArray>(), color);
 
   logic::feature::KeyMap keys;
@@ -26,14 +27,15 @@ void Layer::Load(const std::string name, const JsonObject &config) {
   DEBUG_DEBUG("Layer configuration loaded");
 }
 
-void Layer::LoadLedColor(const JsonArray &config, int *color) {
+void Layer::LoadLedColor(const JsonArray &config,
+                         hardware::led::Pixels::ColorPtr color) {
   DEBUG_VERBOSE("config::loader::Layer::LoadLedColor");
   if (config.size() < 3 || config.size() > 4) {
     DEBUG_WARNING("[WARNING] Incorrect led color length: %d", config.size());
     return;
   }
   for (int i = 0; i < config.size(); ++i) {
-    color[i] = config[i].as<int>();
+    (*color)[i] = config[i].as<int>();
   }
 }
 

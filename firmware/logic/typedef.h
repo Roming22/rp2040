@@ -12,6 +12,9 @@ class Timeline;
 
 typedef std::function<void(logic::quantum::Timeline &)> ActionFunc;
 typedef std::shared_ptr<ActionFunc> ActionFuncPtr;
+ActionFuncPtr NewActionFunc(const ActionFunc &function) {
+  return ActionFuncPtr(new ActionFunc(function));
+}
 ActionFuncPtr ActionFuncNoOp =
     std::make_shared<ActionFunc>([](logic::quantum::Timeline &) {});
 

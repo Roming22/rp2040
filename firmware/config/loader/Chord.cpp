@@ -3,7 +3,6 @@
 #include "../../utils/Debug.hpp"
 #include "Key.h"
 
-#include <iostream>
 #include <sstream>
 
 namespace config {
