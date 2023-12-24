@@ -65,13 +65,13 @@ void Timeline::add_layer(logic::feature::Layer::Ptr layer) {
     const std::string &switch_uid = pair.first;
     const std::vector<std::string> &definitions = pair.second;
     std::string pressed_event = switch_uid + std::string(".pressed");
+    layer_events[pressed_event] = std::vector<ActionFuncPtr>();
     for (auto definition : definitions) {
       const logic::KeyFunc &action = logic::feature::Key::Get(definition);
-      ActionFuncPtr function(
+      layer_events[pressed_event].push_back(ActionFuncPtr(
           new ActionFunc([action, switch_uid](Timeline &timeline) {
             action(timeline, switch_uid);
-          }));
-      set_event_action(pressed_event, function);
+          })));
     }
   }
   DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d", name.c_str(),
@@ -129,15 +129,10 @@ void Timeline::set_event_action(const std::string event_id,
   }
   auto actions = layer_events.find(event_id);
   if (actions == layer_events.end()) {
-    layer_events[event_id] = function;
-  } else {
-    ActionFuncPtr previous = actions->second;
-    layer_events[event_id] =
-        ActionFuncPtr(new ActionFunc([previous, function](Timeline &timeline) {
-          (*previous)(timeline);
-          (*function)(timeline);
-        }));
+    layer_events[event_id] = std::vector<ActionFuncPtr>();
+    actions = layer_events.find(event_id);
   }
+  actions->second.push_back(function);
 }
 
 void Timeline::remove_event_action(const std::string event_id) {
@@ -183,7 +178,7 @@ void Timeline::process_event(const std::string &event_id) {
   }
 
   // Select which the map of events to use
-  std::map<std::string, ActionFuncPtr> *valid_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> *valid_events;
   if (combo_events.size() > 0) {
     DEBUG_INFO("Process Combo");
     valid_events = &combo_events;
@@ -195,9 +190,11 @@ void Timeline::process_event(const std::string &event_id) {
   // Activate the event or end timeline
   auto item = valid_events->find(event_id);
   if (item != valid_events->end()) {
-    ActionFuncPtr action = item->second;
     // DEBUG_INFO("Timeline: running lambdas");
-    (*action)(*this);
+    for (auto action : item->second) {
+      // DEBUG_INFO("Timeline: running lambda %d", action.get());
+      (*action)(*this);
+    }
     // DEBUG_INFO("Timeline: lambdas done");
   } else {
     DEBUG_INFO("Timeline '%s' ended because of unknown event '%s'",
@@ -212,9 +209,8 @@ void Timeline::add_combo_event(const std::string event_id,
                                const ActionFuncPtr function) {
   DEBUG_INFO("logic::quantum::Timeline::add_combo_event %s %s (%d)",
              name.c_str(), event_id.c_str(), function.get());
-  // Combos are simple to handle, as there is no need to string
-  // multiple actions together.
-  combo_events[event_id] = function;
+  combo_events[event_id] = std::vector<ActionFuncPtr>();
+  combo_events[event_id].push_back(function);
 }
 
 void Timeline::process_combo_event(
@@ -297,7 +293,8 @@ Timeline::Ptr Timeline::split(const std::string &id) {
   child->parent = this;
   children.push_back(child);
 
-  child->layer_events = std::map<std::string, ActionFuncPtr>(layer_events);
+  child->layer_events =
+      std::map<std::string, std::vector<ActionFuncPtr>>(layer_events);
   // child->combo_events; an active combo cannot be split.
   child->active_layers = std::list<logic::feature::Layer::Ptr>(active_layers);
 

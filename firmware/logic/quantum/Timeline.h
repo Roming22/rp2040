@@ -28,8 +28,8 @@ protected:
 public:
   std::string name;
 
-  std::map<std::string, ActionFuncPtr> layer_events;
-  std::map<std::string, ActionFuncPtr> combo_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> layer_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> combo_events;
   std::vector<ActionFuncPtr> commit_actions;
   std::vector<logic::Timer::Ptr> timers;
 
