@@ -22,10 +22,10 @@ bool Layer::operator==(const Layer &right) const {
 }
 
 void Layer::Add(const std::string &name, const int *color, KeyMap &keys) {
-  layers[name] = LayerPtr(new Layer(name, color, keys));
+  layers[name] = Layer::Ptr(new Layer(name, color, keys));
 }
 
-LayerPtr Layer::Get(const std::string &name) {
+Layer::Ptr Layer::Get(const std::string &name) {
   auto item = layers.find(name);
   if (item == layers.end()) {
     DEBUG_ERROR("Unknown layer: '%s'", name.c_str());
@@ -46,7 +46,7 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
   std::string release_event = switch_uid + std::string(".released");
 
   // On press actions
-  LayerPtr new_layer;
+  Layer::Ptr new_layer;
   ActionFuncPtr release_action;
   if (name != "") {
     new_layer = Get(name);
@@ -85,6 +85,6 @@ void Layer::activate(logic::quantum::Timeline &timeline) const {
   hardware::led::Pixels::Set(0, color[0], color[1], color[2]);
 }
 
-std::map<const std::string, LayerPtr> Layer::layers;
+std::map<const std::string, Layer::Ptr> Layer::layers;
 } // namespace feature
 } // namespace logic

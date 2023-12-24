@@ -23,11 +23,15 @@ Timeline::Timeline(const Timeline &copy)
     : name(copy.name), pruned(copy.pruned), parent(copy.parent),
       complexity(copy.complexity), children(copy.children),
       active_layers(copy.active_layers), layer_events(copy.layer_events),
-      combo_events(copy.combo_events), commit_actions(copy.commit_actions),
-      end_actions(copy.end_actions) {
+      combo_events(copy.combo_events), commit_actions(copy.commit_actions) {
   DEBUG_INFO("[CREATE %d] logic::quantum::Timeline::Timeline %s", this,
              name.c_str());
 }
+
+Timeline::~Timeline() {
+  DEBUG_INFO("[DELETE @%d] logic::quantum::Timeline", this);
+  stop_timers();
+};
 
 void Timeline::set_complexity(const int i_complexity) {
   complexity = i_complexity;
@@ -57,7 +61,7 @@ void Timeline::set_complexity(const int i_complexity) {
 void Timeline::set_name(const std::string i_name) { name = i_name; }
 std::list<Timeline::Ptr> &Timeline::get_children() { return children; }
 
-void Timeline::add_layer(logic::feature::LayerPtr layer) {
+void Timeline::add_layer(logic::feature::Layer::Ptr layer) {
   DEBUG_INFO("logic::quantum::Timeline::add_layer");
   active_layers.push_back(layer);
 
@@ -83,7 +87,7 @@ void Timeline::add_layer(logic::feature::LayerPtr layer) {
 void Timeline::merge_layers() {
   DEBUG_INFO("logic::quantum::Timeline::merge_layers");
   // The only the last layer is kept.
-  feature::LayerPtr merged_layer = active_layers.back();
+  feature::Layer::Ptr merged_layer = active_layers.back();
   name = "layer." + merged_layer->name + ".toggle";
   active_layers.clear();
   active_layers.push_back(merged_layer);
@@ -110,7 +114,7 @@ void Timeline::remove_layer(const logic::feature::Layer &layer) {
     }
   }
   if (layer_deleted) {
-    feature::LayerPtr current_layer = active_layers.back();
+    feature::Layer::Ptr current_layer = active_layers.back();
     active_layers.pop_back();
     add_layer(current_layer);
     current_layer->activate(*this);
@@ -127,8 +131,12 @@ void Timeline::set_event_action(const std::string event_id,
     }
     return;
   }
-  layer_events[event_id] = std::vector<ActionFuncPtr>();
-  layer_events[event_id].push_back(function);
+  auto actions = layer_events.find(event_id);
+  if (actions == layer_events.end()) {
+    layer_events[event_id] = std::vector<ActionFuncPtr>();
+    actions = layer_events.find(event_id);
+  }
+  actions->second.push_back(function);
 }
 
 void Timeline::remove_event_action(const std::string event_id) {
@@ -156,21 +164,19 @@ void Timeline::add_timer(const std::string timer, int delay_ms) {
 
 void Timeline::stop_timers() {
   for (auto timer : timers) {
+    DEBUG_INFO("10");
     timer->stop();
+    DEBUG_INFO("11");
   }
 }
-// void Timeline::add_end_action(const ActionFuncPtr function) {
-//   DEBUG_INFO("logic::quantum::Timeline::add_end_action %s", name.c_str());
-//   this->end_actions.push_back(function);
-// }
 
 void Timeline::process_event(const std::string &event_id) {
   if (pruned) {
     return;
   }
   DEBUG_INFO("");
-  DEBUG_INFO("logic::quantum::Timeline::process_event %s: %s", name.c_str(),
-             event_id.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::process_event %d %s: %s", this,
+             name.c_str(), event_id.c_str());
   if (children.size() > 0) {
     for (auto child : children) {
       child->process_event(event_id);
@@ -193,18 +199,14 @@ void Timeline::process_event(const std::string &event_id) {
     for (auto action : item->second) {
       (*action)(*this);
     }
-    DEBUG_VERBOSE("Timeline: lambda done");
+    DEBUG_VERBOSE("Timeline: lambdas done");
   } else {
-    if (valid_events->find("ignore_unknown_events") == valid_events->end()) {
-      DEBUG_INFO("Timeline '%s' ended because of unknown event '%s'",
-                 name.c_str(), event_id.c_str());
-      for (const auto pair : *valid_events) {
-        DEBUG_DEBUG("  - %s", pair.first.c_str());
-      }
-      prune();
-    } else {
-      DEBUG_INFO("Unknown event '%s' ignored", event_id.c_str());
+    DEBUG_INFO("Timeline '%s' ended because of unknown event '%s'",
+               name.c_str(), event_id.c_str());
+    for (const auto pair : *valid_events) {
+      DEBUG_DEBUG("  - %s", pair.first.c_str());
     }
+    prune();
   }
 }
 void Timeline::add_combo_event(const std::string event_id,
@@ -215,10 +217,9 @@ void Timeline::add_combo_event(const std::string event_id,
   combo_events[event_id].push_back(function);
 }
 
-void Timeline::process_combo_event(const std::string &event_id,
-                                   const std::string &chord_id,
-                                   const std::vector<std::string> &switches_uid,
-                                   const std::string &timer_id) {
+void Timeline::process_combo_event(
+    const std::string &event_id, const std::string &chord_id,
+    const std::vector<std::string> &switches_uid) {
   if (pruned) {
     return;
   }
@@ -277,7 +278,7 @@ Timeline::Ptr Timeline::split(const std::string &id) {
   child->layer_events =
       std::map<std::string, std::vector<ActionFuncPtr>>(layer_events);
   // child->combo_events; an active combo cannot be split.
-  child->active_layers = std::list<logic::feature::LayerPtr>(active_layers);
+  child->active_layers = std::list<logic::feature::Layer::Ptr>(active_layers);
 
   DEBUG_INFO("*** Split Timeline has %d events", child->layer_events.size());
   return child;
@@ -330,16 +331,19 @@ void Timeline::resolve() {
 }
 
 void Timeline::prune() {
-  DEBUG_INFO("logic::quantum::Timeline::prune '%s'", name.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::prune %d: '%s'", this, name.c_str());
   pruned = true;
+  DEBUG_INFO("0");
   stop_timers();
+  DEBUG_INFO("1");
 
   // Terminate children.
   children.clear();
+  DEBUG_INFO("2");
 }
 
 bool Timeline::clean() {
-  DEBUG_INFO("logic::quantum::Timeline::clean '%s'", name.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::clean %d: '%s'", this, name.c_str());
 
   // Propagate to all children
   std::vector<std::list<Ptr>::iterator> to_delete;

@@ -12,11 +12,13 @@ namespace feature {
 class Layer;
 
 typedef std::map<std::string, std::vector<std::string>> KeyMap;
-typedef std::shared_ptr<Layer> LayerPtr;
 
 class Layer {
+public:
+  typedef std::shared_ptr<Layer> Ptr;
+
 protected:
-  static std::map<const std::string, LayerPtr> layers;
+  static std::map<const std::string, Layer::Ptr> layers;
   int *color;
   KeyMap keys;
 
@@ -27,7 +29,7 @@ public:
   bool operator==(const Layer &right) const;
 
   static void Add(const std::string &name, const int *color, KeyMap &keys);
-  static LayerPtr Get(const std::string &name);
+  static Layer::Ptr Get(const std::string &name);
 
   const KeyMap &get_keys() const;
   static void OnPress(std::string name, logic::quantum::Timeline &timeline,

@@ -6,7 +6,7 @@ layers:
       # Left
         TAB,  TH(D|LSFT), TH(C|LALT),     TH(L|LCTL),
         NONE, T,          A,              TH(E|LY_MO(symbols)),
-        NONE, SPACE,      LGUI, NONE,
+        NONE, SPACE,      LY_MO(symbols), NONE,
       # Right
         R,    S,    H,    RETURN,
         I,    O,    N,    NONE,

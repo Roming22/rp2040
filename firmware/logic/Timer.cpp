@@ -8,39 +8,50 @@
 namespace logic {
 Timer::Timer(const std::string &i_name, const int &delay_ms,
              quantum::Timeline *i_timeline)
-    : name(i_name), timeline(i_timeline), disabled(false) {
+    : name(i_name), timeline(i_timeline), active(true) {
+  timers.push_back(this);
   end_time = utils::Time::Now() + (delay_ms * 1E3);
 
   DEBUG_INFO("[CREATE %d] logic::Timer %s    Start: %d    End: %d", this,
              name.c_str(), utils::Time::Now(), end_time);
 };
 
+Timer::~Timer() {
+  DEBUG_INFO("[DELETE %d] logic::Timer", this);
+  unregister();
+}
+
 void Timer::Tick() {
-  std::vector<quantum::Timeline *> to_delete;
-  for (auto pair : timers) {
-    if (pair.second->tick()) {
-      to_delete.push_back(pair.first);
+  std::vector<Timer *> triggered;
+  for (auto timer : timers) {
+    if (timer->tick()) {
+      triggered.push_back(timer);
     }
   }
-  if (!to_delete.empty()) {
+  if (!triggered.empty()) {
     logic::quantum::Universe::Resolve();
   }
-  for (auto item : to_delete) {
-    timers.erase(item);
+  for (auto timer : triggered) {
+    timer->unregister();
   }
 }
 
 Timer::Ptr Timer::Start(const std::string &name, const int &delay_ms,
                         quantum::Timeline *timeline) {
   DEBUG_INFO("logic::Timer::Start %s", name.c_str());
-  timers[timeline] = Timer::Ptr(new Timer(name, delay_ms, timeline));
-  DEBUG_INFO("Adding timer %d to map", timeline);
-  return timers[timeline];
+  return Timer::Ptr(new Timer(name, delay_ms, timeline));
+}
+
+void Timer::unregister() {
+  auto item = std::find(timers.begin(), timers.end(), this);
+  if (item != timers.end()) {
+    timers.erase(item);
+  }
 }
 
 void Timer::stop() {
-  DEBUG_INFO("logic::Timer::stop %s", timeline->name.c_str());
-  disabled = true;
+  DEBUG_INFO("logic::Timer::stop %d: %s", this, timeline->name.c_str());
+  active = false;
 }
 
 void Timer::send_event() {
@@ -54,16 +65,12 @@ void Timer::send_event() {
 
 bool Timer::tick() {
   DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
-  if (disabled) {
-    return true;
-  }
-  if (end_time <= utils::Time::Now()) {
+  if (active && end_time <= utils::Time::Now()) {
     send_event();
     return true;
   }
   return false;
 }
 
-std::map<quantum::Timeline *, Timer::Ptr> Timer::timers =
-    std::map<quantum::Timeline *, Timer::Ptr>();
+std::list<Timer *> Timer::timers = std::list<Timer *>();
 } // namespace logic
