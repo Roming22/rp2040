@@ -1,4 +1,5 @@
 #include "KeySwitch.h"
+
 #include "../../utils/Debug.hpp"
 
 namespace hardware {

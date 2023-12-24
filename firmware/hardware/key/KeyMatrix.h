@@ -3,11 +3,17 @@
 
 #include "KeySwitch.h"
 
+#include <memory>
 #include <vector>
 
 namespace hardware {
 namespace key {
 class KeyMatrix : public KeySwitch {
+public:
+  typedef std::shared_ptr<KeyMatrix> Ptr;
+  static Ptr New(const std::vector<unsigned int> &col_pins,
+                 const std::vector<unsigned int> &row_pins);
+
 private:
   std::vector<unsigned int> col_pins;
   std::vector<unsigned int> row_pins;

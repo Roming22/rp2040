@@ -1,7 +1,9 @@
 #include "BitBang.h"
+
 #include "../../utils/Debug.hpp"
 
 #include <DIO2.h>
+
 namespace hardware {
 namespace txrx {
 inline BitBang &BitBang::getInstance() {

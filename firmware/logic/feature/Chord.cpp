@@ -5,7 +5,6 @@
 #include "../Timer.h"
 #include "Key.h"
 
-#include <memory>
 #include <sstream>
 
 #define DEFAULT_CHORD_DELAY 70
@@ -53,14 +52,14 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
   // Handle timer
   std::string timer_event_id = chord_id + ".timer";
   timeline_chord->add_timer(timer_event_id, delay_ms);
-  ActionFuncPtr chord_action(new ActionFunc(
+  ActionFuncPtr chord_action(NewActionFunc(
       [](quantum::Timeline &timeline) { timeline.stop_timers(); }));
   timeline_chord->add_commit_action(chord_action);
 
   // Add actions for the other switches in the Chord
   for (auto switch_uid : switches_uid) {
     std::string event = "switch." + switch_uid + ".pressed";
-    ActionFuncPtr switch_action(new ActionFunc(
+    ActionFuncPtr switch_action(NewActionFunc(
         [event, chord_id, chord_switches_uid](quantum::Timeline &timeline) {
           timeline.process_combo_event(event, chord_id, chord_switches_uid);
         }));

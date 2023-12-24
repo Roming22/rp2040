@@ -1,8 +1,10 @@
 #include "Keycode.h"
+
 #include "../../hardware/usb/Key.h"
 #include "../../utils/Debug.hpp"
 #include "../quantum/Timeline.h"
-#include <memory>
+
+#include <sstream>
 
 namespace logic {
 namespace feature {
@@ -24,7 +26,7 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
 
   // On commit actions
   ActionFuncPtr commit_action(
-      new ActionFunc([definition](logic::quantum::Timeline &timeline) {
+      NewActionFunc([definition](logic::quantum::Timeline &timeline) {
         DEBUG_INFO("logic::feature::Keycode pressed: %s",
                    timeline.name.c_str());
         for (auto keycode : definition) {
@@ -35,18 +37,18 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
 
   // On release configuration
   ActionFuncPtr release_action(
-      new ActionFunc([release_event, switch_uid,
-                      definition](logic::quantum::Timeline &timeline) {
+      NewActionFunc([release_event, switch_uid,
+                     definition](logic::quantum::Timeline &timeline) {
         DEBUG_INFO("logic::feature::Keycode::OnRelease %s",
                    timeline.name.c_str());
-        timeline.add_commit_action(ActionFuncPtr(
-            new ActionFunc([definition](logic::quantum::Timeline &timeline) {
-              DEBUG_INFO("logic::feature::Keycode released% s ",
+        timeline.add_commit_action(
+            NewActionFunc([definition](logic::quantum::Timeline &timeline) {
+              DEBUG_INFO("logic::feature::Keycode released: %s",
                          timeline.name.c_str());
               for (auto keycode : definition) {
                 hardware::usb::Key::Release(keycode);
               }
-            })));
+            }));
         timeline.remove_event_action(release_event);
       }));
   timeline_key->set_event_action(release_event, release_action);

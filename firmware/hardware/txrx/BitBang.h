@@ -4,6 +4,7 @@
 #define MYMK_HARDWARE_TXRX_BITBANG
 
 #include <queue>
+#include <vector>
 
 #define DEFAULT_INPUT_TIMEOUT_US 2000
 

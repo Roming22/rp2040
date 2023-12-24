@@ -1,4 +1,5 @@
 #include "BaseBoard.h"
+
 #include "../../utils/Debug.hpp"
 
 namespace hardware {
@@ -21,6 +22,6 @@ void BaseBoard::Tick() {
   instance->tick();
 }
 
-BaseBoard *BaseBoard::instance = nullptr;
+BaseBoard::Ptr BaseBoard::instance = nullptr;
 } // namespace board
 } // namespace hardware

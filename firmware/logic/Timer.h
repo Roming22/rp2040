@@ -2,7 +2,6 @@
 #define MYMK_LOGIC_TIMER
 
 #include <list>
-#include <map>
 #include <memory>
 #include <string>
 

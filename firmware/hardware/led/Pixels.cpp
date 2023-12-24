@@ -1,10 +1,28 @@
 #include "Pixels.h"
+
+#include "../../logic/ObjectManager.h"
 #include "../../utils/Debug.hpp"
 
 namespace hardware {
 namespace led {
+Pixels::Ptr Pixels::instance = nullptr;
+
+Pixels::Ptr Pixels::New(const unsigned int pin, const unsigned int count) {
+  logic::ObjectManager::Register("hardware::led::Pixels");
+  return Ptr(new Pixels(pin, count));
+}
+
+Pixels::ColorPtr Pixels::NewColorPtr(int red, int green, int blue, int white) {
+  ColorPtr color = ColorPtr(new std::vector<int>());
+  color->push_back(red);
+  color->push_back(green);
+  color->push_back(blue);
+  color->push_back(white);
+  return color;
+}
+
 void Pixels::Setup(const unsigned int pin, const unsigned int count) {
-  instance = new Pixels(pin, count);
+  instance = New(pin, count);
   Adafruit_NeoPixel &pixels = instance->pixels;
   pixels.begin();
   pixels.clear();
@@ -48,7 +66,5 @@ unsigned int Pixels::FlipFlop() {
   unsigned int data = (address << 24) + (red << 16) + (green << 8) + blue;
   return data;
 }
-
-Pixels *Pixels::instance = nullptr;
 } // namespace led
 } // namespace hardware

@@ -1,9 +1,16 @@
 #include "KeyMatrix.h"
+
+#include "../../logic/ObjectManager.h"
 #include "../../utils/Debug.hpp"
 #include "../../utils/Time.h"
 
 namespace hardware {
 namespace key {
+KeyMatrix::Ptr KeyMatrix::New(const std::vector<unsigned int> &col_pins,
+                              const std::vector<unsigned int> &row_pins) {
+  return Ptr(new KeyMatrix(col_pins, row_pins));
+}
+
 KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
                      const std::vector<unsigned int> &i_row_pins)
     : last_poll(0), debounce_delay(15000) {
@@ -22,6 +29,8 @@ KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
   for (unsigned int row = 0; row < row_pins.size(); ++row) {
     pinMode(row_pins[row], INPUT);
   }
+
+  logic::ObjectManager::Register("hardware::key::KeyMatrix");
 }
 
 void KeyMatrix::poll_events(std::vector<int> &events) {

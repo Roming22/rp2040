@@ -1,4 +1,5 @@
 #include "Layer.h"
+
 #include "../../logic/feature/Layer.h"
 #include "../../logic/typedef.h"
 #include "../../utils/Debug.hpp"

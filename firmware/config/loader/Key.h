@@ -3,6 +3,7 @@
 
 #include "../../logic/typedef.h"
 
+#include <functional>
 #include <map>
 #include <string>
 

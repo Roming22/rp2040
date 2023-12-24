@@ -1,6 +1,7 @@
 #ifndef MYMK_LOGIC_FEATURE_LAYER
 #define MYMK_LOGIC_FEATURE_LAYER
 
+#include "../../hardware/led/Pixels.h"
 #include "../typedef.h"
 
 #include <map>
@@ -9,7 +10,6 @@
 
 namespace logic {
 namespace feature {
-class Layer;
 
 typedef std::map<std::string, std::vector<std::string>> KeyMap;
 
@@ -19,16 +19,20 @@ public:
 
 protected:
   static std::map<const std::string, Layer::Ptr> layers;
-  int *color;
+  hardware::led::Pixels::ColorPtr color;
   KeyMap keys;
 
 public:
   const std::string name;
-  Layer(const std::string &i_name, const int *i_color, KeyMap &i_keys);
+  Layer(const std::string &i_name,
+        const hardware::led::Pixels::ColorPtr i_color, KeyMap &i_keys);
   ~Layer();
   bool operator==(const Layer &right) const;
 
-  static void Add(const std::string &name, const int *color, KeyMap &keys);
+  static Ptr New(const std::string &name,
+                 const hardware::led::Pixels::ColorPtr color, KeyMap &keys);
+  static void Add(const std::string &name,
+                  const hardware::led::Pixels::ColorPtr color, KeyMap &keys);
   static Layer::Ptr Get(const std::string &name);
 
   const KeyMap &get_keys() const;

@@ -3,6 +3,9 @@
 
 #include "../../logic/typedef.h"
 
+#include <string>
+#include <vector>
+
 namespace config {
 namespace key {
 class Keycode {
