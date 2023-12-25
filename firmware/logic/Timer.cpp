@@ -63,15 +63,7 @@ void Timer::stop() {
   active = false;
 }
 
-void Timer::send_event() {
-  DEBUG_INFO("");
-  DEBUG_INFO("############################################################");
-  DEBUG_INFO("# @%dms Timer Event %d %s for %d", utils::Time::Now(), this,
-             name.c_str(), timeline);
-  DEBUG_INFO("############################################################");
-  utils::Memory::PrintMemoryUsage();
-  timeline->process_event(name);
-}
+void Timer::send_event() { logic::Event::Add(name, end_time, timeline); }
 
 bool Timer::tick() {
   DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());

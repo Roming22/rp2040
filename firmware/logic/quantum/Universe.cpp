@@ -1,6 +1,7 @@
 #include "Universe.h"
 
 #include "../../utils/Debug.hpp"
+#include "../../utils/Fps.h"
 #include "../../utils/Memory.h"
 #include "../../utils/Time.h"
 #include "../Events.h"
@@ -32,16 +33,21 @@ void Universe::Resolve() { start_timeline->resolve(); }
 
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
-  while (logic::Event::HasEvents()) {
-    std::string event_id = logic::Event::Get();
+  utils::FPS::Tick("Universe");
+  if (logic::Event::HasEvents()) {
+    Event::Ptr event = logic::Event::Get();
+    Timeline *timeline = start_timeline.get();
+    if (event->timeline != nullptr) {
+      timeline = event->timeline;
+    }
     DEBUG_INFO("");
     DEBUG_INFO("############################################################");
-    DEBUG_INFO("# @%dms Universe Event %s for %d", utils::Time::Now(),
-               event_id.c_str(), start_timeline.get());
+    DEBUG_INFO("# @%dms Universe Event %s for %d", event->time,
+               event->id.c_str(), timeline);
     DEBUG_INFO("############################################################");
     utils::Memory::PrintMemoryUsage();
-    start_timeline->process_event(event_id);
-    start_timeline->resolve();
+    timeline->process_event(event->id);
+    timeline->resolve();
   }
 }
 

@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-#define DEFAULT_CHORD_DELAY 70
+#define DEFAULT_CHORD_DELAY 80
 
 namespace logic {
 namespace feature {

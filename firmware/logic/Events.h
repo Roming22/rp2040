@@ -1,20 +1,34 @@
 #ifndef MYMK_LOGIC_EVENTS
 #define MYMK_LOGIC_EVENTS
 
+#include "quantum/Timeline.h"
+
+#include "Timer.h"
+#include <memory>
 #include <queue>
-#include <string>
 
 namespace logic {
 class Event {
+public:
+  typedef std::shared_ptr<Event> Ptr;
+
+  const std::string id;
+  const unsigned long time;
+  quantum::Timeline *timeline;
+
 private:
-  static std::queue<std::string> ids;
+  static std::list<Ptr> events;
+
+  Event(const std::string &id, const unsigned long time,
+        quantum::Timeline *timeline);
 
 public:
-  static void Add(const std::string &id);
+  ~Event();
 
+  static void Add(const std::string &id, const unsigned long time,
+                  quantum::Timeline *timeline);
   static bool HasEvents();
-
-  static std::string Get();
+  static Ptr Get();
 };
 } // namespace logic
 #endif

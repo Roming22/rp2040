@@ -2,6 +2,7 @@
 
 #include "../../logic/Events.h"
 #include "../../utils/Debug.hpp"
+#include "../../utils/Time.h"
 
 namespace hardware {
 namespace board {
@@ -43,7 +44,7 @@ void MotherBoard::add_events(const std::vector<int> &switch_events) {
     } else {
       event_id = "switch." + std::to_string(-switch_event) + ".released";
     }
-    logic::Event::Add(event_id);
+    logic::Event::Add(event_id, utils::Time::Now(), nullptr);
   }
 }
 

@@ -27,8 +27,8 @@ void Keyboard::Tick() {
   utils::Time::Tick();
   utils::FPS::Tick("Keyboard");
   // Get events
-  hardware::board::BaseBoard::Tick();
   logic::Timer::Tick();
+  hardware::board::BaseBoard::Tick();
   // Process events
 #ifndef MULTICORE
   logic::quantum::Universe::Tick();
