@@ -37,9 +37,6 @@ void Timer::Tick() {
       triggered.push_back(timer);
     }
   }
-  if (!triggered.empty()) {
-    logic::quantum::Universe::Resolve();
-  }
   for (auto timer : triggered) {
     timer->unregister();
   }

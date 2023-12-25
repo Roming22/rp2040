@@ -332,8 +332,7 @@ void Timeline::resolve() {
     return;
   }
 
-  // The current timeline has no purpose anymore,
-  // move to the next node.
+  // The timeline is resolved, move to the next node.
   Ptr child = *children.begin();
   DEBUG_INFO("Stepping to the next Timeline: %s (@%d)", child->name.c_str(),
              child);

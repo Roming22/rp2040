@@ -64,7 +64,7 @@ public:
                            const std::string &combo_id,
                            const std::vector<std::string> &switches_uid);
 
-  Timeline::Ptr split(const std::string &id);
+  Ptr split(const std::string &id);
 
   void execute();
   void resolve();

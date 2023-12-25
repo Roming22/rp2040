@@ -21,8 +21,6 @@ protected:
 public:
   static void Setup(std::string layer_name);
 
-  static void Resolve();
-
   static void Tick();
 
   static void StartTimeline(Timeline::Ptr &timeline);

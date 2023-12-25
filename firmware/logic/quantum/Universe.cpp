@@ -29,8 +29,6 @@ void Universe::StartTimeline(Timeline::Ptr &timeline) {
   start_timeline = timeline;
 }
 
-void Universe::Resolve() { start_timeline->resolve(); }
-
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
   utils::FPS::Tick("Universe");
@@ -47,7 +45,7 @@ void Universe::Tick() {
     DEBUG_INFO("############################################################");
     utils::Memory::PrintMemoryUsage();
     timeline->process_event(event->id);
-    timeline->resolve();
+    start_timeline->resolve();
   }
 }
 
