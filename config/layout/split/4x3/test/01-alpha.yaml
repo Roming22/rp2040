@@ -4,7 +4,7 @@ layers:
       color: [127, 0, 0]
     keys: [
       # Left
-        TAB,  D,      C,    C,
+        TAB,  D,      C,    L,
         NONE, T,      A,    E,
         NONE, SPACE,  LSFT, NONE,
       # Right

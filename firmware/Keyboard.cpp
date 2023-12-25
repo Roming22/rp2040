@@ -23,10 +23,16 @@ void Keyboard::Setup() {
 
 void Keyboard::Tick() {
   DEBUG_VERBOSE("firmware::Keyboard::Tick");
+  // Move clock forward
   utils::Time::Tick();
-  logic::Timer::Tick();
+  utils::FPS::Tick("Keyboard");
+  // Get events
   hardware::board::BaseBoard::Tick();
+  logic::Timer::Tick();
+  // Process events
+#ifndef MULTICORE
   logic::quantum::Universe::Tick();
-  utils::FPS::Tick();
+#endif
 }
+
 } // namespace firmware
