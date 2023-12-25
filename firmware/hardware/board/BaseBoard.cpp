@@ -1,6 +1,7 @@
 #include "BaseBoard.h"
 
 #include "../../utils/Debug.hpp"
+#include "../../utils/Fps.h"
 
 namespace hardware {
 namespace board {
@@ -16,6 +17,7 @@ void BaseBoard::tick() {
 
 void BaseBoard::Tick() {
   DEBUG_VERBOSE("harware::board::BaseBoard::Tick");
+  utils::FPS::Tick("Keyboard");
   if (instance->is_connected) {
     hardware::txrx::BitBang::Tick();
   }

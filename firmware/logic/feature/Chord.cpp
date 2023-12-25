@@ -29,6 +29,7 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
 
   // Send timer event to the new timeline
   int delay_ms = Chord::delay_ms;
+  // TODO: Support custom delay per chord
   // if (definition.size() > 2) {
   //   delay_ms = std::stoi(definition[2]);
   // }
@@ -37,6 +38,9 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
   for (auto item : switches_uid) {
     switches_ss << "." << item;
     // TODO: ignore chord if is uses a switch that is already pressed
+    // A possible solution would be to remove "keycode" from the
+    // timeline names, and add ".switch.{item}".
+    // This would enable to search for ".{item}" in the name of the parent.
   }
 
   std::string chord_id = "chord" + switch_uid.substr(6) + switches_ss.str();
@@ -52,9 +56,6 @@ void Chord::OnPress(logic::quantum::Timeline &timeline,
   // Handle timer
   std::string timer_event_id = chord_id + ".timer";
   timeline_chord->add_timer(timer_event_id, delay_ms);
-  ActionFuncPtr chord_action(NewActionFunc(
-      [](quantum::Timeline &timeline) { timeline.stop_timers(); }));
-  timeline_chord->add_commit_action(chord_action);
 
   // Add actions for the other switches in the Chord
   for (auto switch_uid : switches_uid) {

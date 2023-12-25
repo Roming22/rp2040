@@ -5,7 +5,6 @@
 #include "logic/Timer.h"
 #include "logic/quantum/Universe.h"
 #include "utils/Debug.hpp"
-#include "utils/Fps.h"
 #include "utils/Time.h"
 
 namespace firmware {
@@ -25,12 +24,11 @@ void Keyboard::Tick() {
   DEBUG_VERBOSE("firmware::Keyboard::Tick");
   // Move clock forward
   utils::Time::Tick();
-  utils::FPS::Tick("Keyboard");
-  // Get events
-  logic::Timer::Tick();
+  // Get events. User triggered events have priority.
   hardware::board::BaseBoard::Tick();
-  // Process events
+  logic::Timer::Tick();
 #ifndef MULTICORE
+  // Process events
   logic::quantum::Universe::Tick();
 #endif
 }

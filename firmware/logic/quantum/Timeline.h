@@ -53,7 +53,6 @@ public:
   void add_commit_action(const ActionFuncPtr function);
 
   void add_timer(const std::string timer, int delay_ms);
-  void stop_timers();
 
   void process_event(const std::string &event_id);
 

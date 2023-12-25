@@ -18,7 +18,6 @@ Timeline::Timeline(const std::string &i_name)
 
 Timeline::~Timeline() {
   DEBUG_INFO("[DELETE @%d] logic::quantum::Timeline", this);
-  stop_timers();
   ObjectManager::Unregister("logic::quantum::Timeline");
 };
 
@@ -151,12 +150,6 @@ void Timeline::add_timer(const std::string timer, int delay_ms) {
   timers.push_back(logic::Timer::Start(timer, delay_ms, this));
 }
 
-void Timeline::stop_timers() {
-  for (auto timer : timers) {
-    timer->stop();
-  }
-}
-
 void Timeline::process_event(const std::string &event_id) {
   if (pruned) {
     return;
@@ -221,7 +214,6 @@ void Timeline::process_combo_event(
       name.c_str(), combo_events.size());
   combo_events.erase(event_id);
   if (combo_events.size() == 0) {
-    stop_timers();
     // Prune any sibling timeline with a complexity less than the current
     // timeline
     // Warning: Sequences must be processed first to override Chords
@@ -237,27 +229,18 @@ void Timeline::process_combo_event(
           (*sibling)->prune();
         }
       }
+      // Ignore the timer
+      // The timer is ignored instead of being stopped in case the timer Event
+      // happens in the same loop.
+      set_event_action(combo_id + ".timer", ActionFuncNoOp);
     }
 
-    // Create a release event for each switch belonging to the combo
-    // DEBUG_INFO("[PRE] Known events:");
-    // for (const auto pair : layer_events) {
-    //   DEBUG_INFO("  - %s", pair.first.c_str());
-    // }
     const std::string release_combo_id = combo_id + ".released";
     for (auto switch_uid : switches_uid) {
       std::string release_event_id = "switch." + switch_uid + ".released";
-      DEBUG_INFO("COMBO release id %s (trigger: %s)", release_event_id.c_str(),
-                 release_combo_id.c_str());
       ActionFuncPtr release_action(
           NewActionFunc([release_combo_id, release_event_id, switch_uid,
                          switches_uid, this](Timeline &timeline) {
-            // DEBUG_INFO("Combo release event");
-            // DEBUG_INFO("[PROCESS PRE] Known events:");
-            // for (const auto pair : timeline.layer_events) {
-            //   DEBUG_INFO("  - %s", pair.first.c_str());
-            // }
-
             // Execute release actions
             auto actions = layer_events.find(release_combo_id);
             if (actions != layer_events.end()) {
@@ -265,18 +248,10 @@ void Timeline::process_combo_event(
             } else {
               DEBUG_INFO("Event not found %s", release_combo_id.c_str());
             }
-            // DEBUG_INFO("[PROCESS POST] Known events:");
-            // for (const auto pair : timeline.layer_events) {
-            //   DEBUG_INFO("  - %s", pair.first.c_str());
-            // }
             timeline.remove_event_action(release_event_id);
           }));
       set_event_action(release_event_id, release_action);
     }
-    // DEBUG_INFO("[POST] Known events:");
-    // for (const auto pair : layer_events) {
-    //   DEBUG_INFO("  - %s", pair.first.c_str());
-    // }
   }
 }
 
@@ -348,7 +323,6 @@ void Timeline::resolve() {
 void Timeline::prune() {
   DEBUG_INFO("logic::quantum::Timeline::prune %d: '%s'", this, name.c_str());
   pruned = true;
-  stop_timers();
 
   // Terminate children.
   children.clear();
