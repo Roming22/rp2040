@@ -10,13 +10,9 @@ namespace feature {
 Layer::Layer(const std::string &i_name,
              const hardware::led::Pixels::ColorPtr i_color, KeyMap &i_keys)
     : name(i_name), color(i_color), keys(i_keys) {
-  DEBUG_INFO("[CREATE %d] logic::feature::Layer %s", this, name.c_str());
   logic::ObjectManager::Register("logic::feature::Layer");
 }
-Layer::~Layer() {
-  DEBUG_INFO("[DELETE %d] logic::feature::Layer %s", this);
-  logic::ObjectManager::Unregister("logic::feature::Layer");
-}
+Layer::~Layer() { logic::ObjectManager::Unregister("logic::feature::Layer"); }
 bool Layer::operator==(const Layer &right) const {
   DEBUG_INFO("Layer %s (%d_ == %s (%d)", name.c_str(), this, right.name.c_str(),
              &right);
@@ -68,20 +64,16 @@ void Layer::OnPress(std::string name, logic::quantum::Timeline &timeline,
   }
   if (is_toggle) {
     new_timeline->merge_layers();
-    release_action =
-        NewActionFunc([release_event](logic::quantum::Timeline &timeline) {
-          timeline.remove_event_action(release_event);
-        });
+    release_action = ActionFuncNoOp;
   } else {
     release_action = NewActionFunc(
         [new_layer, release_event](logic::quantum::Timeline &timeline) {
           DEBUG_INFO("logic::feature::Layer::deactivate %s: %s",
                      new_layer->name.c_str(), release_event.c_str());
           timeline.remove_layer(*new_layer);
-          timeline.remove_event_action(release_event);
         });
   }
-  new_timeline->set_event_action(release_event, release_action);
+  new_timeline->set_release_action(release_event, release_action);
 }
 
 void Layer::activate(logic::quantum::Timeline &timeline) const {

@@ -11,13 +11,13 @@ namespace logic {
 namespace quantum {
 Timeline::Timeline(const std::string &i_name)
     : name(i_name), pruned(false), parent(nullptr), complexity(1) {
-  DEBUG_INFO("[CREATE %d] logic::quantum::Timeline::Timeline %s", this,
-             i_name.c_str());
+  // DEBUG_INFO("[CREATE %d] logic::quantum::Timeline::Timeline %s", this,
+  //            i_name.c_str());
   logic::ObjectManager::Register("logic::quantum::Timeline");
 }
 
 Timeline::~Timeline() {
-  DEBUG_INFO("[DELETE @%d] logic::quantum::Timeline", this);
+  // DEBUG_INFO("[DELETE @%d] logic::quantum::Timeline", this);
   ObjectManager::Unregister("logic::quantum::Timeline");
 };
 
@@ -113,31 +113,22 @@ void Timeline::remove_layer(const logic::feature::Layer &layer) {
   }
 }
 
-void Timeline::set_event_action(const std::string event_id,
-                                const ActionFuncPtr function) {
-  DEBUG_INFO("logic::quantum::Timeline::set_event_function %s: %s",
+void Timeline::set_release_action(const std::string event_id,
+                                  const ActionFuncPtr function) {
+  DEBUG_INFO("logic::quantum::Timeline::set_release_action %s: %s",
              name.c_str(), event_id.c_str());
   if (children.size() > 0) {
     for (auto child : children) {
-      child->set_event_action(event_id, function);
+      child->set_release_action(event_id, function);
     }
     return;
   }
-  auto actions = layer_events.find(event_id);
-  if (actions == layer_events.end()) {
-    layer_events[event_id] = std::vector<ActionFuncPtr>();
-    actions = layer_events.find(event_id);
+  auto item = release_events.find(event_id);
+  if (item == release_events.end()) {
+    release_events[event_id] = std::vector<ActionFuncPtr>();
+    item = release_events.find(event_id);
   }
-  actions->second.push_back(function);
-}
-
-void Timeline::remove_event_action(const std::string event_id) {
-  DEBUG_INFO("logic::quantum::Timeline::remove_event_function %s: %s",
-             name.c_str(), event_id.c_str());
-  auto item = layer_events.find(event_id);
-  if (item != layer_events.end()) {
-    layer_events.erase(item);
-  }
+  item->second.push_back(function);
 }
 
 void Timeline::add_commit_action(const ActionFuncPtr function) {
@@ -167,22 +158,36 @@ void Timeline::process_event(const std::string &event_id) {
     return;
   }
 
+  // Handle release events first
+  auto item = release_events.find(event_id);
+  if (item != release_events.end()) {
+    DEBUG_INFO("Process Release");
+    for (auto action : item->second) {
+      DEBUG_INFO("**********");
+      // DEBUG_INFO("Timeline: running lambda %d", action.get());
+      (*action)(*this);
+    }
+    release_events.erase(item);
+    return;
+  }
+
   // Select which the map of events to use
   std::map<std::string, std::vector<ActionFuncPtr>> *valid_events;
   if (combo_events.size() > 0) {
     DEBUG_INFO("Process Combo");
     valid_events = &combo_events;
   } else {
-    DEBUG_INFO("Process switch");
+    DEBUG_INFO("Process Layer");
     valid_events = &layer_events;
   }
 
   // Activate the event or end timeline
-  auto item = valid_events->find(event_id);
+  item = valid_events->find(event_id);
   if (item != valid_events->end()) {
     // DEBUG_INFO("Timeline: running lambdas");
     for (auto action : item->second) {
       // DEBUG_INFO("Timeline: running lambda %d", action.get());
+      DEBUG_INFO("**********");
       (*action)(*this);
     }
     // DEBUG_INFO("Timeline: lambdas done");
@@ -232,7 +237,7 @@ void Timeline::process_combo_event(
       // Ignore the timer
       // The timer is ignored instead of being stopped in case the timer Event
       // happens in the same loop.
-      set_event_action(combo_id + ".timer", ActionFuncNoOp);
+      set_release_action(combo_id + ".timer", ActionFuncNoOp);
     }
 
     const std::string release_combo_id = combo_id + ".released";
@@ -242,35 +247,37 @@ void Timeline::process_combo_event(
           NewActionFunc([release_combo_id, release_event_id, switch_uid,
                          switches_uid, this](Timeline &timeline) {
             // Execute release actions
-            auto actions = layer_events.find(release_combo_id);
-            if (actions != layer_events.end()) {
+            auto actions = release_events.find(release_combo_id);
+            if (actions != release_events.end()) {
               timeline.process_event(release_combo_id);
             } else {
               DEBUG_INFO("Event not found %s", release_combo_id.c_str());
             }
-            timeline.remove_event_action(release_event_id);
           }));
-      set_event_action(release_event_id, release_action);
+      set_release_action(release_event_id, release_action);
     }
   }
 }
 
 Timeline::Ptr Timeline::split(const std::string &id) {
-  DEBUG_INFO("*** logic::quantum::Timeline::split %s + %s", name.c_str(),
+  DEBUG_INFO("logic::quantum::Timeline::split %s + %s", name.c_str(),
              id.c_str());
   const std::string new_name = name + "|" + id;
   Ptr child(New(new_name));
-  utils::Memory::PrintMemoryUsage();
+  // utils::Memory::PrintMemoryUsage();
 
   child->parent = this;
   children.push_back(child);
 
   child->layer_events =
       std::map<std::string, std::vector<ActionFuncPtr>>(layer_events);
+  child->release_events =
+      std::map<std::string, std::vector<ActionFuncPtr>>(release_events);
   // child->combo_events; an active combo cannot be split.
   child->active_layers = std::list<logic::feature::Layer::Ptr>(active_layers);
 
-  DEBUG_INFO("*** Split Timeline has %d events", child->layer_events.size());
+  DEBUG_INFO("Split Timeline has %d layer events and %d release events",
+             child->layer_events.size(), child->release_events.size());
   return child;
 }
 
@@ -278,6 +285,7 @@ void Timeline::execute() {
   DEBUG_INFO("logic::quantum::Timeline::execute");
   for (auto action : commit_actions) {
     DEBUG_INFO("execute action");
+    DEBUG_INFO("**********");
     (*action)(*this);
     DEBUG_INFO("action executed");
   }

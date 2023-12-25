@@ -49,9 +49,8 @@ void Keycode::OnPress(logic::quantum::Timeline &timeline,
                 hardware::usb::Key::Release(keycode);
               }
             }));
-        timeline.remove_event_action(release_event);
       }));
-  timeline_key->set_event_action(release_event, release_action);
+  timeline_key->set_release_action(release_event, release_action);
 }
 } // namespace feature
 } // namespace logic

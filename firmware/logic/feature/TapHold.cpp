@@ -41,7 +41,7 @@ void TapHold::OnPress(logic::quantum::Timeline &timeline,
   DEBUG_INFO("timelines %d & %d", timeline_tap, timeline_hold);
   const ActionFuncPtr release_action(NewActionFunc(
       [timeline_hold](quantum::Timeline &) { timeline_hold->prune(); }));
-  timeline_tap->set_event_action(release_event, release_action);
+  timeline_tap->set_release_action(release_event, release_action);
   timeline_tap->add_timer(timer_event_id, delay_ms);
 }
 } // namespace feature

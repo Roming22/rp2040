@@ -29,6 +29,7 @@ public:
   std::string name;
 
   std::map<std::string, std::vector<ActionFuncPtr>> layer_events;
+  std::map<std::string, std::vector<ActionFuncPtr>> release_events;
   std::map<std::string, std::vector<ActionFuncPtr>> combo_events;
   std::vector<ActionFuncPtr> commit_actions;
   std::vector<logic::Timer::Ptr> timers;
@@ -47,9 +48,8 @@ public:
   void merge_layers();
   void remove_layer(const logic::feature::Layer &layer);
 
-  void set_event_action(const std::string event_id,
-                        const ActionFuncPtr function);
-  void remove_event_action(const std::string event_id);
+  void set_release_action(const std::string event_id,
+                          const ActionFuncPtr function);
   void add_commit_action(const ActionFuncPtr function);
 
   void add_timer(const std::string timer, int delay_ms);
