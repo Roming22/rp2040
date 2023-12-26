@@ -32,6 +32,8 @@ void Universe::StartTimeline(Timeline::Ptr &timeline) {
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
 #ifdef MULTICORE
+  // Move clock forward
+  utils::Time::Tick();
   utils::FPS::Tick("Universe");
 #endif
   if (logic::Event::HasEvents()) {

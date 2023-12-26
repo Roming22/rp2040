@@ -14,7 +14,7 @@ Event::~Event() { ObjectManager::Unregister("logic::Event"); }
 
 void Event::Add(const std::string &id, const unsigned long time,
                 quantum::Timeline *timeline) {
-  DEBUG_INFO("logic::Event::Add %s at %dms", id.c_str(), time);
+  DEBUG_VERBOSE("logic::Event::Add %s at %dms", id.c_str(), time);
   // The oldest event is at the end of the list.
   auto index = events.begin();
   for (; index != events.end(); ++index) {
@@ -31,7 +31,12 @@ bool Event::HasEvents() {
 }
 
 Event::Ptr Event::Get() {
-  DEBUG_VERBOSE("logic::Event::Get");
+  DEBUG_INFO("logic::Event::Get");
+
+  for (auto event : events) {
+    DEBUG_INFO("- %dus: %s", event->time, event->id.c_str());
+  }
+
   Ptr event = events.back();
   events.pop_back();
   return event;

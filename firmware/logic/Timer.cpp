@@ -17,9 +17,9 @@ Timer::Timer(const std::string &i_name, const int &delay_ms,
   timers.push_back(this);
   end_time = utils::Time::Now() + (delay_ms * 1E3);
 
-  // DEBUG_INFO(
-  //     "[CREATE %d] logic::Timer %s    Start: %d    End: %d    Timeline: %d",
-  //     this, name.c_str(), utils::Time::Now(), end_time, timeline);
+  DEBUG_INFO(
+      "[CREATE %d] logic::Timer %s    Start: %d    End: %d    Timeline: %d",
+      this, name.c_str(), utils::Time::Now(), end_time, timeline);
   logic::ObjectManager::Register("logic::Timer");
 };
 

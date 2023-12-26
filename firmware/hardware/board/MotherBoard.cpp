@@ -36,6 +36,7 @@ void MotherBoard::receive_switch_events(std::vector<int> &switch_events) {
 }
 
 void MotherBoard::add_events(const std::vector<int> &switch_events) {
+  unsigned long now = micros();
   for (unsigned int i = 0; i < switch_events.size(); ++i) {
     int switch_event = switch_events[i];
     std::string event_id;
@@ -44,7 +45,7 @@ void MotherBoard::add_events(const std::vector<int> &switch_events) {
     } else {
       event_id = "switch." + std::to_string(-switch_event) + ".released";
     }
-    logic::Event::Add(event_id, utils::Time::Now(), nullptr);
+    logic::Event::Add(event_id, now, nullptr);
   }
 }
 

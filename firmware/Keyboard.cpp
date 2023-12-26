@@ -22,8 +22,10 @@ void Keyboard::Setup() {
 
 void Keyboard::Tick() {
   DEBUG_VERBOSE("firmware::Keyboard::Tick");
+#ifndef MULTICORE
   // Move clock forward
   utils::Time::Tick();
+#endif
   // Get events. User triggered events have priority.
   hardware::board::BaseBoard::Tick();
   logic::Timer::Tick();

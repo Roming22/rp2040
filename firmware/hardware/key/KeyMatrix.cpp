@@ -35,7 +35,7 @@ KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
 
 void KeyMatrix::poll_events(std::vector<int> &events) {
   events.clear();
-  if (utils::Time::Now() - last_poll < debounce_delay) {
+  if (micros() - last_poll < debounce_delay) {
     return;
   }
 
@@ -58,7 +58,7 @@ void KeyMatrix::poll_events(std::vector<int> &events) {
           events.push_back(-1 - key_index);
         }
         key_states[key_index] = state;
-        last_poll = utils::Time::Now();
+        last_poll = micros();
         DEBUG_DEBUG("COL pin: %d    ROW pin: %d    After: %d", col_pins[col],
                     row_pins[row], key_states[key_index]);
       }

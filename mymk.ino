@@ -34,20 +34,22 @@ void setup() {
              "###################");
 #ifdef MULTICORE
   multicore_launch_core1(core1);
+  delay(100);
+  utils::Time::Tick();
 #endif
 }
 
 #define core0 loop
-void core0() { firmware::Keyboard::Tick(); }
+void core0() {
+#ifdef MULTICORE
+  logic::quantum::Universe::Tick();
+#else
+  firmware::Keyboard::Tick();
+#endif
+}
 
 void core1() {
-  bool flip = true;
   while (true) {
-    // logic::quantum::Universe::Tick();
-    hardware::led::Pixels::Set(2, 255 * flip, 255 * flip, 255 * flip);
-    hardware::led::Pixels::Set(3, 255 * flip, 255 * flip, 255 * flip);
-    hardware::led::Pixels::Set(4, 255 * flip, 255 * flip, 255 * flip);
-    flip = !flip;
-    delay(250);
+    firmware::Keyboard::Tick();
   }
 }
