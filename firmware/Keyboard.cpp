@@ -21,7 +21,7 @@ void Keyboard::Setup() {
 }
 
 void Keyboard::Tick() {
-  DEBUG_VERBOSE("firmware::Keyboard::Tick");
+  // DEBUG_VERBOSE("firmware::Keyboard::Tick");
   // Move clock forward
   utils::Time::Tick();
   // Get events. User triggered events have priority.

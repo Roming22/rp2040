@@ -14,7 +14,9 @@ Event::~Event() { ObjectManager::Unregister("logic::Event"); }
 
 void Event::Add(const std::string &id, const unsigned long time,
                 quantum::Timeline *timeline) {
-  DEBUG_DEBUG("logic::Event::Add %s", id.c_str());
+  // #ifdef SWITCH_CORES
+  DEBUG_INFO("logic::Event::Add %s at %dus", id.c_str(), (time / 1000) % 10000);
+  // #endif
   // The oldest event is at the end of the list.
   auto index = events.begin();
   for (; index != events.end(); ++index) {

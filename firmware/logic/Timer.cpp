@@ -6,20 +6,21 @@
 #include "ObjectManager.h"
 #include "quantum/Universe.h"
 #include "typedef.h"
+#include <functional>
 
 namespace logic {
+std::function<void(Timer &)> Timer::callback = [](Timer &timer) {
+  logic::Event::Add(timer.name, timer.end_time, timer.timeline);
+};
+
 Timer::Timer(const std::string &i_name, const int &delay_ms,
              quantum::Timeline *i_timeline)
-    : name(i_name), timeline(i_timeline), active(true) {
+    : name(i_name), timeline(i_timeline) {
   // TODO sort timers by end_time
   // This will allow to exit the Tick loop early, as well
   // as ensure the ordering of the events.
   timers.push_back(this);
   end_time = utils::Time::Now() + (delay_ms * 1E3);
-
-  // DEBUG_INFO(
-  //     "[CREATE %d] logic::Timer %s    Start: %d    End: %d    Timeline: %d",
-  //     this, name.c_str(), utils::Time::Now(), end_time, timeline);
   logic::ObjectManager::Register("logic::Timer");
 };
 
@@ -27,7 +28,6 @@ Timer::~Timer() {
   // DEBUG_INFO("[DELETE %d] logic::Timer (%d)", this, timers.size());
   unregister();
   logic::ObjectManager::Unregister("logic::Timer");
-  DEBUG_DEBUG("Deleted %d", timers.size());
 }
 
 void Timer::Tick() {
@@ -55,17 +55,14 @@ void Timer::unregister() {
   }
 }
 
-void Timer::stop() {
-  DEBUG_INFO("logic::Timer::stop %d: %s", this, timeline->name.c_str());
-  active = false;
-}
-
-void Timer::send_event() { logic::Event::Add(name, end_time, timeline); }
-
 bool Timer::tick() {
-  DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
-  if (active && end_time <= utils::Time::Now()) {
-    send_event();
+  // DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
+  if (end_time <= utils::Time::Now()) {
+    // Having a call to Event::Add here tanked the performance
+    // of the Keyboard::Tick loop (in multicore mod), by almost
+    // 2/3 (from 28kHz to 11kHz). Using the callback seems to
+    // trick the compiler to better optimize the loop.
+    callback(*this);
     return true;
   }
   return false;

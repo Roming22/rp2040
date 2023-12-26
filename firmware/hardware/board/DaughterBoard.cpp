@@ -16,9 +16,6 @@ void DaughterBoard::Setup(const std::vector<unsigned int> &i_col_pins,
   hardware::txrx::BitBang::Send(i_col_pins.size() * i_row_pins.size());
 }
 
-void DaughterBoard::loop() {
-  std::vector<int> switch_events(2, 0);
-  load_switch_events(switch_events);
-}
+void DaughterBoard::loop() { load_switch_events(); }
 } // namespace board
 } // namespace hardware

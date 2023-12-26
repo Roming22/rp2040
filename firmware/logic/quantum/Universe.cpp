@@ -31,9 +31,6 @@ void Universe::StartTimeline(Timeline::Ptr &timeline) {
 
 void Universe::Tick() {
   DEBUG_VERBOSE("logic::quantum::Universe::Tick");
-#ifdef MULTICORE_ENABLED
-  utils::FPS::Tick("Universe");
-#endif
   if (logic::Event::HasEvents()) {
     Event::Ptr event = logic::Event::Get();
     Timeline *timeline = start_timeline.get();

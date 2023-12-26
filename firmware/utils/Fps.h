@@ -6,6 +6,7 @@
 namespace utils {
 class FPS {
 public:
+  static int delay;
   static void Tick(const std::string &name);
 };
 } // namespace utils

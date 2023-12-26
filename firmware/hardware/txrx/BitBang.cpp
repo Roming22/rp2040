@@ -2,8 +2,6 @@
 
 #include "../../utils/Debug.hpp"
 
-#include <DIO2.h>
-
 namespace hardware {
 namespace txrx {
 inline BitBang &BitBang::getInstance() {
@@ -29,18 +27,18 @@ void BitBang::Setup(const unsigned int pin, const unsigned int message_length,
 }
 
 inline void BitBang::_resetPin() const {
-  pinMode2(_pin, OUTPUT);
-  digitalWrite2(_pin, !_active_state);
+  pinMode(_pin, OUTPUT);
+  digitalWrite(_pin, !_active_state);
 }
 inline void BitBang::_inputPin() const { pinMode(_pin, _input_mode); }
 
 inline void BitBang::_sendBit(const bool &bit) const {
-  digitalWrite2(_pin, _active_state);
+  digitalWrite(_pin, _active_state);
   busy_wait_us_32(_tick);
-  digitalWrite2(_pin, bit);
+  digitalWrite(_pin, bit);
   busy_wait_us_32(_tick);
   busy_wait_us_32(_tick);
-  digitalWrite2(_pin, !_active_state);
+  digitalWrite(_pin, !_active_state);
   busy_wait_us_32(_tick);
 }
 
@@ -48,18 +46,18 @@ inline unsigned int BitBang::_receivePulse(unsigned int wait) const {
   unsigned int duration = 0;
 
   // Wait for REST state
-  while (digitalRead2(_pin) == _active_state) {
+  while (digitalRead(_pin) == _active_state) {
   }
 
   // Wait for ACTIVE state marking the pulse start
   while (duration == 0 && wait-- > 0) {
-    if (digitalRead2(_pin) == _active_state) {
+    if (digitalRead(_pin) == _active_state) {
       duration = 1;
     }
     busy_wait_us_32(1);
   }
   // Wait for REST state marking the pulse end
-  while (digitalRead2(_pin) == _active_state) {
+  while (digitalRead(_pin) == _active_state) {
     ++duration;
     busy_wait_us_32(1);
   }

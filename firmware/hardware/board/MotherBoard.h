@@ -27,9 +27,9 @@ public:
                     const std::vector<unsigned int> &i_row_pins,
                     const bool i_is_connected);
 
-  void receive_switch_events(std::vector<int> &switch_events);
+  void receive_switch_events();
 
-  void add_events(const std::vector<int> &switch_events);
+  void add_events();
 
   void tick();
 };

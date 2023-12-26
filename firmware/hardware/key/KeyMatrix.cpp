@@ -21,50 +21,42 @@ KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
   key_states = std::vector<bool>(size, HIGH);
 
   // Set col pins
-  for (unsigned int col = 0; col < col_pins.size(); ++col) {
-    pinMode(col_pins[col], INPUT_PULLUP);
+  for (unsigned int col_pin : col_pins) {
+    pinMode(col_pin, INPUT_PULLUP);
   }
 
   // Set row pins
-  for (unsigned int row = 0; row < row_pins.size(); ++row) {
-    pinMode(row_pins[row], INPUT);
+  for (unsigned int row_pin : row_pins) {
+    pinMode(row_pin, INPUT);
   }
 
   logic::ObjectManager::Register("hardware::key::KeyMatrix");
 }
 
 void KeyMatrix::poll_events(std::vector<int> &events) {
-  events.clear();
   if (utils::Time::Now() - last_poll < debounce_delay) {
     return;
   }
 
-  DEBUG_VERBOSE("harware::key::KeyMatrix.poll_events");
   bool state;
   int key_index = 0;
-  for (unsigned int row = 0; row < row_pins.size(); ++row) {
-    pinMode(row_pins[row], OUTPUT);
-    digitalWrite(row_pins[row], LOW);
-    for (unsigned int col = 0; col < col_pins.size(); col++) {
-      state = digitalRead(col_pins[col]);
+  for (unsigned int row_pin : row_pins) {
+    pinMode(row_pin, OUTPUT);
+    digitalWrite(row_pin, LOW);
+    for (unsigned int col_pin : col_pins) {
+      state = digitalRead(col_pin);
       if (state != key_states[key_index]) {
-        DEBUG_DEBUG("COL pin: %d    ROW pin: %d    Before: %d", col_pins[col],
-                    row_pins[row], key_states[key_index]);
         if (state == LOW) {
-          DEBUG_DEBUG("Switch pressed: %d", key_index + 1);
           events.push_back(1 + key_index);
         } else {
-          DEBUG_DEBUG("Switch released: %d", key_index + 1);
           events.push_back(-1 - key_index);
         }
         key_states[key_index] = state;
         last_poll = utils::Time::Now();
-        DEBUG_DEBUG("COL pin: %d    ROW pin: %d    After: %d", col_pins[col],
-                    row_pins[row], key_states[key_index]);
       }
       ++key_index;
     }
-    pinMode(row_pins[row], INPUT);
+    pinMode(row_pin, INPUT);
   }
 }
 } // namespace key

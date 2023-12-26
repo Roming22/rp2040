@@ -7,8 +7,11 @@
 #include <map>
 
 namespace utils {
+int FPS::delay = 0; // display every seconds
 void FPS::Tick(const std::string &name) {
-  int display_every = 30; // seconds
+  if (delay == 0) {
+    return;
+  }
   static std::map<std::string, int> counter;
   static std::map<std::string, unsigned long> time;
   unsigned long then = Time::Now();
@@ -21,7 +24,11 @@ void FPS::Tick(const std::string &name) {
     time[name] = then;
   }
   counter[name] = value + 1;
-  if (Time::Now() - then > display_every * 1E6) {
+  if (Time::Now() - then > delay * 1E6) {
+    // for (auto kvp : time) {
+    // std::string _name = kvp.first;
+    // then = kvp.second;
+    // value = counter[_name];
     DEBUG_INFO("FPS %s: %d (Memory: %.2f%%)", name.c_str(),
                (int)((1E6 * value) / (Time::Now() - then)),
                Memory::GetPctUsed());
