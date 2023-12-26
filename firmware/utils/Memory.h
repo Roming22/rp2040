@@ -10,6 +10,7 @@ protected:
 
 public:
   static int GetFreeMemory();
+  static float GetPctUsed();
   static void PrintMemoryUsage();
 };
 } // namespace utils

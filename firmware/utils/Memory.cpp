@@ -8,6 +8,12 @@ int Memory::GetFreeMemory() {
   return &top - reinterpret_cast<char *>(sbrk(0));
 }
 
+float Memory::GetPctUsed() {
+  int memoryUsed = totalMemory - GetFreeMemory();
+  float percentUsed = 100.0 * (float)memoryUsed / totalMemory;
+  return percentUsed;
+}
+
 void Memory::PrintMemoryUsage() {
   int memoryUsed = totalMemory - GetFreeMemory();
   float percentUsed = 100.0 * (float)memoryUsed / totalMemory;

@@ -1,6 +1,7 @@
 #include "Fps.h"
 
 #include "Debug.hpp"
+#include "Memory.h"
 #include "Time.h"
 
 #include <map>
@@ -21,8 +22,9 @@ void FPS::Tick(const std::string &name) {
   }
   counter[name] = value + 1;
   if (Time::Now() - then > display_every * 1E6) {
-    DEBUG_INFO("FPS %s: %d", name.c_str(),
-               (int)((1E6 * value) / (Time::Now() - then)));
+    DEBUG_INFO("FPS %s: %d (Memory: %.2f%%)", name.c_str(),
+               (int)((1E6 * value) / (Time::Now() - then)),
+               Memory::GetPctUsed());
     time[name] = Time::Now();
     counter[name] = 0;
   }

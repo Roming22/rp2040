@@ -27,7 +27,7 @@ void Keyboard::Tick() {
   // Get events. User triggered events have priority.
   hardware::board::BaseBoard::Tick();
   logic::Timer::Tick();
-#ifndef MULTICORE
+#ifndef MULTICORE_ENABLED
   // Process events
   logic::quantum::Universe::Tick();
 #endif

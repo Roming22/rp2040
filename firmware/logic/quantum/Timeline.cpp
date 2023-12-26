@@ -146,8 +146,8 @@ void Timeline::process_event(const std::string &event_id) {
     return;
   }
   DEBUG_INFO("");
-  DEBUG_INFO("logic::quantum::Timeline::process_event %d %s: %s", this,
-             name.c_str(), event_id.c_str());
+  Serial.print("logic::quantum::Timeline::process_event ");
+  Serial.println(event_id.c_str());
   if (children.size() > 0) {
     // DEBUG_INFO("Timeline Children");
     for (auto child : children) {
@@ -337,7 +337,8 @@ void Timeline::prune() {
 }
 
 bool Timeline::clean() {
-  DEBUG_INFO("logic::quantum::Timeline::clean %d: '%s'", this, name.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::clean %d: '%s' (%d)", this,
+             name.c_str(), complexity);
 
   // Propagate to all children
   std::vector<std::list<Ptr>::iterator> to_delete;
