@@ -7,7 +7,11 @@
 
 #include <sstream>
 
+#ifdef MULTICORE
+#define DEFAULT_CHORD_DELAY 30
+#else
 #define DEFAULT_CHORD_DELAY 80
+#endif
 
 namespace logic {
 namespace feature {
