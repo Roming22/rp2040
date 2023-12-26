@@ -15,9 +15,9 @@ class Timeline;
 class Timer {
 public:
   typedef std::shared_ptr<Timer> Ptr;
+  const std::string name;
 
 private:
-  const std::string name;
   bool active;
   long end_time;
   quantum::Timeline *timeline;

@@ -194,9 +194,9 @@ void Timeline::process_event(const std::string &event_id) {
   } else {
     DEBUG_INFO("Timeline '%s' ended because of unknown event '%s'",
                name.c_str(), event_id.c_str());
-    for (const auto pair : *valid_events) {
-      DEBUG_INFO("  - %s", pair.first.c_str());
-    }
+    // for (const auto pair : *valid_events) {
+    //   DEBUG_INFO("  - %s", pair.first.c_str());
+    // }
     prune();
   }
 }
