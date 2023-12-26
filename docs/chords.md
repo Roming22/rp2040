@@ -6,7 +6,11 @@ A Chord is defined by 2 parameters:
 1. The list of switches that make up the Chord.
 2. The activation delay of the Chord.
 
-The Chord is part of the Combo family.
+The Chord is part of the [Combo](./combos.md) family.
+
+## Switch Function
+
+
 
 ## Behavior
 1. The order in which the Chord's switches are pressed do not matter. 
@@ -31,15 +35,8 @@ The Chord is part of the Combo family.
 
 This allows to parse a chord definition as a standard mathematical expression, keeping the known operators precedence.
 
-### Activating the Chord
-* A filter is added to the Timeline to end the timeline if any action other than a switch belonging to the Chord is pressed.
-* On commit, the filter is cleared, and the timer is stopped.
-* On ending the timeline, the timer is stopped.
+### SwitchFunction
+Internally the chord definition is translated to a SwitchFunction in the form of 
+`CH(switch-1, ..., switch-n, keycode)`.
 
-### Ending other timelines when a Chord is activated
-Timelines are order by their Complexity, where the Complexity is the number of event required for the timeline to be valid. E.g. KEYCODE(SPACE) has complexity of 1, CHORD(1,2,3,BACKSPACE) has a complexity of 3.
-When a Chord is activated, it will send a signal to it's parent to end any timeline of a lower Complexity.
-
-### Releasing the Chord
-* On commit an action event is set to execute the release action for each switch of the Chord.
-* The action event also set the action event of the other Chord's switches to a no-op function. This ensure that only the first switch release event triggers the release action, with subsequent switch releases doing nothing.
+Example: `1+2+3: ENTER` becomes `CH(1,2,3, ENTER)`.
