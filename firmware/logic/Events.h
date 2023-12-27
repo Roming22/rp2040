@@ -28,6 +28,7 @@ public:
   static void Add(const std::string &id, const unsigned long time,
                   quantum::Timeline *timeline);
   static bool HasEvents();
+  static Event &Peek();
   static Ptr Get();
 };
 } // namespace logic

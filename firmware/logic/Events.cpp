@@ -32,10 +32,14 @@ bool Event::HasEvents() {
   return !events.empty();
 }
 
+Event &Event::Peek() { return *events.back(); }
+
 Event::Ptr Event::Get() {
   DEBUG_VERBOSE("logic::Event::Get");
   Ptr event = events.back();
   events.pop_back();
+  DEBUG_INFO("Event %s at %dus", event->id.c_str(),
+             (event->time / 1000) % 10000);
   return event;
 }
 

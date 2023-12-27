@@ -15,6 +15,7 @@ class Timeline;
 
 class Timer {
 public:
+  static unsigned long now;
   typedef std::shared_ptr<Timer> Ptr;
   const std::string name;
 

@@ -54,7 +54,7 @@ void Timeline::set_name(const std::string i_name) { name = i_name; }
 std::list<Timeline::Ptr> &Timeline::get_children() { return children; }
 
 void Timeline::add_layer(logic::feature::Layer::Ptr layer) {
-  DEBUG_INFO("logic::quantum::Timeline::add_layer");
+  // DEBUG_INFO("logic::quantum::Timeline::add_layer");
   active_layers.push_back(layer);
 
   for (const auto &pair : layer->get_keys()) {
@@ -70,10 +70,11 @@ void Timeline::add_layer(logic::feature::Layer::Ptr layer) {
           }));
     }
   }
-  DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d", name.c_str(),
-             active_layers.size());
-  DEBUG_INFO("logic::quantum::Timeline events %s after load: %d (@%d)",
-             name.c_str(), layer_events.size(), this);
+  // DEBUG_INFO("logic::quantum::Timeline layers %s after load: %d",
+  // name.c_str(),
+  //            active_layers.size());
+  // DEBUG_INFO("logic::quantum::Timeline events %s after load: %d (@%d)",
+  //            name.c_str(), layer_events.size(), this);
 }
 
 void Timeline::merge_layers() {
@@ -83,10 +84,11 @@ void Timeline::merge_layers() {
   name = "layer." + merged_layer->name + ".toggle";
   active_layers.clear();
   active_layers.push_back(merged_layer);
-  DEBUG_INFO("logic::quantum::Timeline layers %s after merge: %d", name.c_str(),
-             active_layers.size());
-  DEBUG_INFO("logic::quantum::Timeline events %s after merge: %d (@%d)",
-             name.c_str(), layer_events.size(), this);
+  // DEBUG_INFO("logic::quantum::Timeline layers %s after merge: %d",
+  // name.c_str(),
+  //            active_layers.size());
+  // DEBUG_INFO("logic::quantum::Timeline events %s after merge: %d (@%d)",
+  //            name.c_str(), layer_events.size(), this);
 }
 
 void Timeline::remove_layer(const logic::feature::Layer &layer) {
@@ -115,8 +117,8 @@ void Timeline::remove_layer(const logic::feature::Layer &layer) {
 
 void Timeline::set_release_action(const std::string event_id,
                                   const ActionFuncPtr function) {
-  DEBUG_INFO("logic::quantum::Timeline::set_release_action %s: %s",
-             name.c_str(), event_id.c_str());
+  // DEBUG_INFO("logic::quantum::Timeline::set_release_action %s: %s",
+  //            name.c_str(), event_id.c_str());
   if (children.size() > 0) {
     for (auto child : children) {
       child->set_release_action(event_id, function);
@@ -132,12 +134,13 @@ void Timeline::set_release_action(const std::string event_id,
 }
 
 void Timeline::add_commit_action(const ActionFuncPtr function) {
-  DEBUG_INFO("logic::quantum::Timeline::add_commit_action %s", name.c_str());
+  // DEBUG_INFO("logic::quantum::Timeline::add_commit_action %s", name.c_str());
   this->commit_actions.push_back(function);
 }
 
 void Timeline::add_timer(const std::string timer, int delay_ms) {
-  DEBUG_INFO("logic::quantum::Timeline::add_Timer %d: %s ", this, name.c_str());
+  // DEBUG_INFO("logic::quantum::Timeline::add_Timer %d: %s ", this,
+  // name.c_str());
   timers.push_back(logic::Timer::Start(timer, delay_ms, this));
 }
 
@@ -146,8 +149,7 @@ void Timeline::process_event(const std::string &event_id) {
     return;
   }
   DEBUG_INFO("");
-  Serial.print("logic::quantum::Timeline::process_event ");
-  Serial.println(event_id.c_str());
+  DEBUG_INFO("logic::quantum::Timeline::process_event %s", event_id.c_str());
   if (children.size() > 0) {
     // DEBUG_INFO("Timeline Children");
     for (auto child : children) {
@@ -264,7 +266,6 @@ Timeline::Ptr Timeline::split(const std::string &id) {
              id.c_str());
   const std::string new_name = name + "|" + id;
   Ptr child(New(new_name));
-  // utils::Memory::PrintMemoryUsage();
 
   child->parent = this;
   children.push_back(child);
@@ -276,8 +277,8 @@ Timeline::Ptr Timeline::split(const std::string &id) {
   // child->combo_events; an active combo cannot be split.
   child->active_layers = std::list<logic::feature::Layer::Ptr>(active_layers);
 
-  DEBUG_INFO("Split Timeline has %d layer events and %d release events",
-             child->layer_events.size(), child->release_events.size());
+  // DEBUG_INFO("Split Timeline has %d layer events and %d release events",
+  //            child->layer_events.size(), child->release_events.size());
   return child;
 }
 

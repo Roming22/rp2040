@@ -21,16 +21,12 @@ void Keyboard::Setup() {
 }
 
 void Keyboard::Tick() {
-  // DEBUG_VERBOSE("firmware::Keyboard::Tick");
-  // Move clock forward
+  // DEBUG_INFO("firmware::Keyboard::Tick");
+  // Move real clock forward
   utils::Time::Tick();
   // Get events. User triggered events have priority.
   hardware::board::BaseBoard::Tick();
   logic::Timer::Tick();
-#ifndef MULTICORE_ENABLED
-  // Process events
-  logic::quantum::Universe::Tick();
-#endif
 }
 
 } // namespace firmware

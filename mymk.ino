@@ -1,8 +1,8 @@
-// #define MULTICORE_ENABLED 1
 #define DEBUG_ENABLED 1
 #define FPS_DELAY 15
 
-#define SWITCH_CORES
+// #define MULTICORE_ENABLED 1
+// #define SWITCH_CORES
 
 #include "firmware.hpp"
 
@@ -54,6 +54,12 @@ void core0() {
   // adding the loop in the function has a massive
   // impact on the performance (from 14kHz to 25kHz).
   while (true) {
+#ifndef MULTICORE_ENABLED
+    utils::Time::Tick();
+    utils::FPS::Tick("Keyboard");
+    firmware::Keyboard::Tick();
+    logic::quantum::Universe::Tick();
+#else
 #ifndef SWITCH_CORES
     utils::Time::Tick();
     utils::FPS::Tick("Core0 Universe");
@@ -62,6 +68,7 @@ void core0() {
 #else
     utils::FPS::Tick("Core0 Keyboard");
     firmware::Keyboard::Tick();
+#endif
 #endif
     if (flash != old) {
       hardware::led::Pixels::Set(4, 255 * flash, 0, 255 * flash);

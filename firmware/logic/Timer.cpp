@@ -2,13 +2,13 @@
 
 #include "../logic/Events.h"
 #include "../utils/Debug.hpp"
-#include "../utils/Time.h"
 #include "ObjectManager.h"
 #include "quantum/Universe.h"
 #include "typedef.h"
 #include <functional>
 
 namespace logic {
+unsigned long Timer::now = micros();
 std::function<void(Timer &)> Timer::callback = [](Timer &timer) {
   logic::Event::Add(timer.name, timer.end_time, timer.timeline);
 };
@@ -20,8 +20,9 @@ Timer::Timer(const std::string &i_name, const int &delay_ms,
   // This will allow to exit the Tick loop early, as well
   // as ensure the ordering of the events.
   timers.push_back(this);
-  end_time = utils::Time::Now() + (delay_ms * 1E3);
+  end_time = now + (delay_ms * 1E3);
   logic::ObjectManager::Register("logic::Timer");
+  DEBUG_INFO("logic::Timer::Timer Start: %d    End: %d", now, end_time);
 };
 
 Timer::~Timer() {
@@ -31,6 +32,13 @@ Timer::~Timer() {
 }
 
 void Timer::Tick() {
+  // Move clock forward
+  if (logic::Event::HasEvents()) {
+    now = logic::Event::Peek().time;
+  } else {
+    now = micros();
+  }
+
   std::vector<Timer *> triggered;
   for (auto timer : timers) {
     if (timer->tick()) {
@@ -44,7 +52,7 @@ void Timer::Tick() {
 
 Timer::Ptr Timer::Start(const std::string &name, const int &delay_ms,
                         quantum::Timeline *timeline) {
-  DEBUG_INFO("logic::Timer::Start %s", name.c_str());
+  // DEBUG_INFO("logic::Timer::Start %s", name.c_str());
   return Ptr(new Timer(name, delay_ms, timeline));
 }
 
@@ -57,15 +65,15 @@ void Timer::unregister() {
 
 bool Timer::tick() {
   // DEBUG_VERBOSE("logic::Timer::tick %s", name.c_str());
-  if (end_time <= utils::Time::Now()) {
-    // Having a call to Event::Add here tanked the performance
-    // of the Keyboard::Tick loop (in multicore mod), by almost
-    // 2/3 (from 28kHz to 11kHz). Using the callback seems to
-    // trick the compiler to better optimize the loop.
-    callback(*this);
-    return true;
+  if (end_time > now) {
+    return false;
   }
-  return false;
+  // Having a call to Event::Add here tanked the performance
+  // of the Keyboard::Tick loop (in multicore mod), by almost
+  // 2/3 (from 28kHz to 11kHz). Using the callback seems to
+  // trick the compiler to better optimize the loop.
+  callback(*this);
+  return true;
 }
 
 std::list<Timer *> Timer::timers = std::list<Timer *>();

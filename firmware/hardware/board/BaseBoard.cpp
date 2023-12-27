@@ -6,7 +6,7 @@
 namespace hardware {
 namespace board {
 void BaseBoard::load_switch_events() {
-  // DEBUG_VERBOSE("harware::board::BaseBoard::load_switch_events");
+  // DEBUG_INFO("harware::board::BaseBoard::load_switch_events");
   key_switch->poll_events(switch_events);
 }
 

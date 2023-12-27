@@ -5,7 +5,7 @@
 #include "../Timer.h"
 #include "Key.h"
 
-#define DEFAULT_TAPHOLD_DELAY 70
+#define DEFAULT_TAPHOLD_DELAY 80
 
 namespace logic {
 namespace feature {
