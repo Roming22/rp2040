@@ -36,6 +36,7 @@ void MotherBoard::receive_switch_events() {
 }
 
 void MotherBoard::add_events() {
+  unsigned long now = utils::Time::Now();
   for (int switch_event : switch_events) {
     std::string event_id;
     if (switch_event > 0) {
@@ -43,7 +44,7 @@ void MotherBoard::add_events() {
     } else {
       event_id = "switch." + std::to_string(-switch_event) + ".released";
     }
-    logic::Event::Add(event_id, utils::Time::Now(), nullptr);
+    logic::Event::Add(event_id, now, nullptr);
   }
 }
 
@@ -53,7 +54,9 @@ void MotherBoard::tick() {
   if (is_connected) {
     receive_switch_events();
   }
-  add_events();
+  if (!switch_events.empty()) {
+    add_events();
+  }
 }
 } // namespace board
 } // namespace hardware

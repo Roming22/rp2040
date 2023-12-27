@@ -34,10 +34,14 @@ KeyMatrix::KeyMatrix(const std::vector<unsigned int> &i_col_pins,
 }
 
 void KeyMatrix::poll_events(std::vector<int> &events) {
-  if (utils::Time::Now() - last_poll < debounce_delay) {
+  // DEBUG_INFO("hardware::key::KeyMatrix::poll_events");
+  unsigned long now = utils::Time::Now();
+  if (now - last_poll < debounce_delay) {
+    // DEBUG_INFO("Debouncing %d - %d < %d", now, last_poll, debounce_delay);
     return;
   }
 
+  // DEBUG_INFO("hardware::key::KeyMatrix::poll_events Scanning");
   bool state;
   int key_index = 0;
   for (unsigned int row_pin : row_pins) {
@@ -47,12 +51,18 @@ void KeyMatrix::poll_events(std::vector<int> &events) {
       state = digitalRead(col_pin);
       if (state != key_states[key_index]) {
         if (state == LOW) {
+          // DEBUG_INFO("hardware::key::KeyMatrix::poll_events Switch %d
+          // pressed",
+          //            key_index + 1);
           events.push_back(1 + key_index);
         } else {
+          // DEBUG_INFO("hardware::key::KeyMatrix::poll_events Switch %d
+          // released",
+          //            key_index + 1);
           events.push_back(-1 - key_index);
         }
         key_states[key_index] = state;
-        last_poll = utils::Time::Now();
+        last_poll = now;
       }
       ++key_index;
     }

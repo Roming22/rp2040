@@ -13,7 +13,7 @@ void FPS::Tick(const std::string &name) {
   }
   static std::map<std::string, int> counter;
   static std::map<std::string, unsigned long> time;
-  unsigned long now = millis();
+  unsigned long now = Time::Now();
   unsigned long then;
   auto fps = counter.find(name);
   int value = 0;
@@ -25,13 +25,13 @@ void FPS::Tick(const std::string &name) {
     then = now;
   }
   counter[name] = value + 1;
-  if (now - then > delay * 1E3) {
+  if (now - then > delay * 1E6) {
     // for (auto kvp : time) {
     // std::string _name = kvp.first;
     // then = kvp.second;
     // value = counter[_name];
     DEBUG_INFO("FPS %s: %d (Memory: %.2f%%)", name.c_str(),
-               (int)((1E3 * value) / (now - then)), Memory::GetPctUsed());
+               (int)((1E6 * value) / (now - then)), Memory::GetPctUsed());
     time[name] = now;
     counter[name] = 0;
   }
