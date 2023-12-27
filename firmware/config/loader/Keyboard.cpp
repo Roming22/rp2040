@@ -35,8 +35,8 @@ void Keyboard::LoadHardware() {
   JsonObject config = jsonDoc[board_uid].as<JsonObject>();
 
   bool isLeft = true;
-  bool is_connected = false;
-  if (config.containsKey("data")) {
+  bool is_connected = jsonDoc.size() > 1;
+  if (is_connected && config.containsKey("data")) {
     isLeft =
         (!config["data"].containsKey("isLeft") || config["data"]["isLeft"]);
     is_connected = true;
@@ -49,7 +49,8 @@ void Keyboard::LoadHardware() {
       delay(3600000);
     }
   }
-  DEBUG_INFO("[INFO] Board chirality is on the left side: %d", isLeft);
+  DEBUG_INFO("[INFO] Board chirality is on the left side and connected: %d, %d",
+             isLeft, is_connected);
   randomSeed(isLeft * 42);
 
   if (config.containsKey("leds")) {
@@ -77,9 +78,11 @@ void Keyboard::LoadHardware() {
       for (JsonVariant item : config["matrix"]["rows"].as<JsonArray>()) {
         row_pins.push_back(item.as<unsigned int>());
       }
-      if (Serial) {
+      // TODO: dynamically detect which is plugged in
+      // * Detect USB Frame?
+      // * Detect where the power is coming from (VSYS vs VUSB)?
+      if (isLeft) {
         DEBUG_INFO("Connected to USB");
-        is_connected = false;
         hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
       } else {
         DEBUG_INFO("Not connected to USB");

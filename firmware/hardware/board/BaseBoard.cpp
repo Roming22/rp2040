@@ -18,7 +18,7 @@ void BaseBoard::tick() {
 void BaseBoard::Tick() {
   // DEBUG_VERBOSE("harware::board::BaseBoard::Tick");
   if (instance->is_connected) {
-    hardware::txrx::BitBang::Tick();
+    // hardware::txrx::BitBang::Tick();
   }
   instance->tick();
 }

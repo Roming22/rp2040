@@ -52,7 +52,7 @@ void MotherBoard::tick() {
   switch_events.clear();
   load_switch_events();
   if (is_connected) {
-    receive_switch_events();
+    // receive_switch_events();
   }
   if (!switch_events.empty()) {
     add_events();
