@@ -22,7 +22,7 @@ public:
   MotherBoard(const std::vector<unsigned int> &i_col_pins,
               const std::vector<unsigned int> &i_row_pins,
               const bool i_is_connected)
-      : BaseBoard(i_col_pins, i_row_pins, i_is_connected) {
+      : BaseBoard(i_col_pins, i_row_pins, i_is_connected, true) {
     offset = -1 * i_is_connected;
     logic::ObjectManager::Register("hardware::board::MotherBoard");
   }

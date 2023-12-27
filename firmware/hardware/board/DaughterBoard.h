@@ -16,7 +16,7 @@ public:
 
   DaughterBoard(const std::vector<unsigned int> &i_col_pins,
                 const std::vector<unsigned int> &i_row_pins)
-      : BaseBoard(i_col_pins, i_row_pins, true) {
+      : BaseBoard(i_col_pins, i_row_pins, true, false) {
     logic::ObjectManager::Register("hardware::board::DaughterBoard");
   }
 

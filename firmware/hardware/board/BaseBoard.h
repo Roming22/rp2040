@@ -21,11 +21,14 @@ protected:
 public:
   BaseBoard(const std::vector<unsigned int> &i_col_pins,
             const std::vector<unsigned int> &i_row_pins,
-            const bool i_is_connected)
-      : switch_events(), is_connected(i_is_connected) {
+            const bool i_is_connected, const bool i_is_motherboard)
+      : switch_events(), is_connected(i_is_connected),
+        is_motherboard(i_is_motherboard) {
     key_switch = hardware::key::KeyMatrix::New(i_col_pins, i_row_pins);
     logic::ObjectManager::Register("hardware::board::baseboard");
   }
+
+  static bool IsMotherboard();
 
   virtual void connect();
 

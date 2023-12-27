@@ -2,6 +2,7 @@
 
 #include "../../utils/Debug.hpp"
 #include "../../utils/Fps.h"
+#include "MotherBoard.h"
 
 namespace hardware {
 namespace board {
@@ -10,6 +11,8 @@ void BaseBoard::connect() {
   DEBUG_ERROR("[ERROR] BaseBoard::connect is not implemented");
   delay(3600000);
 }
+
+bool BaseBoard::IsMotherboard() { return instance->is_motherboard; }
 
 void BaseBoard::load_switch_events() {
   // DEBUG_INFO("harware::board::BaseBoard::load_switch_events");

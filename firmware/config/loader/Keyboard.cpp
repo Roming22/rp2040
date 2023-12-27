@@ -15,7 +15,9 @@ namespace loader {
 void Keyboard::Load() {
   hardware::usb::Key::Init();
   LoadHardware();
-  LoadLayout();
+  if (hardware::board::BaseBoard::IsMotherboard()) {
+    LoadLayout();
+  }
 }
 
 void Keyboard::LoadHardware() {
