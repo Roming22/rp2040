@@ -5,6 +5,12 @@
 
 namespace hardware {
 namespace board {
+
+void BaseBoard::connect() {
+  DEBUG_ERROR("[ERROR] BaseBoard::connect is not implemented");
+  delay(3600000);
+}
+
 void BaseBoard::load_switch_events() {
   // DEBUG_INFO("harware::board::BaseBoard::load_switch_events");
   key_switch->poll_events(switch_events);
@@ -17,9 +23,9 @@ void BaseBoard::tick() {
 
 void BaseBoard::Tick() {
   // DEBUG_VERBOSE("harware::board::BaseBoard::Tick");
-  if (instance->is_connected) {
-    // hardware::txrx::BitBang::Tick();
-  }
+  // if (instance->is_connected) {
+  //   hardware::txrx::BitBang::Tick();
+  // }
   instance->tick();
 }
 

@@ -27,6 +27,8 @@ public:
     logic::ObjectManager::Register("hardware::board::baseboard");
   }
 
+  virtual void connect();
+
   void load_switch_events();
 
   virtual void tick();

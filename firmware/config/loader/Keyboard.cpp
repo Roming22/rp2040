@@ -34,24 +34,9 @@ void Keyboard::LoadHardware() {
   }
   JsonObject config = jsonDoc[board_uid].as<JsonObject>();
 
-  bool isLeft = true;
+  bool isLeft =
+      (!config["data"].containsKey("isLeft") || config["data"]["isLeft"]);
   bool is_connected = jsonDoc.size() > 1;
-  if (is_connected && config.containsKey("data")) {
-    isLeft =
-        (!config["data"].containsKey("isLeft") || config["data"]["isLeft"]);
-    is_connected = true;
-    if (config["data"].containsKey("pin")) {
-
-      hardware::txrx::BitBang::Setup((int)config["data"]["pin"], 32, 31250);
-    } else {
-      DEBUG_INFO("[ERROR] Not connection between boards: "
-                 "'.$board_uid.data.pin' not found");
-      delay(3600000);
-    }
-  }
-  DEBUG_INFO("[INFO] Board chirality is on the left side and connected: %d, %d",
-             isLeft, is_connected);
-  randomSeed(isLeft * 42);
 
   if (config.containsKey("leds")) {
     if (config["leds"].containsKey("count") &&
@@ -66,6 +51,20 @@ void Keyboard::LoadHardware() {
   } else {
     DEBUG_INFO("[INFO] No leds on the board: '.{board_uid}.leds' not found");
   }
+
+  if (is_connected && config.containsKey("data")) {
+    is_connected = true;
+    if (config["data"].containsKey("pin")) {
+      hardware::txrx::BitBang::Setup((int)config["data"]["pin"], 32, 31250);
+    } else {
+      DEBUG_INFO("[ERROR] Not connection between boards: "
+                 "'.$board_uid.data.pin' not found");
+      delay(3600000);
+    }
+  }
+  DEBUG_INFO("[INFO] Board chirality is on the left side and connected: %d, %d",
+             isLeft, is_connected);
+  randomSeed(isLeft * 42);
 
   if (config.containsKey("matrix")) {
     if (config["matrix"].containsKey("cols") &&
@@ -98,7 +97,7 @@ void Keyboard::LoadHardware() {
     DEBUG_INFO(
         "[WARNING] No switches on the board: '.{board_uid}.matrix' not found");
   }
-  DEBUG_INFO("Hardware loaded");
+  DEBUG_INFO("");
 }
 
 void Keyboard::LoadLayout() {

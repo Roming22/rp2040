@@ -1,25 +1,17 @@
-// Max frequency on an RP2040: 31250Hz (8us tick)
-
-#ifndef MYMK_HARDWARE_TXRX_BITBANG
-#define MYMK_HARDWARE_TXRX_BITBANG
-
-#include <queue>
-#include <vector>
-
-#define DEFAULT_INPUT_TIMEOUT_US 2000
+#ifndef MYMK_BITBANG
+#define MYMK_BITBANG
 
 namespace hardware {
 namespace txrx {
+
 class BitBang {
 private:
-  unsigned int _pin;
+  unsigned int pin;
   unsigned int msg_len;
-  unsigned int _input_mode;
-  bool _active_state;
-  unsigned int _tick;
-  std::vector<unsigned int> _pulses;
-
-  std::queue<unsigned int> in, out;
+  unsigned int input_mode;
+  bool active_state;
+  unsigned int tick;
+  std::vector<unsigned int> pulses;
 
   // Singleton
   BitBang() {}
@@ -29,49 +21,79 @@ public:
   BitBang(const BitBang &obj) = delete;
   BitBang &operator=(const BitBang &obj) = delete;
 
-  inline static BitBang &getInstance();
+  static void Setup(const unsigned int i_pin,
+                    const unsigned int i_message_ength,
+                    const unsigned int i_frequency,
+                    const unsigned int i_input_mode = INPUT);
 
-  static void Setup(const unsigned int pin, const unsigned int message_length,
-                    const unsigned int frequency,
-                    const unsigned input_mode = INPUT);
+  inline static BitBang &getInstance() {
+    static BitBang instance;
+    return instance;
+  };
 
-  inline void _resetPin() const;
+  inline void _resetPin() const {
+    pinMode(pin, OUTPUT);
+    gpio_put(pin, !active_state);
+  }
 
-  inline void _inputPin() const;
+  inline void _inputPin() const { pinMode(pin, input_mode); }
 
-  inline void _sendBit(const bool &bit) const;
+  inline void _sendBit(const bool &bit) const {
+    gpio_put(pin, active_state);
+    busy_wait_us_32(tick);
+    gpio_put(pin, bit);
+    busy_wait_us_32(tick);
+    busy_wait_us_32(tick);
+    gpio_put(pin, !active_state);
+    busy_wait_us_32(tick);
+  }
 
-  inline unsigned int
-  _receivePulse(unsigned int wait = DEFAULT_INPUT_TIMEOUT_US) const;
+  inline unsigned int _receivePulse(unsigned int wait = 1E6) const {
+    unsigned int duration = 0;
+
+    // Wait for REST state
+    while (gpio_get(pin == active_state)) {
+    }
+
+    // Wait for ACTIVE state marking the pulse start
+    while (duration == 0 && wait-- > 0) {
+      if (gpio_get(pin == active_state)) {
+        duration = 1;
+      }
+      busy_wait_us_32(1);
+    }
+    // Wait for REST state marking the pulse end
+    while (gpio_get(pin == active_state)) {
+      ++duration;
+      busy_wait_us_32(1);
+    }
+
+    return duration;
+  }
+
+  inline void _sendData(const unsigned &value,
+                        const unsigned int &length) const {
+    // Send bits, LSB first.
+    for (int i = 0; i < length; ++i) {
+      _sendBit(bitRead(value, i));
+    }
+  }
+
+  inline void _receiveData(const unsigned int &length) {
+    // Read bits
+    _inputPin();
+    for (int i = length; i > 0; --i) {
+      pulses.push_back(_receivePulse(1E6));
+    }
+    _resetPin();
+  }
 
   unsigned int _decodePulses();
 
-  inline void _sendSync();
-
-  inline void _receiveSync();
-
-  static void SendSync();
-
-  static void ReceiveSync();
-
-  inline void _sendData(const unsigned &value) const;
-
-  inline void _receiveData();
-
   static void SendData(const unsigned int &value);
-
   static unsigned int ReceiveData();
-
-  static void Send(const int &value);
-
-  static unsigned int Receive();
-
-  static void Out(const unsigned int value);
-
-  static std::queue<unsigned int> &In();
-
-  static void Tick();
 };
 } // namespace txrx
 } // namespace hardware
+
 #endif

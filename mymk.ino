@@ -9,8 +9,10 @@
 void setup() {
   Serial.begin(115200);
   Debug.timestampOn();
-  while (!Serial) {
+  int retry = 20;
+  while (!Serial && retry > 0) {
     delay(50);
+    --retry;
   }
 
   Debug.timestampOn();

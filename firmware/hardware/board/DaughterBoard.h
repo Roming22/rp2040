@@ -23,6 +23,8 @@ public:
   static void Setup(const std::vector<unsigned int> &i_col_pins,
                     const std::vector<unsigned int> &i_row_pins);
 
+  void connect();
+
   void loop();
 };
 } // namespace board

@@ -28,23 +28,26 @@ void Pixels::Setup(const unsigned int pin, const unsigned int count) {
   pixels.clear();
   pixels.show();
   pixels.setBrightness(255);
+  Pixels::Set(0, 0, 0, 0);
   DEBUG_DEBUG("[Pixels] OFF");
 }
 
 void Pixels::Setup(const unsigned int pin, const unsigned int count,
                    const bool &isLeft) {
   Pixels::Setup(pin, count);
-  Pixels::Set(0, 0, 0, 0);
 #ifndef MULTICORE_ENABLED
-  delay(200);
+  delay(100);
   Pixels::Set(0, 255 * isLeft, 255 * (1 - isLeft), 0);
-  delay(1000);
+  delay(300);
   Pixels::Set(0, 0, 0, 0);
 #endif
 }
 
 void Pixels::Set(const unsigned int address, const unsigned int red,
                  const unsigned int green, const unsigned int blue) {
+  if (instance == nullptr) {
+    return;
+  }
   Adafruit_NeoPixel &pixels = instance->pixels;
   if (address == 0) {
     pixels.fill(pixels.Color(red, green, blue));

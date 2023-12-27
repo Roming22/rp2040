@@ -324,7 +324,7 @@ void Timeline::resolve() {
   child->name = child->name.substr(child->name.find_last_of('|') + 1);
   Universe::StartTimeline(child);
   child->resolve();
-  logic::ObjectManager::Print();
+  // logic::ObjectManager::Print();
   utils::Memory::PrintMemoryUsage();
   DEBUG_INFO("");
 }

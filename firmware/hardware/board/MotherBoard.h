@@ -9,6 +9,9 @@
 namespace hardware {
 namespace board {
 class MotherBoard : public hardware::board::BaseBoard {
+  int offset; // An offset of 0 means no connection. An offset of -1 means a bad
+              // connection.
+
 public:
   typedef std::shared_ptr<MotherBoard> Ptr;
 
@@ -20,12 +23,15 @@ public:
               const std::vector<unsigned int> &i_row_pins,
               const bool i_is_connected)
       : BaseBoard(i_col_pins, i_row_pins, i_is_connected) {
+    offset = -1 * i_is_connected;
     logic::ObjectManager::Register("hardware::board::MotherBoard");
   }
 
   static void Setup(const std::vector<unsigned int> &i_col_pins,
                     const std::vector<unsigned int> &i_row_pins,
                     const bool i_is_connected);
+
+  void connect();
 
   void receive_switch_events();
 
