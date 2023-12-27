@@ -1,8 +1,8 @@
-#define MULTICORE_ENABLED 1
+// #define MULTICORE_ENABLED 1
 #define DEBUG_ENABLED 1
-#define FPS_DELAY 2
+#define FPS_DELAY 15
 
-// #define SWITCH_CORES
+#define SWITCH_CORES
 
 #include "firmware.hpp"
 

@@ -2,7 +2,6 @@
 
 #include "Debug.hpp"
 #include "Memory.h"
-#include "Time.h"
 
 #include <map>
 
@@ -14,26 +13,34 @@ void FPS::Tick(const std::string &name) {
   }
   static std::map<std::string, int> counter;
   static std::map<std::string, unsigned long> time;
-  unsigned long then = Time::Now();
+  unsigned long now = millis();
+  unsigned long then;
   auto fps = counter.find(name);
   int value = 0;
   if (fps != counter.end()) {
     value = fps->second;
     then = time[name];
   } else {
-    time[name] = then;
+    time[name] = now;
+    then = now;
   }
   counter[name] = value + 1;
-  if (Time::Now() - then > delay * 1E6) {
+  if (now - then > delay * 1E3) {
     // for (auto kvp : time) {
     // std::string _name = kvp.first;
     // then = kvp.second;
     // value = counter[_name];
     DEBUG_INFO("FPS %s: %d (Memory: %.2f%%)", name.c_str(),
-               (int)((1E6 * value) / (Time::Now() - then)),
-               Memory::GetPctUsed());
-    time[name] = Time::Now();
+               (int)((1E3 * value) / (now - then)), Memory::GetPctUsed());
+    time[name] = now;
     counter[name] = 0;
   }
+}
+
+void FPS::TimeIt(std::function<void()> function) {
+  unsigned long begin = micros();
+  function();
+  unsigned long end = micros();
+  DEBUG_INFO("TimeIt: %dHz", 1E3 / int(end - begin));
 }
 } // namespace utils
