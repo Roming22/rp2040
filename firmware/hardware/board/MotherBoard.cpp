@@ -26,7 +26,7 @@ void MotherBoard::Setup(const std::vector<unsigned int> &i_col_pins,
 void MotherBoard::connect() {
   delay(100);
   hardware::led::Pixels::Set(1, 0, 0, 50);
-  offset = hardware::txrx::BitBang::ReceiveData();
+  offset = hardware::txrx::BitBang::Receive();
   hardware::led::Pixels::Set(0, 0, 0, 0);
   DEBUG_INFO("Connected (offset): %d", offset);
   // TODO: send layer color
@@ -36,7 +36,7 @@ void MotherBoard::receive_switch_events() {
   DEBUG_VERBOSE("harware::board::MotherBoard::receive_switch_events");
   int event;
   while (true) {
-    event = hardware::txrx::BitBang::ReceiveData();
+    event = hardware::txrx::BitBang::Receive();
     if (event == 0) {
       return;
     }

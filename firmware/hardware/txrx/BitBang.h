@@ -88,10 +88,51 @@ public:
     _resetPin();
   }
 
+  inline void _sendSyncSignal() {
+    while (true) {
+      pulses.clear();
+
+      // Send REQUEST
+      _resetPin();
+      _sendBit(active_state);
+
+      // Wait for READY
+      _inputPin();
+      pulses.push_back(_receivePulse());
+      if (pulses.back() != 0) {
+        if (_decodePulses() != active_state) {
+          _resetPin();
+          return;
+        }
+      }
+    }
+  }
+
+  inline void _receiveSyncSignal() {
+    // Wait for REQUEST
+    _inputPin();
+    while (true) {
+      pulses.clear();
+      pulses.push_back(_receivePulse());
+      if (pulses.back() != 0 and _decodePulses() == active_state) {
+        break;
+      }
+    }
+    busy_wait_us_32(tick + 12);
+
+    // Send READY
+    _resetPin();
+    _sendBit(!active_state);
+  }
+
   unsigned int _decodePulses();
 
   static void SendData(const unsigned int &value);
   static unsigned int ReceiveData();
+  static void SendSyncSignal();
+  static void ReceiveSyncSignal();
+  static void Send(const int &value);
+  static unsigned int Receive();
 };
 } // namespace txrx
 } // namespace hardware

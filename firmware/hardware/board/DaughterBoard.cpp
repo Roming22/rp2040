@@ -21,19 +21,17 @@ void DaughterBoard::Setup(const std::vector<unsigned int> &i_col_pins,
 void DaughterBoard::connect() {
   delay(100);
   hardware::led::Pixels::Set(1, 0, 0, 50);
-  hardware::txrx::BitBang::SendData(key_switch->size);
+  hardware::txrx::BitBang::Send(key_switch->size);
   hardware::led::Pixels::Set(1, 0, 0, 0);
   // TODO: receive layer color
 }
 
 void DaughterBoard::send_switch_events() {
-  int event = 0;
-  while (!switch_events.empty()) {
-    DEBUG_INFO("Sending switch event %d", switch_events.back());
-    hardware::txrx::BitBang::SendData(switch_events.back());
-    switch_events.pop_back();
+  for (int event : switch_events) {
+    DEBUG_INFO("Sending switch event %d", event);
+    hardware::txrx::BitBang::Send(event);
   }
-  hardware::txrx::BitBang::SendData(0);
+  hardware::txrx::BitBang::Send(0);
 }
 
 void DaughterBoard::tick() {

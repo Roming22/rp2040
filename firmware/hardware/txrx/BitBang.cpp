@@ -98,5 +98,39 @@ unsigned int BitBang::ReceiveData() {
 
   return value;
 }
+
+void BitBang::Send(const int &value) {
+  static BitBang &instance = getInstance();
+  DEBUG_DEBUG("Send value: %d", value);
+
+  noInterrupts();
+  instance._sendSyncSignal();
+  busy_wait_us_32(instance.tick * 4);
+  instance._sendData(value, instance.msg_len);
+  interrupts();
+
+  // Serial.print("Sent bits: ");
+  // Serial.println(value, BIN);
+}
+
+unsigned int BitBang::Receive() {
+  static BitBang &instance = getInstance();
+  instance.pulses.reserve(instance.msg_len);
+  static unsigned int value;
+
+  noInterrupts();
+  instance._receiveSyncSignal();
+  instance._receiveData(instance.msg_len);
+  interrupts();
+
+  // Decode pulse
+  value = instance._decodePulses();
+
+  // Serial.print("Received bits: ");
+  // Serial.println(value, BIN);
+  DEBUG_DEBUG("Received value: %d", value);
+
+  return value;
+}
 } // namespace txrx
 } // namespace hardware
