@@ -24,18 +24,24 @@ void loop() {
   }
 
   // Receive GO
-  if (!isLeft || loopIndex > 1) {
+  if (isLeft) {
     Serial.println("GET");
-    msg = BitBang::receive(msgLen) + isLeft;
+    msg = BitBang::receive(msgLen);
+  } else {
+    delay(50);
+    // Send GO
+    Serial.println("");
+    Serial.println("POST");
+    BitBang::send(loopIndex, msgLen);
   }
 
-  if (loopIndex != msg) {
+  if (isLeft && loopIndex != msg) {
     Serial.println("");
     Serial.println("");
     Serial.print("!!! Bad value: ");
     Serial.print(++badValues);
     Serial.println(" !!!");
-    delay(2000);
+    // delay(2000);
   }
   Serial.println("");
   Serial.println("BLINK");
@@ -47,9 +53,4 @@ void loop() {
     delay(2000);
   }
   blinkLeds();
-
-  // Send GO
-  Serial.println("");
-  Serial.println("POST");
-  BitBang::send(loopIndex, msgLen);
 }

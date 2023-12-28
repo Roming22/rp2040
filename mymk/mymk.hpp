@@ -22,7 +22,7 @@ void setup() {
   for (int i = 10; i > 0; --i) {
     Serial.println();
   }
-  Serial.println("[ECHO BLINK]");
+  Serial.println("[ECHO-SYNC BLINK]");
   Serial.println("#############################################################"
                  "###################");
   Serial.println("# Rebooting");
