@@ -52,9 +52,10 @@ public:
   inline void inputPin() const { pinMode(_pin, _input_mode); }
 
   inline void sendBit(const bool &bit) const {
+    bool signal = bit ? _active_state : !_active_state;
     gpio_put(_pin, _active_state);
     busy_wait_us_32(_tick);
-    gpio_put(_pin, bit);
+    gpio_put(_pin, signal);
     busy_wait_us_32(_tick);
     busy_wait_us_32(_tick);
     gpio_put(_pin, !_active_state);
