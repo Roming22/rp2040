@@ -26,7 +26,7 @@ public:
     BitBang &instance = getInstance();
     instance._pin = pin;
     instance._input_mode = input_mode;
-    instance._active_state = (instance._input_mode == INPUT);
+    instance._active_state = (instance._input_mode == LOW);
     instance.resetPin();
 
     instance._tick = 1E6 / frequency / 4;
