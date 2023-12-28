@@ -57,8 +57,8 @@ unsigned int BitBang::_decodePulses() {
 
 void BitBang::SendData(const unsigned int &value) {
   static const BitBang &instance = getInstance();
-  Serial.print("Send value: ");
-  Serial.println(value);
+  // Serial.print("Send value: ");
+  // Serial.println(value);
 
   // Send GO
   noInterrupts();
@@ -68,9 +68,8 @@ void BitBang::SendData(const unsigned int &value) {
   instance._sendData(value, instance.msg_len);
   interrupts();
 
-  Serial.print("Sent bits: ");
-  Serial.print(value, BIN);
-  Serial.println();
+  // Serial.print("Sent bits: ");
+  // Serial.println(value, BIN);
 }
 
 unsigned int BitBang::ReceiveData() {

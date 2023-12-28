@@ -25,7 +25,9 @@ public:
 
   void connect();
 
-  void loop();
+  void send_switch_events();
+
+  void tick();
 };
 } // namespace board
 } // namespace hardware

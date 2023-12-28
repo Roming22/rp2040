@@ -26,6 +26,19 @@ void DaughterBoard::connect() {
   // TODO: receive layer color
 }
 
-void DaughterBoard::loop() { load_switch_events(); }
+void DaughterBoard::send_switch_events() {
+  int event = 0;
+  while (!switch_events.empty()) {
+    DEBUG_INFO("Sending switch event %d", switch_events.back());
+    hardware::txrx::BitBang::SendData(switch_events.back());
+    switch_events.pop_back();
+  }
+  hardware::txrx::BitBang::SendData(0);
+}
+
+void DaughterBoard::tick() {
+  load_switch_events();
+  send_switch_events();
+}
 } // namespace board
 } // namespace hardware

@@ -26,27 +26,28 @@ void MotherBoard::Setup(const std::vector<unsigned int> &i_col_pins,
 void MotherBoard::connect() {
   delay(100);
   hardware::led::Pixels::Set(1, 0, 0, 50);
-  int offset = hardware::txrx::BitBang::ReceiveData();
+  offset = hardware::txrx::BitBang::ReceiveData();
   hardware::led::Pixels::Set(0, 0, 0, 0);
   DEBUG_INFO("Connected (offset): %d", offset);
   // TODO: send layer color
 }
 
 void MotherBoard::receive_switch_events() {
-  // DEBUG_VERBOSE("harware::board::MotherBoard::receive_switch_events");
-  // std::queue<unsigned int> &daughterboard_switch_events =
-  //     hardware::txrx::BitBang::In();
-  // while (daughterboard_switch_events.size() > 0) {
-  //   int event = daughterboard_switch_events.front();
-  //   daughterboard_switch_events.pop();
-  //   if (event > 0) {
-  //     DEBUG_INFO("Received Press event");
-  //     switch_events.push_back(event + key_switch->size);
-  //   } else {
-  //     DEBUG_INFO("Received Release event");
-  //     switch_events.push_back(event - key_switch->size);
-  //   }
-  // }
+  DEBUG_VERBOSE("harware::board::MotherBoard::receive_switch_events");
+  int event;
+  while (true) {
+    event = hardware::txrx::BitBang::ReceiveData();
+    if (event == 0) {
+      return;
+    }
+    if (event > 0) {
+      DEBUG_INFO("Received Press event");
+      switch_events.push_back(event + offset);
+    } else {
+      DEBUG_INFO("Received Release event");
+      switch_events.push_back(event - offset);
+    }
+  }
 }
 
 void MotherBoard::add_events() {
