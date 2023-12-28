@@ -63,6 +63,7 @@ public:
   }
 
   inline unsigned int receivePulse(unsigned int wait = 1E6) const {
+    // A return value of 0 means the communication failed.
     unsigned int duration = 0;
 
     // Wait for REST state
@@ -70,10 +71,7 @@ public:
     }
 
     // Wait for ACTIVE state marking the pulse start
-    while (duration == 0 && wait-- > 0) {
-      if (gpio_get(_pin) == _active_state) {
-        duration = 1;
-      }
+    while (gpio_get(_pin) != _active_state && wait-- > 0) {
       busy_wait_us_32(1);
     }
     // Wait for REST state marking the pulse end
@@ -127,7 +125,7 @@ public:
 
     // Send GO
     noInterrupts();
-    instance.sendBit(!instance._active_state);
+    instance.sendBit(0);
 
     // Send bits, LSB first.
     for (int i = 0; i < length; ++i) {
