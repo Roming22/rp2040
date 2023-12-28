@@ -27,4 +27,36 @@ public:
   }
 };
 
+void set_pixels() {
+  Pixels::initialize(PIXELS_PIN, PIXELS_COUNT);
+  Pixels &pixels = *Pixels::get();
+
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+  delay(200);
+  pixels.fill(pixels.Color(255 * isLeft, 255 * (1 - isLeft), 0));
+  pixels.show();
+  delay(1000);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+}
+
+void blinkLeds() {
+  static int color = 0;
+  static Pixels &pixels = *Pixels::get();
+
+  int red = 255 * (color == 0 || color == 1 || color == 5);
+  int green = 255 * (color == 1 || color == 2 || color == 3);
+  int blue = 255 * (color == 3 || color == 4 || color == 5);
+
+  pixels.fill(pixels.Color(red, green, blue));
+  pixels.show();
+  delay(25);
+  pixels.fill(pixels.Color(0, 0, 0));
+  pixels.show();
+  delay(25);
+
+  color = ++color % 6;
+}
+
 #endif

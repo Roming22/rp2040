@@ -169,4 +169,6 @@ public:
   }
 };
 
+void set_bitbang() { BitBang::initialize(DATA_PIN, 1 << 13); }
+
 #endif
