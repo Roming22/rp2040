@@ -52,9 +52,9 @@ void blinkLeds() {
   pixels.fill(pixels.Color(red, green, blue));
   pixels.show();
   delay(25);
-  pixels.fill(pixels.Color(0, 0, 0));
-  pixels.show();
-  delay(25);
+  // pixels.fill(pixels.Color(0, 0, 0));
+  // pixels.show();
+  // delay(25);
 
   color = ++color % 6;
 }

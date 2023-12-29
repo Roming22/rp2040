@@ -13,6 +13,7 @@ void set_board() {
     Serial.println(": Controller");
   } else {
     Serial.println(": Extension");
+    delay(1000); // Ensures that it starts the loop last.
   }
 }
 void setup() {

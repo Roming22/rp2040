@@ -1,6 +1,9 @@
 #ifndef MYMK_BITBANG
 #define MYMK_BITBANG
 
+#include <cmath>
+#include <functional>
+
 class BitBang {
 private:
   unsigned int _pin;
@@ -52,18 +55,21 @@ public:
   inline void inputPin() const { pinMode(_pin, _input_mode); }
 
   inline void sendBit(const bool &bit) const {
-    bool signal = bit ? _active_state : !_active_state;
+    unsigned int begin;
+    begin = micros();
     gpio_put(_pin, _active_state);
-    busy_wait_us_32(_tick);
-    gpio_put(_pin, signal);
-    busy_wait_us_32(_tick);
-    busy_wait_us_32(_tick);
+    while (micros() - begin < _tick * (bit ? 3 : 1)) {
+    }
+    begin = micros();
     gpio_put(_pin, !_active_state);
-    busy_wait_us_32(_tick);
+    while (micros() - begin < _tick * (bit ? 1 : 3)) {
+    }
   }
 
   inline unsigned int receivePulse(unsigned int wait = 1E6) const {
     // A return value of 0 means the communication failed.
+    unsigned int begin;
+    unsigned int end = 0;
     unsigned int duration = 0;
 
     // Wait for REST state
@@ -72,34 +78,37 @@ public:
 
     // Wait for ACTIVE state marking the pulse start
     while (gpio_get(_pin) != _active_state && wait-- > 0) {
-      busy_wait_us_32(1);
-    }
-    // Wait for REST state marking the pulse end
-    while (gpio_get(_pin) == _active_state) {
-      ++duration;
-      busy_wait_us_32(1);
+      begin = micros();
     }
 
+    // Wait for REST state marking the pulse end
+    while (gpio_get(_pin) == _active_state) {
+      end = micros();
+    }
+
+    if (end != 0) {
+      duration = end - begin;
+    }
     return duration;
   }
 
   int decodePulses(std::vector<unsigned int> &pulses) const {
-    static unsigned int threshold = _tick * 3 / 2;
+    static unsigned int threshold = _tick * 2;
     unsigned int pulse;
+    unsigned int index = 0;
     unsigned int value = 0;
 
     static unsigned int min = 1000;
     static unsigned int max = 0;
 
-    Serial.print("Pulses: ");
-    for (int i = pulses.size() - 1; i >= 0; --i) {
-      pulse = pulses.back();
+    // Serial.print("Pulses: ");
+    for (int pulse : pulses) {
       if (pulse > threshold) {
-        bitSet(value, i);
+        bitSet(value, index);
       }
-      pulses.pop_back();
-      Serial.print(pulse);
-      Serial.print(", ");
+      index++;
+      // Serial.print(pulse);
+      // Serial.print(", ");
       if (pulse > 0) {
         if (pulse < min) {
           min = pulse;
@@ -109,11 +118,11 @@ public:
         }
       }
     }
-    Serial.print(" (");
-    Serial.print(min);
-    Serial.print(",");
-    Serial.print(max);
-    Serial.println(")");
+    // Serial.print(" (");
+    // Serial.print(min);
+    // Serial.print(",");
+    // Serial.print(max);
+    // Serial.println(")");
 
     return value;
   }
@@ -124,6 +133,7 @@ public:
     Serial.println(value);
 
     // Send GO
+    unsigned int begin = micros();
     noInterrupts();
     instance.sendBit(0);
 
@@ -132,6 +142,8 @@ public:
       instance.sendBit(bitRead(value, i));
     }
     interrupts();
+    Serial.print("Time: ");
+    Serial.println((micros() - begin) / 1000.0);
 
     Serial.print("Sent bits: ");
     Serial.print(value, BIN);
@@ -146,13 +158,21 @@ public:
     instance.inputPin();
 
     // Wait for GO
+    noInterrupts();
+    unsigned int begin = micros();
     while (instance.receivePulse() == 0) {
     }
 
     // Read bits
+    unsigned int end = micros();
     for (int i = length; i > 0; --i) {
       pulses.push_back(instance.receivePulse());
     }
+    interrupts();
+    Serial.print("Wait Time (ms): ");
+    Serial.println((end - begin) / 1000.0);
+    Serial.print("Transmission Time (ms): ");
+    Serial.println((micros() - begin) / 1000.0);
     instance.resetPin();
 
     // Decode pulse
@@ -169,6 +189,6 @@ public:
   }
 };
 
-void set_bitbang() { BitBang::initialize(DATA_PIN, 1 << 13); }
+void set_bitbang() { BitBang::initialize(DATA_PIN, DATA_FREQ); }
 
 #endif
