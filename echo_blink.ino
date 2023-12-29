@@ -1,6 +1,6 @@
 #define DATA_PIN 1
 // #define DATA_FREQ 8064
-#define DATA_FREQ 50000
+#define DATA_FREQ 125000
 #define PIXELS_PIN 0
 #define PIXELS_COUNT 4
 bool isLeft = 0;
@@ -28,13 +28,19 @@ void loop() {
   // Receive GO
   if (isLeft) {
     Serial.println("GET");
+    // if (BitBang::receiveSync(25000)) {
+    //   Serial.println("Synced");
     msg = BitBang::receive(msgLen);
+    // }
   } else {
     // Send GO
-    delay(30); // Communication currently unstable
+    delay(1); // Communication currently unstable without an added delay
     Serial.println("");
     Serial.println("POST");
+    // if (BitBang::sendSync(25000)) {
+    //   Serial.println("Synced");
     BitBang::send(loopIndex, msgLen);
+    // }
   }
 
   if (isLeft && loopIndex != msg) {
@@ -52,7 +58,7 @@ void loop() {
   }
   Serial.println("");
   Serial.println("BLINK");
-  if (loopIndex % 1000 == 0 && badValues) {
+  if (loopIndex % 100 == 0 && badValues) {
     Serial.print("Bad value check: ");
     Serial.print(badValues);
     pixels.fill(pixels.Color(255 * (badValues > 0), 255 * (badValues == 0), 0));
