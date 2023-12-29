@@ -169,11 +169,11 @@ public:
 
   static void send(const unsigned int &value, const unsigned int &length) {
     static const BitBang &instance = getInstance();
-    Serial.print("Send value: ");
-    Serial.println(value);
+    // Serial.print("Send value: ");
+    // Serial.println(value);
 
     // Send GO
-    unsigned int begin = micros();
+    // unsigned int begin = micros();
     noInterrupts();
     instance.sendBit(0);
 
@@ -182,12 +182,12 @@ public:
       instance.sendBit(bitRead(value, i));
     }
     interrupts();
-    Serial.print("Time: ");
-    Serial.println((micros() - begin) / 1000.0);
+    // Serial.print("Time: ");
+    // Serial.println((micros() - begin) / 1000.0);
 
-    Serial.print("Sent bits: ");
-    Serial.print(value, BIN);
-    Serial.println();
+    // Serial.print("Sent bits: ");
+    // Serial.print(value, BIN);
+    // Serial.println();
   }
 
   static unsigned int receive(const unsigned int &length) {
@@ -218,12 +218,12 @@ public:
     // Decode pulse
     int value = instance.decodePulses(pulses);
 
-    if (value > 0) {
-      Serial.print("Received bits: ");
-      Serial.println(value, BIN);
-      Serial.print("Received value: ");
-      Serial.println(value);
-    }
+    // if (value > 0) {
+    //   Serial.print("Received bits: ");
+    //   Serial.println(value, BIN);
+    //   Serial.print("Received value: ");
+    //   Serial.println(value);
+    // }
 
     return value;
   }
