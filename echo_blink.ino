@@ -1,6 +1,7 @@
 #define DATA_PIN 1
-// #define DATA_FREQ 8064
-#define DATA_FREQ 125000
+// #define DATA_FREQ 8192
+#define DATA_FREQ 16384
+// #define DATA_FREQ 125000
 #define PIXELS_PIN 0
 #define PIXELS_COUNT 4
 bool isLeft = 0;
@@ -27,36 +28,30 @@ void loop() {
 
   // Receive GO
   if (isLeft) {
-    // Serial.println("GET");
-    // if (BitBang::receiveSync(25000)) {
-    //   Serial.println("Synced");
-    msg = BitBang::receive(msgLen);
-    // }
+    Serial.println("GET");
+    // msg = BitBang::receive(msgLen);
+    BitBang::receive(msgLen);
   } else {
     // Send GO
-    delay(4); // Communication currently unstable without an added delay
-    // Serial.println("POST");
-    // if (BitBang::sendSync(25000)) {
-    //   Serial.println("Synced");
+    Serial.println("POST");
     BitBang::send(loopIndex, msgLen);
-    // }
   }
 
-  if (isLeft && loopIndex != msg) {
-    if (msg > 10) {
-      Serial.println("Value: ");
-      Serial.println(msg);
-      Serial.println("");
-      Serial.println("");
-      Serial.print("!!! Bad value: ");
-      Serial.print(++badValues);
-      Serial.println(" !!!");
-    } else {
-      badValues = 0;
-    }
-    // delay(2000);
-    loopIndex = msg;
-  }
+  // if (isLeft && loopIndex != msg) {
+  //   if (msg > 10) {
+  //     Serial.println("Value: ");
+  //     Serial.println(msg);
+  //     Serial.println("");
+  //     Serial.println("");
+  //     Serial.print("!!! Bad value: ");
+  //     Serial.print(++badValues);
+  //     Serial.println(" !!!");
+  //   } else {
+  //     badValues = 0;
+  //   }
+  //   // delay(2000);
+  //   loopIndex = msg;
+  // }
   // Serial.println("");
   // Serial.println("BLINK");
   if (loopIndex % 100 == 0 && badValues) {
@@ -66,5 +61,8 @@ void loop() {
     pixels.show();
     delay(2000);
   }
-  blinkLeds();
+  blinkLeds(loopIndex % 6);
+  if (loopIndex % 4999 == 0) {
+    delay(1000);
+  }
 }

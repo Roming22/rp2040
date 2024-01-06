@@ -30,6 +30,7 @@ void setup() {
   set_board();
   set_pixels();
   set_bitbang();
+  delay(100);
 
   Serial.println("");
   Serial.println("# Looping");
