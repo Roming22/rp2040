@@ -84,6 +84,9 @@ void Keyboard::LoadHardware() {
       for (JsonVariant item : config["matrix"]["cols"].as<JsonArray>()) {
         col_pins.push_back(item.as<unsigned int>());
       }
+      if (!isLeft) {
+        std::reverse(col_pins.begin(), col_pins.end());
+      }
     } else {
       DEBUG_INFO(
           "[ERROR] Cannot configure switches: '.%s.matrix.cols' not found",

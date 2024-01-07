@@ -22,14 +22,14 @@ layers:
         7+8: U
         6+8: B
         6+7+8: M
-        14+15: Q
-        15+16: K
-        14+16: J
-        14+15+16: BSPC
-        18+19: G
-        19+20: Y
-        18+20: P
-        20+19+18: W
+        13+14: Q
+        14+15: K
+        13+15: J
+        13+14+15: BSPC
+        17+18: G
+        18+19: Y
+        17+19: P
+        19+18+17: W
   symbols:
     leds:
       color: [127, 21, 0]
@@ -39,8 +39,8 @@ layers:
         TRNS, "#",      "$",          "!",
         TRNS, LY_TO(),  LY_TO(alpha), TRNS,
       # Right
-        TRNS, "-",  "/",          "=",
-        TRNS, ".",  ",",          "'",
+        "-",  "/",  "=",          TRNS
+        ".",  ",",  "'",          TRNS
         TRNS, TRNS, LY_TO(alpha), TRNS
       ]
     combos:
@@ -50,11 +50,11 @@ layers:
         2+3+4: ESC
         6+7: "{"
         7+8: "}"
-        14+15: "]"
-        15+16: "["
-        14+15+16: BSPC
-        18+19: ")"
-        19+20: "("
+        13+14: "]"
+        14+15: "["
+        13+14+15: BSPC
+        17+18: ")"
+        18+19: "("
   fn_num:
     leds:
       color: [127, 42, 0]
@@ -64,9 +64,9 @@ layers:
         TRNS, F7,           F9,           F11,
         TRNS, LY_TO(alpha), TRNS,         TRNS,
       # Right
-        TRNS, TH(5|RCTL), TH(7|RALT),   TH(9|RSFT),
-        TRNS, "0",        "2",          "4",
-        TRNS, TRNS,       LY_TO(alpha), TRNS
+        TH(5|RCTL), TH(7|RALT),   TH(9|RSFT), TRNS
+        "0",        "2",          "4",        TRNS,
+        TRNS,       LY_TO(alpha), TRNS,       TRNS
       ]
     combos:
       chords:
@@ -77,11 +77,11 @@ layers:
         6+7: F8
         7+8: F10
         6+8: F12
-        14+15: "8"
-        15+16: "6"
-        14+15+16: BSPC
-        18+19: "3"
-        19+20: "1"
+        13+14: "8"
+        14+15: "6"
+        13+14+15: BSPC
+        17+18: "3"
+        18+19: "1"
   system:
     leds:
       color: [127, 0, 127]
@@ -91,7 +91,7 @@ layers:
         TRNS, HOME,         PGDN, END,
         TRNS, LY_TO(alpha), TRNS, TRNS,
       # Right
-        TRNS, BSPC, UP,           DEL,
-        TRNS, LEFT,   DONW,         RIGHT,
-        TRNS, TRNS,   LY_TO(alpha), TRNS
+        BSPC, UP,           DEL,    TRANS,
+        LEFT, DOWN,         RIGHT,  TRANS,
+        TRNS, LY_TO(alpha), TRNS,   TRANS
       ]
