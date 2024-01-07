@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <functional>
+#include <math.h>
 #include <vector>
 
 class BitBang {
   unsigned int _pin;
-  unsigned int _input_mode;
   bool _active_state;
   unsigned int _tick;
 
@@ -33,7 +33,7 @@ class BitBang {
     gpio_put(_pin, !_active_state);
   }
 
-  inline void inputPin() const { pinMode(_pin, _input_mode); }
+  inline void inputPin() const { pinMode(_pin, INPUT); }
 
   inline void sendBit(const bool &bit) const {
     unsigned long time = micros() + (_tick * (bit ? 3 : 1));
@@ -62,6 +62,10 @@ class BitBang {
     // Serial.print("Received pulse #: ");
     // Serial.println(pulses.size());
     return !pulses.empty();
+  }
+
+  inline unsigned int getPulseLength(unsigned int pulse) const {
+    return pulse / _tick + ((pulse % _tick) * 2 >= _tick);
   }
 
   inline unsigned int receivePulse(unsigned int wait_us) const {
@@ -135,12 +139,10 @@ class BitBang {
   }
 
 public:
-  static void initialize(const unsigned int pin, const unsigned int frequency,
-                         const unsigned input_mode = INPUT) {
+  static void initialize(const unsigned int pin, const unsigned int frequency) {
     BitBang &instance = getInstance();
     instance._pin = pin;
-    instance._input_mode = input_mode;
-    instance._active_state = (instance._input_mode == LOW);
+    instance._active_state = HIGH;
     instance.resetPin();
 
     instance._tick = 1E6 / frequency / 4;
@@ -174,10 +176,43 @@ public:
     return;
   }
 
+  void sendGo() const {
+    unsigned long time = micros() + (_tick * 4);
+    gpio_put(_pin, _active_state);
+    wait_until(time);
+    time = micros() + (_tick);
+    gpio_put(_pin, !_active_state);
+    wait_until(time);
+  }
+
+  bool receiveGo() const {
+    std::vector<unsigned int> pulses;
+    receivePulses(pulses, 1, _tick * 16);
+    int pulseLength = getPulseLength(pulses.back());
+    pulses.clear();
+    return pulseLength == 4;
+  }
+
+  void sendAck() const {
+    unsigned long time = micros() + (_tick * 5);
+    gpio_put(_pin, _active_state);
+    wait_until(time);
+    time = micros() + (_tick);
+    gpio_put(_pin, !_active_state);
+    wait_until(time);
+  }
+
+  bool receiveAck() const {
+    std::vector<unsigned int> pulses;
+    receivePulses(pulses, 1, _tick * 16);
+    int pulse = getPulseLength(pulses.back());
+    pulses.clear();
+    return pulse == 5;
+  }
+
   static void send(const unsigned int &value, const unsigned int &length) {
     static const BitBang &instance = getInstance();
     std::vector<unsigned int> pulses;
-    bool synced = false;
     // Serial.print("Send value: ");
     // Serial.println(value);
 
@@ -187,20 +222,18 @@ public:
     // Serial.println("Channel open (Send)");
 
     // Wait for GO
-    while (!synced) {
-      synced = instance.receivePulses(pulses, 1, instance._tick * 16) &&
-               instance.decodePulses(pulses) == 1;
+    while (!instance.receiveGo()) {
     }
     // Send ACK
     unsigned long time = micros() + instance._tick * 2;
     instance.wait_until(time);
-    instance.sendBit(1);
-    Serial.println("Synced");
+    instance.sendAck();
+    // Serial.println("Synced");
 
-    // // Send bits, LSB first.
-    // for (int i = 0; i < length; ++i) {
-    //   instance.sendBit(bitRead(value, i));
-    // }
+    // Send bits, LSB first.
+    for (int i = 0; i < length; ++i) {
+      instance.sendBit(bitRead(value, i));
+    }
     interrupts();
     // // Long delay to signify end of transmission
     // time = micros() + instance._tick * 4;
@@ -226,16 +259,15 @@ public:
     // Serial.println("Channel open (Receive)");
     while (!synced) {
       // Send GO
-      instance.sendBit(1);
+      instance.sendGo();
       // Check for ACK
-      synced = instance.receivePulses(pulses, 1, instance._tick * 16) &&
-               instance.decodePulses(pulses) == 1;
+      synced = instance.receiveAck();
     }
-    Serial.println("Synced");
+    // Serial.println("Synced");
 
     // // Read bits
     // unsigned int end = micros();
-    // instance.receivePulses(pulses, length, instance._tick * 400);
+    instance.receivePulses(pulses, length, instance._tick * 400);
 
     interrupts();
     // Serial.print("Wait Time (ms): ");
@@ -243,18 +275,18 @@ public:
     // Serial.print("Transmission Time (ms): ");
     // Serial.println((micros() - begin) / 1000.0);
 
-    // // Decode pulse
-    // int value = instance.decodePulses(pulses);
+    // Decode pulse
+    int value = instance.decodePulses(pulses);
 
-    // if (value > 0) {
-    //   Serial.print("Received bits: ");
-    //   Serial.println(value, BIN);
-    //   Serial.print("Received value: ");
-    //   Serial.println(value);
-    // }
+    if (value > 0) {
+      Serial.print("Received bits: ");
+      Serial.println(value, BIN);
+      Serial.print("Received value: ");
+      Serial.println(value);
+    }
 
-    return 0;
-    // return value;
+    // return 0;
+    return value;
   }
 };
 
