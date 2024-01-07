@@ -35,12 +35,6 @@ void Pixels::Setup(const unsigned int pin, const unsigned int count) {
 void Pixels::Setup(const unsigned int pin, const unsigned int count,
                    const bool &isLeft) {
   Pixels::Setup(pin, count);
-#ifndef MULTICORE_ENABLED
-  delay(100);
-  Pixels::Set(0, 255 * isLeft, 255 * (1 - isLeft), 0);
-  delay(300);
-  Pixels::Set(0, 0, 0, 0);
-#endif
 }
 
 void Pixels::Set(const unsigned int address, const unsigned int red,

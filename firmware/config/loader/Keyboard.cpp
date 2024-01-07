@@ -4,7 +4,7 @@
 #include "../../hardware/board/DaughterBoard.h"
 #include "../../hardware/board/MotherBoard.h"
 #include "../../hardware/led/Pixels.h"
-#include "../../hardware/txrx/BitBang.h"
+#include "../../hardware/txrx/BitBang.hpp"
 #include "../../hardware/usb/Key.h"
 #include "../../logic/quantum/Universe.h"
 #include "../../utils/Debug.hpp"
@@ -24,7 +24,7 @@ void Keyboard::LoadHardware() {
   DEBUG_INFO("config::loader::Keyboard::LoadHardware");
 
   const char *jsonString = HARDWARE_CONFIG_JSON;
-  DynamicJsonDocument jsonDoc(HARDWARE_CONFIG_JSON_SIZE);
+  JsonDocument jsonDoc;
   ParseJson(jsonDoc, jsonString);
 
   std::string board_uid = GetControllerUid();
@@ -38,8 +38,8 @@ void Keyboard::LoadHardware() {
 
   bool isLeft =
       (!config["data"].containsKey("isLeft") || config["data"]["isLeft"]);
-  bool is_connected = jsonDoc.size() > 1;
 
+  // LEDS
   if (config.containsKey("leds")) {
     if (config["leds"].containsKey("count") &&
         config["leds"].containsKey("pin")) {
@@ -50,54 +50,64 @@ void Keyboard::LoadHardware() {
                  "'.{board_uid}.leds.pin' not found");
       delay(3600000);
     }
+    hardware::led::Pixels::Set(4, 255 * isLeft, 255 * (1 - isLeft), 0);
   } else {
     DEBUG_INFO("[INFO] No leds on the board: '.{board_uid}.leds' not found");
   }
 
-  if (is_connected && config.containsKey("data")) {
-    is_connected = true;
+  // TXRX
+  bool is_connected = config.containsKey("data");
+  if (is_connected) {
     if (config["data"].containsKey("pin")) {
-      hardware::txrx::BitBang::Setup((int)config["data"]["pin"], 32, 31250);
+      hardware::txrx::BitBang::Setup((int)config["data"]["pin"], 32, 125000);
     } else {
       DEBUG_INFO("[ERROR] Not connection between boards: "
-                 "'.$board_uid.data.pin' not found");
+                 "'.%s.data.pin' not found",
+                 board_uid.c_str());
       delay(3600000);
     }
   }
-  DEBUG_INFO("[INFO] Board chirality is on the left side and connected: %d, %d",
-             isLeft, is_connected);
-  randomSeed(isLeft * 42);
 
+  // BOARD
+  // TODO: dynamically detect which is plugged in
+  // * Detect USB Frame?
+  // * Detect where the power is coming from (VSYS vs VUSB)?
+  bool isMotherBoard = isLeft;
+  DEBUG_INFO("[INFO] %s is on the %s side and %s connected",
+             isMotherBoard ? "MotherBoard" : "DaughterBoard",
+             isLeft ? "left" : "right", is_connected ? "is" : "is not");
+  randomSeed(isMotherBoard * 42);
   if (config.containsKey("matrix")) {
-    if (config["matrix"].containsKey("cols") &&
-        config["matrix"].containsKey("rows")) {
-      std::vector<unsigned int> col_pins;
+    std::vector<unsigned int> col_pins;
+    std::vector<unsigned int> row_pins;
+    if (config["matrix"].containsKey("cols")) {
       for (JsonVariant item : config["matrix"]["cols"].as<JsonArray>()) {
         col_pins.push_back(item.as<unsigned int>());
       }
-      std::vector<unsigned int> row_pins;
+    } else {
+      DEBUG_INFO(
+          "[ERROR] Cannot configure switches: '.%s.matrix.cols' not found",
+          board_uid.c_str());
+      delay(3600000);
+    }
+    if (config["matrix"].containsKey("rows")) {
       for (JsonVariant item : config["matrix"]["rows"].as<JsonArray>()) {
         row_pins.push_back(item.as<unsigned int>());
       }
-      // TODO: dynamically detect which is plugged in
-      // * Detect USB Frame?
-      // * Detect where the power is coming from (VSYS vs VUSB)?
-      if (isLeft) {
-        DEBUG_INFO("Connected to USB");
-        hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
-      } else {
-        DEBUG_INFO("Not connected to USB");
-        hardware::board::DaughterBoard::Setup(col_pins, row_pins);
-      }
     } else {
       DEBUG_INFO(
-          "[ERROR] Cannot configure switches: '.$board_uid.matrix.cols' or "
-          "'.$board_uid.matrix.rows' not found");
+          "[ERROR] Cannot configure switches: '.%s.matrix.rows' not found",
+          board_uid.c_str());
       delay(3600000);
     }
+    if (isMotherBoard) {
+      hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
+    } else {
+      hardware::board::DaughterBoard::Setup(col_pins, row_pins);
+    }
   } else {
-    DEBUG_INFO(
-        "[WARNING] No switches on the board: '.{board_uid}.matrix' not found");
+    DEBUG_INFO("[WARNING] No switches on the board: '.%s.matrix' not found",
+               board_uid.c_str());
   }
   DEBUG_INFO("");
 }
@@ -106,7 +116,7 @@ void Keyboard::LoadLayout() {
   DEBUG_INFO("config::loader::Keyboard::LoadLayout");
 
   const char *jsonString = LAYOUT_CONFIG_JSON;
-  DynamicJsonDocument jsonDoc(LAYOUT_CONFIG_JSON_SIZE);
+  JsonDocument jsonDoc;
   ParseJson(jsonDoc, jsonString);
 
   std::string default_layer = "";
@@ -129,8 +139,7 @@ std::string Keyboard::GetControllerUid() {
   return std::string(board_uid);
 }
 
-void Keyboard::ParseJson(DynamicJsonDocument &jsonDoc,
-                         const char *&jsonString) {
+void Keyboard::ParseJson(JsonDocument &jsonDoc, const char *&jsonString) {
   DEBUG_INFO("%s", jsonString);
   DeserializationError error = deserializeJson(jsonDoc, jsonString);
   if (error) {

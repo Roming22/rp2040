@@ -45,21 +45,14 @@ parse_args(){
 }
 
 generate_hpp() {
-    MAGIC_NUMBER=4 # Used to calculate the size of the JsonDocument in memory
     HARDWARE_CONFIG="$(yq --no-colors --output-format json "$HARDWARE_PATH" | jq -c -M)"
     LAYOUT_CONFIG="$(yq --no-colors --output-format json "$LAYOUT_PATH" | jq -c -M)"
     cat << EOF
 #ifndef HARDWARE_CONFIG_JSON
 #define HARDWARE_CONFIG_JSON "$(echo "$HARDWARE_CONFIG"  | sed 's:":\\":g')"
 #endif
-#ifndef HARDWARE_CONFIG_JSON_SIZE
-#define HARDWARE_CONFIG_JSON_SIZE $(( $(echo "$HARDWARE_CONFIG" | wc -c) * MAGIC_NUMBER))
-#endif
 #ifndef LAYOUT_CONFIG_JSON
 #define LAYOUT_CONFIG_JSON "$(echo "$LAYOUT_CONFIG" | sed 's:":\\":g')"
-#endif
-#ifndef LAYOUT_CONFIG_JSON_SIZE
-#define LAYOUT_CONFIG_JSON_SIZE $(( $(echo "$LAYOUT_CONFIG" | wc -c) * MAGIC_NUMBER))
 #endif
 EOF
 }

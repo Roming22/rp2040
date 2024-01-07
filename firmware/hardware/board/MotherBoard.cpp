@@ -4,7 +4,7 @@
 #include "../../utils/Debug.hpp"
 #include "../../utils/Time.h"
 #include "../led/Pixels.h"
-#include "../txrx/BitBang.h"
+#include "../txrx/BitBang.hpp"
 
 namespace hardware {
 namespace board {
@@ -24,12 +24,15 @@ void MotherBoard::Setup(const std::vector<unsigned int> &i_col_pins,
 }
 
 void MotherBoard::connect() {
-  delay(100);
   hardware::led::Pixels::Set(1, 0, 0, 50);
-  offset = hardware::txrx::BitBang::Receive();
-  hardware::led::Pixels::Set(0, 0, 0, 0);
-  DEBUG_INFO("Connected (offset): %d", offset);
+  DEBUG_INFO("MotherBoard handshake...");
+  while (!hardware::txrx::BitBang::Receive()) {
+  }
+  offset = hardware::txrx::BitBang::GetValue();
   // TODO: send layer color
+  DEBUG_INFO("Handshake: OK");
+  hardware::led::Pixels::Set(1, 0, 50, 0);
+  DEBUG_INFO("Connected (offset): %d", offset);
 }
 
 void MotherBoard::receive_switch_events() {

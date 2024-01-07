@@ -11,7 +11,7 @@ protected:
   static void LoadHardware();
   static void LoadLayout();
   static std::string GetControllerUid();
-  static void ParseJson(DynamicJsonDocument &jsonDoc, const char *&jsonString);
+  static void ParseJson(JsonDocument &jsonDoc, const char *&jsonString);
 
 public:
   static void Load();
