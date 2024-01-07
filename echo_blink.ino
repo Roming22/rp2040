@@ -66,5 +66,5 @@ void loop() {
     pixels.show();
     delay(2000);
   }
-  blinkLeds();
+  blinkLeds((loopIndex - 1) % 6);
 }

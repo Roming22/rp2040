@@ -41,8 +41,7 @@ void set_pixels() {
   pixels.show();
 }
 
-void blinkLeds() {
-  static int color = 0;
+void blinkLeds(unsigned int color) {
   static Pixels &pixels = *Pixels::get();
 
   int red = 255 * (color == 0 || color == 1 || color == 5);
@@ -51,8 +50,6 @@ void blinkLeds() {
 
   pixels.fill(pixels.Color(red, green, blue));
   pixels.show();
-
-  color = ++color % 6;
 }
 
 #endif

@@ -6,7 +6,6 @@
 
 class BitBang {
   unsigned int _pin;
-  unsigned int _input_mode;
   bool _active_state;
   unsigned int _tick;
 
@@ -27,7 +26,7 @@ class BitBang {
     gpio_put(_pin, !_active_state);
   }
 
-  inline void inputPin() const { pinMode(_pin, _input_mode); }
+  inline void inputPin() const { pinMode(_pin, INPUT_PULLUP); }
 
   inline void sendBit(const bool &bit) const {
     unsigned int begin;
@@ -123,12 +122,10 @@ class BitBang {
   }
 
 public:
-  static void initialize(const unsigned int pin, const unsigned int frequency,
-                         const unsigned input_mode = INPUT) {
+  static void initialize(const unsigned int pin, const unsigned int frequency) {
     BitBang &instance = getInstance();
     instance._pin = pin;
-    instance._input_mode = input_mode;
-    instance._active_state = (instance._input_mode == LOW);
+    instance._active_state = LOW;
     instance.resetPin();
 
     instance._tick = 1E6 / frequency / 4;
