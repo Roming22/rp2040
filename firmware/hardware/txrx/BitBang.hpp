@@ -10,11 +10,10 @@ namespace hardware {
 namespace txrx {
 
 class BitBang {
-  unsigned int _pin;
-  unsigned int msgLength;
-  bool _active_state;
-  bool connection;
-  unsigned int _tick;
+  unsigned int pin;
+  unsigned int msg_length;
+  bool active_state;
+  unsigned int tick;
   std::list<unsigned int> values;
 
   // Singleton
@@ -35,13 +34,13 @@ class BitBang {
   }
 
   inline void openChannel() const {
-    digitalWrite(_pin, !_active_state);
-    pinMode(_pin, INPUT_PULLUP);
+    digitalWrite(pin, !active_state);
+    pinMode(pin, INPUT_PULLUP);
   }
 
   inline void closeChannel() const {
-    pinMode(_pin, OUTPUT);
-    digitalWrite(_pin, _active_state);
+    pinMode(pin, OUTPUT);
+    digitalWrite(pin, active_state);
   }
 
   inline bool isChannelOpened() const {
@@ -49,11 +48,11 @@ class BitBang {
     openChannel();
     while (!quiet) {
       while (!quiet) {
-        quiet = digitalRead(_pin) != _active_state;
+        quiet = digitalRead(pin) != active_state;
       }
-      unsigned long timeout = micros() + _tick * 8;
+      unsigned long timeout = micros() + tick * 8;
       while (quiet && micros() < timeout) {
-        quiet = digitalRead(_pin) != _active_state;
+        quiet = digitalRead(pin) != active_state;
       }
     }
     closeChannel();
@@ -65,11 +64,11 @@ class BitBang {
     openChannel();
     while (!closed) {
       while (!closed) {
-        closed = digitalRead(_pin) == _active_state;
+        closed = digitalRead(pin) == active_state;
       }
-      unsigned long timeout = micros() + _tick * 8;
+      unsigned long timeout = micros() + tick * 8;
       while (closed && micros() < timeout) {
-        closed = digitalRead(_pin) == _active_state;
+        closed = digitalRead(pin) == active_state;
       }
     }
     closeChannel();
@@ -78,11 +77,11 @@ class BitBang {
 
   inline void sendBit(const bool &bit) const {
     unsigned long time;
-    time = micros() + (_tick * (bit ? 3 : 1));
-    digitalWrite(_pin, _active_state);
+    time = micros() + (tick * (bit ? 3 : 1));
+    digitalWrite(pin, active_state);
     wait_until(time);
-    time = micros() + (_tick * (bit ? 1 : 3));
-    digitalWrite(_pin, !_active_state);
+    time = micros() + (tick * (bit ? 1 : 3));
+    digitalWrite(pin, !active_state);
     wait_until(time);
   }
 
@@ -94,16 +93,16 @@ class BitBang {
     unsigned timeout = micros() + wait_us;
 
     // Wait for REST state
-    while (digitalRead(_pin) == _active_state) {
+    while (digitalRead(pin) == active_state) {
     }
 
     // Wait for ACTIVE state marking the pulse start
-    while (digitalRead(_pin) != _active_state && begin < timeout) {
+    while (digitalRead(pin) != active_state && begin < timeout) {
       begin = micros();
     }
 
     // Wait for REST state marking the pulse end
-    while (digitalRead(_pin) == _active_state) {
+    while (digitalRead(pin) == active_state) {
       end = micros();
     }
 
@@ -114,7 +113,7 @@ class BitBang {
   }
 
   int decodePulses(std::vector<unsigned int> &pulses) const {
-    static unsigned int threshold = _tick * 2;
+    static unsigned int threshold = tick * 2;
     unsigned int index = 0;
     unsigned int value = 0;
 
@@ -148,78 +147,78 @@ public:
                     const unsigned int frequency) {
     BitBang &instance = GetInstance();
 
-    instance._pin = pin;
-    instance._active_state = LOW;
+    instance.pin = pin;
+    instance.active_state = LOW;
     instance.closeChannel();
 
-    instance._tick = 1E6 / frequency / 4;
-    instance.msgLength = msgLength;
-    instance.connection = false;
+    instance.tick = 1E6 / frequency / 4;
+    instance.msg_length = msgLength;
+    instance.is_connected = false;
 
-    delay(50); // Delay necessary for both boards to catch up
-    DEBUG_INFO("Waiting for channed to close.");
+    delay(200); // Delay necessary for both boards to catch up
+    // DEBUG_INFO("Waiting for channed to close.");
     while (!instance.isChannelClosed()) {
     }
-    DEBUG_INFO("Channel closed.");
+    // DEBUG_INFO("Channel closed.");
 
     DEBUG_INFO("LOW: %d    HIGH: %d    ACTIVE: %d", LOW, HIGH,
-               instance._active_state);
-    DEBUG_INFO("BitBang tick (usec): %d    Frequency (Hz): %d", instance._tick,
-               int(1E6 / (instance._tick * 4)));
+               instance.active_state);
+    DEBUG_INFO("BitBang tick (usec): %d    Frequency (Hz): %d", instance.tick,
+               int(1E6 / (instance.tick * 4)));
   }
 
   static bool Send(const unsigned int &value) {
     static const BitBang &instance = GetInstance();
-    DEBUG_INFO("Send value: %d", value);
+    // DEBUG_INFO("Send value: %d", value);
 
     // Send GO
     // unsigned int begin = micros();
-    DEBUG_INFO("Waiting on channel to open");
+    // DEBUG_INFO("Waiting on channel to open");
     while (!instance.isChannelOpened()) {
     }
-    DEBUG_INFO("Channel has been opened");
+    // DEBUG_INFO("Channel has been opened");
     noInterrupts();
     instance.sendBit(0);
 
     // Send bits, LSB first.
-    for (int i = 0; i < instance.msgLength; ++i) {
+    for (int i = 0; i < instance.msg_length; ++i) {
       instance.sendBit(bitRead(value, i));
     }
     interrupts();
     while (!instance.isChannelClosed()) {
-      DEBUG_INFO("Waiting for channel to close");
+      // DEBUG_INFO("Waiting for channel to close");
     }
-    DEBUG_INFO("Channel has been closed");
+    // DEBUG_INFO("Channel has been closed");
     // DEBUG_INFO("Time: %d",(micros() - begin) / 1000.0);
 
-    DEBUG_INFO("Sent bits: ");
-    Serial.println(value, BIN);
+    // DEBUG_INFO("Sent bits: ");
+    // Serial.println(value, BIN);
     return true;
   }
 
   static bool Receive() {
     static BitBang &instance = GetInstance();
     std::vector<unsigned int> pulses;
-    pulses.reserve(instance.msgLength);
+    pulses.reserve(instance.msg_length);
 
     // Wait for GO
-    DEBUG_INFO("Opening channel");
+    // DEBUG_INFO("Opening channel");
     instance.openChannel();
-    DEBUG_INFO("Channel opened");
+    // DEBUG_INFO("Channel opened");
     noInterrupts();
     // unsigned int begin = micros();
     if (instance.receivePulse(5000) == 0) {
       // TODO: Handle connection failures
       instance.closeChannel();
       interrupts();
-      DEBUG_INFO("Connection failed");
+      // DEBUG_INFO("Connection failed");
       return false;
     }
 
     // Read bits
     // unsigned int end = micros();
-    for (int i = instance.msgLength; i > 0; --i) {
-      pulses.push_back(instance.receivePulse(instance._tick * 4));
+    for (int i = instance.msg_length; i > 0; --i) {
+      pulses.push_back(instance.receivePulse(instance.tick * 4));
     }
     instance.closeChannel();
     interrupts();
@@ -228,7 +227,7 @@ public:
 
     // Decode pulse
     instance.values.push_back(instance.decodePulses(pulses));
-    DEBUG_INFO("Received value: %d", instance.values.back());
+    // DEBUG_INFO("Received value: %d", instance.values.back());
 
     return true;
   }

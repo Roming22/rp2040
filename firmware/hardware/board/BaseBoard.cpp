@@ -16,6 +16,7 @@ bool BaseBoard::IsMotherboard() { return instance->is_motherboard; }
 
 void BaseBoard::load_switch_events() {
   // DEBUG_INFO("harware::board::BaseBoard::load_switch_events");
+  switch_events.clear();
   key_switch->poll_events(switch_events);
 }
 
