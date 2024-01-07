@@ -41,4 +41,17 @@ void set_pixels(const bool &isLeft) {
   pixels.show();
 }
 
+void setLed(unsigned int ledId, unsigned int color) {
+  static Pixels &pixels = *Pixels::get();
+
+  int red = 255 * (color == 0 || color == 1 || color == 5);
+  int green = 255 * (color == 1 || color == 2 || color == 3);
+  int blue = 255 * (color == 3 || color == 4 || color == 5);
+
+  pixels.setPixelColor(ledId, red, green, blue);
+  while (!pixels.canShow()) {
+  };
+  pixels.show();
+}
+
 #endif
