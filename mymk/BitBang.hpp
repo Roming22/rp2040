@@ -28,16 +28,19 @@ class BitBang {
 
   inline void inputPin() const { pinMode(_pin, INPUT_PULLUP); }
 
+  inline void wait_until(unsigned long time) const {
+    while (micros() < time) {
+    }
+  }
+
   inline void sendBit(const bool &bit) const {
-    unsigned int begin;
-    begin = micros();
+    unsigned long time;
+    time = micros() + (_tick * (bit ? 3 : 1));
     gpio_put(_pin, _active_state);
-    while (micros() - begin < _tick * (bit ? 3 : 1)) {
-    }
-    begin = micros();
+    wait_until(time);
+    time = micros() + (_tick * (bit ? 1 : 3));
     gpio_put(_pin, !_active_state);
-    while (micros() - begin < _tick * (bit ? 1 : 3)) {
-    }
+    wait_until(time);
   }
 
   inline unsigned int receivePulse(unsigned int wait_us) const {
@@ -88,12 +91,11 @@ class BitBang {
 
   int decodePulses(std::vector<unsigned int> &pulses) const {
     static unsigned int threshold = _tick * 2;
-    unsigned int pulse;
     unsigned int index = 0;
     unsigned int value = 0;
 
-    static unsigned int min = 1000;
-    static unsigned int max = 0;
+    // static unsigned int min = 1000;
+    // static unsigned int max = 0;
 
     // Serial.print("Pulses: ");
     for (int pulse : pulses) {
@@ -103,14 +105,14 @@ class BitBang {
       index++;
       // Serial.print(pulse);
       // Serial.print(", ");
-      if (pulse > 0) {
-        if (pulse < min) {
-          min = pulse;
-        }
-        if (pulse > max) {
-          max = pulse;
-        }
-      }
+      // if (pulse > 0) {
+      //   if (pulse < min) {
+      //     min = pulse;
+      //   }
+      //   if (pulse > max) {
+      //     max = pulse;
+      //   }
+      // }
     }
     // Serial.print(" (");
     // Serial.print(min);
