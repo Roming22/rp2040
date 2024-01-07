@@ -25,32 +25,21 @@ void loop() {
     Serial.println(" [Extension]");
   }
 
-  // Receive GO
   if (isLeft) {
     // Serial.println("GET");
-    // if (BitBang::receiveSync(25000)) {
-    //   Serial.println("Synced");
     msg = BitBang::receive(msgLen);
-    // }
+    // delay(1000); // This delay breaks the communication.
   } else {
-    // Send GO
-    delay(4); // Communication currently unstable without an added delay
     // Serial.println("POST");
-    // if (BitBang::sendSync(25000)) {
-    //   Serial.println("Synced");
     BitBang::send(loopIndex, msgLen);
-    // }
   }
 
   if (isLeft && loopIndex != msg) {
     if (msg > 10) {
-      Serial.println("Value: ");
-      Serial.println(msg);
-      Serial.println("");
-      Serial.println("");
-      Serial.print("!!! Bad value: ");
+      Serial.print("!!! Bad value #");
       Serial.print(++badValues);
-      Serial.println(" !!!");
+      Serial.print(": ");
+      Serial.println(msg);
     } else {
       badValues = 0;
     }
@@ -61,9 +50,7 @@ void loop() {
   // Serial.println("BLINK");
   if (loopIndex % 100 == 0 && badValues) {
     Serial.print("Bad value check: ");
-    Serial.print(badValues);
-    pixels.fill(pixels.Color(255 * (badValues > 0), 255 * (badValues == 0), 0));
-    pixels.show();
+    Serial.println(badValues);
     delay(2000);
   }
   blinkLeds((loopIndex - 1) % 6);
