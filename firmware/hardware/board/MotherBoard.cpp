@@ -38,18 +38,18 @@ void MotherBoard::connect() {
 void MotherBoard::receive_switch_events() {
   DEBUG_VERBOSE("harware::board::MotherBoard::receive_switch_events");
   int event;
-  while (true) {
-    event = hardware::txrx::BitBang::Receive();
+  while (hardware::txrx::BitBang::Receive()) {
+    event = hardware::txrx::BitBang::GetValue();
     if (event == 0) {
       return;
-    }
-    if (event > 0) {
+    } else if (event > 0) {
+      event += offset;
       DEBUG_INFO("Received Press event");
-      switch_events.push_back(event + offset);
     } else {
+      event -= offset;
       DEBUG_INFO("Received Release event");
-      switch_events.push_back(event - offset);
     }
+    switch_events.push_back(event);
   }
 }
 
@@ -67,7 +67,6 @@ void MotherBoard::add_events() {
 }
 
 void MotherBoard::tick() {
-  switch_events.clear();
   load_switch_events();
   if (offset > 0) {
     receive_switch_events();
