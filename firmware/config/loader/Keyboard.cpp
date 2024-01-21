@@ -69,10 +69,10 @@ void Keyboard::LoadHardware() {
   }
 
   // BOARD
-  // TODO: dynamically detect which is plugged in
-  // * Detect USB Frame?
-  // * Detect where the power is coming from (VSYS vs VUSB)?
   bool isMotherBoard = isLeft;
+  if (config.containsKey("usb") && config["usb"].containsKey("vusb_pin")) {
+    isMotherBoard = IsUsbConnected(config["usb"]["vusb_pin"]);
+  }
   DEBUG_INFO("[INFO] %s is on the %s side and %s connected",
              isMotherBoard ? "MotherBoard" : "DaughterBoard",
              isLeft ? "left" : "right", is_connected ? "is" : "is not");
@@ -140,6 +140,15 @@ std::string Keyboard::GetControllerUid() {
   char board_uid[len] = "";
   pico_get_unique_board_id_string(board_uid, len);
   return std::string(board_uid);
+}
+
+bool Keyboard::IsUsbConnected(int vusb_pin) {
+  // DEBUG_INFO("Checking USB connection");
+  pinMode(vusb_pin, INPUT);
+  delay(10);
+  bool connected = digitalRead(vusb_pin);
+  DEBUG_DEBUG("%s to USB", connected ? "Connected" : "Not connected");
+  return connected;
 }
 
 void Keyboard::ParseJson(JsonDocument &jsonDoc, const char *&jsonString) {

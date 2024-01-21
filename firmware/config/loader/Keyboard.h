@@ -11,6 +11,7 @@ protected:
   static void LoadHardware();
   static void LoadLayout();
   static std::string GetControllerUid();
+  static bool IsUsbConnected(int vusb_pins);
   static void ParseJson(JsonDocument &jsonDoc, const char *&jsonString);
 
 public:
