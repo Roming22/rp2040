@@ -104,7 +104,8 @@ void Keyboard::LoadHardware() {
       delay(3600000);
     }
     if (isMotherBoard) {
-      hardware::board::MotherBoard::Setup(col_pins, row_pins, is_connected);
+      hardware::board::MotherBoard::Setup(col_pins, row_pins, isLeft,
+                                          is_connected);
     } else {
       hardware::board::DaughterBoard::Setup(col_pins, row_pins);
     }

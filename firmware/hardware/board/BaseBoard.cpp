@@ -14,10 +14,15 @@ void BaseBoard::connect() {
 
 bool BaseBoard::IsMotherboard() { return instance->is_motherboard; }
 
-void BaseBoard::load_switch_events() {
+void BaseBoard::load_switch_events(const int offset) {
   // DEBUG_INFO("harware::board::BaseBoard::load_switch_events");
   switch_events.clear();
   key_switch->poll_events(switch_events);
+  if (offset > 0) {
+    for (int i = 0; i < switch_events.size(); ++i) {
+      switch_events[i] += offset;
+    }
+  }
 }
 
 void BaseBoard::tick() {

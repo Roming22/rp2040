@@ -30,8 +30,9 @@ void DaughterBoard::connect() {
 
 void DaughterBoard::send_switch_events() {
   for (int event : switch_events) {
-    DEBUG_INFO("Sending switch event %d", event);
-    hardware::txrx::BitBang::Send(event);
+    DEBUG_INFO("Sending switch event %d as %d", event,
+               event + key_switch->size + 1);
+    hardware::txrx::BitBang::Send(event + key_switch->size + 1);
   }
   hardware::txrx::BitBang::Send(0);
 }

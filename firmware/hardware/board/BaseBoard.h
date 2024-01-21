@@ -32,7 +32,7 @@ public:
 
   virtual void connect();
 
-  void load_switch_events();
+  void load_switch_events(const int offset = 0);
 
   virtual void tick();
 

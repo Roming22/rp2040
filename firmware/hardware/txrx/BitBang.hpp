@@ -34,6 +34,7 @@ class BitBang {
   }
 
   inline void openChannel() const {
+    noInterrupts();
     digitalWrite(pin, !active_state);
     pinMode(pin, INPUT_PULLUP);
   }
@@ -41,6 +42,7 @@ class BitBang {
   inline void closeChannel() const {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, active_state);
+    interrupts();
   }
 
   inline bool isChannelOpened() const {
@@ -87,27 +89,48 @@ class BitBang {
 
   inline unsigned int receivePulse(unsigned int wait_us) const {
     // A return value of 0 means the communication failed.
-    unsigned int begin = 0;
-    unsigned int end = 0;
+    unsigned long int begin = 0;
+    unsigned long int end = 0;
     unsigned int duration = 0;
     unsigned timeout = micros() + wait_us;
 
     // Wait for REST state
     while (digitalRead(pin) == active_state) {
+      if (micros() > timeout) {
+        // DEBUG_INFO("REST state not detected");
+        return 0;
+      }
     }
 
     // Wait for ACTIVE state marking the pulse start
-    while (digitalRead(pin) != active_state && begin < timeout) {
+    begin = micros();
+    while (digitalRead(pin) != active_state) {
       begin = micros();
+      if (begin > timeout) {
+        // DEBUG_INFO("REST state for too long");
+        return 0;
+      }
     }
 
     // Wait for REST state marking the pulse end
+    timeout = micros() + tick * 10;
     while (digitalRead(pin) == active_state) {
       end = micros();
+      if (end > timeout) {
+        // DEBUG_INFO("ACTIVE state for too long");
+        return 0;
+      }
     }
 
-    if (end != 0) {
+    if (end > 0) {
+      // Serial.println("Full pulse");
       duration = end - begin;
+      if (duration > 100) {
+        DEBUG_INFO("Bad pulse: %d  (%d-%d)", duration, end, begin);
+      }
+    }
+    if (duration > 100) {
+      DEBUG_INFO("Bad NO pulse: %d", duration);
     }
     return duration;
   }
@@ -120,14 +143,11 @@ class BitBang {
     // static unsigned int min = 1000;
     // static unsigned int max = 0;
 
-    // DEBUG_INFO("Pulses: ");
     for (int pulse : pulses) {
       if (pulse > threshold) {
         bitSet(value, index);
       }
       index++;
-      // Serial.print(pulse);
-      // Serial.print(", ");
       // if (pulse > 0) {
       //   if (pulse < min) {
       //     min = pulse;
@@ -138,6 +158,16 @@ class BitBang {
       // }
     }
     // DEBUG_INFO(" (%d, %d)", min, max);
+    if (value > 0) {
+      DEBUG_INFO("Pulses: ");
+      for (int pulse : pulses) {
+        Serial.print(pulse);
+        Serial.print(", ");
+      }
+      Serial.println(" -- End");
+      Serial.print("Pulse: ");
+      Serial.println(value, BIN);
+    }
 
     return value;
   }
@@ -151,9 +181,8 @@ public:
     instance.active_state = LOW;
     instance.closeChannel();
 
-    instance.tick = 1E6 / frequency / 4;
+    instance.tick = 1E6 / (frequency * 4);
     instance.msg_length = msgLength;
-    instance.is_connected = false;
 
     delay(200); // Delay necessary for both boards to catch up
     // DEBUG_INFO("Waiting for channed to close.");
@@ -174,11 +203,12 @@ public:
     // Send GO
     // unsigned int begin = micros();
     // DEBUG_INFO("Waiting on channel to open");
+    noInterrupts();
     while (!instance.isChannelOpened()) {
     }
     // DEBUG_INFO("Channel has been opened");
-    noInterrupts();
-    instance.sendBit(0);
+    instance.sendBit(1);
+    // instance.wait_until(micros() + 20);
 
     // Send bits, LSB first.
     for (int i = 0; i < instance.msg_length; ++i) {
@@ -205,12 +235,10 @@ public:
     // DEBUG_INFO("Opening channel");
     instance.openChannel();
     // DEBUG_INFO("Channel opened");
-    noInterrupts();
     // unsigned int begin = micros();
     if (instance.receivePulse(5000) == 0) {
       // TODO: Handle connection failures
       instance.closeChannel();
-      interrupts();
       // DEBUG_INFO("Connection failed");
       return false;
     }
@@ -218,10 +246,9 @@ public:
     // Read bits
     // unsigned int end = micros();
     for (int i = instance.msg_length; i > 0; --i) {
-      pulses.push_back(instance.receivePulse(instance.tick * 4));
+      pulses.push_back(instance.receivePulse(100));
     }
     instance.closeChannel();
-    interrupts();
     // DEBUG_INFO("Wait Time (ms): %d", (end - begin) / 1000.0);
     // DEBUG_INFO("Transmission Time (ms): %d", (micros() - begin) / 1000.0);
 
