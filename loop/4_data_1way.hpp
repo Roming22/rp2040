@@ -5,16 +5,22 @@ void loop() {
   static unsigned int msg = 0;
   static unsigned int inError = 0;
 
-  DEBUG_INFO("## Loop %d [%s] %s Value", ++loopIndex,
+  DEBUG_INFO("## [Loop %d] %s %s Value", ++loopIndex,
              isLeft ? "Controller" : "Extension", isLeft ? "GET" : "POST");
 
+  delay(1 << random(10)); // This delay does not break the communication
   if (isLeft) {
-    // delay(1000); This delay does not break the communication
+    // delay(1000);
     setLed(1, 0);
-    msg = BitBang::receive(msgLen);
+    while (!BitBang::receive(msgLen, 1000)) {
+      DEBUG_INFO("Retry");
+    }
+    msg = BitBang::GetValue();
   } else {
     setLed(1, 0);
-    BitBang::send(loopIndex, msgLen);
+    while (!BitBang::send(loopIndex, msgLen, 1200)) {
+      DEBUG_INFO("Retry");
+    }
     msg = loopIndex;
   }
   setLed(1, 2);

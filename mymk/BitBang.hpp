@@ -8,6 +8,7 @@ class BitBang {
   unsigned int _pin;
   bool _active_state;
   unsigned int _tick;
+  int value;
 
   // Singleton
   BitBang() {}
@@ -27,6 +28,7 @@ class BitBang {
   }
 
   inline void openChannel() const {
+    setLed(3, 4);
     digitalWrite(_pin, !_active_state);
     pinMode(_pin, INPUT_PULLUP);
   }
@@ -34,6 +36,7 @@ class BitBang {
   inline void closeChannel() const {
     pinMode(_pin, OUTPUT);
     digitalWrite(_pin, _active_state);
+    setLed(3, 0);
   }
 
   inline bool isChannelOpened() const {
@@ -66,7 +69,6 @@ class BitBang {
     // A return value of 0 means the communication failed.
     unsigned int begin = 0;
     unsigned int end = 0;
-    unsigned int duration = 0;
     unsigned timeout = micros() + wait_us;
 
     // Wait for REST state
@@ -84,21 +86,23 @@ class BitBang {
     }
 
     if (end != 0) {
-      duration = end - begin;
+      return end - begin;
     }
-    return duration;
+    return 0;
   }
 
-  int decodePulses(std::vector<unsigned int> &pulses) const {
+  int decodePulses(std::vector<unsigned int> &pulses) {
     static unsigned int threshold = _tick * 2;
     unsigned int index = 0;
-    unsigned int value = 0;
 
     // static unsigned int min = 1000;
     // static unsigned int max = 0;
 
     // DEBUG_INFO("Pulses: ");
     for (int pulse : pulses) {
+      if (pulse == 0) {
+        return false;
+      }
       if (pulse > threshold) {
         bitSet(value, index);
       }
@@ -116,11 +120,12 @@ class BitBang {
     }
     // DEBUG_INFO(" (%d, %d)", min, max);
 
-    return value;
+    return true;
   }
 
 public:
-  static void initialize(const unsigned int pin, const unsigned int frequency) {
+  static void initialize(const unsigned int pin, const unsigned int frequency,
+                         const bool isUsbConnected) {
     BitBang &instance = getInstance();
     instance._pin = pin;
     instance._active_state = LOW;
@@ -141,16 +146,23 @@ public:
     Serial.println(int(1E6 / (instance._tick * 4)));
   }
 
-  static void send(const unsigned int &value, const unsigned int &length) {
+  static bool send(const unsigned int &value, const unsigned int &length,
+                   unsigned int timeout_ms) {
     static const BitBang &instance = getInstance();
     // DEBUG_INFO("Send value: %d",value);
 
     // Send GO
     // unsigned int begin = micros();
+    unsigned int begin = micros() + timeout_ms * 1E3;
     noInterrupts();
     while (!instance.isChannelOpened()) {
+      if (micros() > timeout_ms) {
+        DEBUG_INFO("Channel did not opened");
+        interrupts();
+        return false;
+      }
     }
-    instance.sendBit(0);
+    instance.sendBit(1);
 
     // Send bits, LSB first.
     for (int i = 0; i < length; ++i) {
@@ -161,19 +173,23 @@ public:
 
     // DEBUG_INFO("Sent bits: ");
     // Serial.println(value, BIN);
+    return true;
   }
 
-  static unsigned int receive(const unsigned int &length) {
-    static const BitBang &instance = getInstance();
+  static bool receive(const unsigned int &length, unsigned int timeout_ms) {
+    static BitBang &instance = getInstance();
     std::vector<unsigned int> pulses;
     pulses.reserve(length);
+    instance.value = 0;
 
     // Wait for GO
     noInterrupts();
     instance.openChannel();
     // unsigned int begin = micros();
-    if (instance.receivePulse(5000) == 0) {
-      return 1000000;
+    if (instance.receivePulse(timeout_ms * 1E3) < instance._tick * 2) {
+      DEBUG_INFO("GO not received");
+      interrupts();
+      return false;
     }
 
     // Read bits
@@ -187,18 +203,18 @@ public:
     // DEBUG_INFO("Transmission Time (ms): %d", (micros() - begin) / 1000.0);
 
     // Decode pulse
-    int value = instance.decodePulses(pulses);
+    return instance.decodePulses(pulses);
 
     // if (value > 0) {
     //   DEBUG_INFO("Received bits: ");
     //   Serial.println(value, BIN);
     //   DEBUG_INFO("Received value: %d",value);
     // }
+  }
 
-    return value;
+  static int GetValue() {
+    static const BitBang &instance = getInstance();
+    return instance.value;
   }
 };
-
-void set_bitbang() { BitBang::initialize(DATA_PIN, DATA_FREQ); }
-
 #endif

@@ -8,12 +8,13 @@ void set_board() {
   std::string left_uid("E461508723193526");
   isLeft = std::string(board_uid) == left_uid;
 
-  Serial.print(board_uid);
-  if (isLeft) {
-    Serial.println(": Controller");
-  } else {
-    Serial.println(": Extension");
-  }
+  // DEBUG_INFO("Checking USB connection");
+  pinMode(VUSB_PIN, INPUT);
+  delay(10);
+  isUsbConnected = digitalRead(VUSB_PIN);
+
+  DEBUG_INFO("%s: %s is %sconnected to USB", board_uid,
+             isLeft ? "Controller" : "Extension", isUsbConnected ? "" : "not ");
 
   randomSeed(isLeft * 42);
 }

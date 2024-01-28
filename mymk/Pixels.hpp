@@ -50,7 +50,7 @@ void setLed(unsigned int ledId, unsigned int color) {
 
   pixels.setPixelColor(ledId, red, green, blue);
   while (!pixels.canShow()) {
-  };
+  }
   pixels.show();
 }
 

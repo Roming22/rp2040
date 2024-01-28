@@ -4,10 +4,12 @@
 #define DATA_FREQ 125000
 #define PIXELS_PIN 0
 #define PIXELS_COUNT 4
+#define VUSB_PIN 19
 
 #define LOOP 4
 
 bool isLeft = 0;
+bool isUsbConnected = true;
 
 #include "mymk/mymk.hpp"
 
@@ -49,7 +51,7 @@ void setup() {
 
   set_board();
   set_pixels(isLeft);
-  set_bitbang();
+  BitBang::initialize(DATA_PIN, DATA_FREQ, isUsbConnected);
 
   Serial.println("");
   Serial.println("# Looping");
