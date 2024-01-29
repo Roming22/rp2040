@@ -6,7 +6,7 @@
 #define PIXELS_COUNT 4
 #define VUSB_PIN 19
 
-#define LOOP 4
+#define LOOP 6
 
 bool isLeft = 0;
 bool isUsbConnected = true;
@@ -27,6 +27,9 @@ bool isUsbConnected = true;
 #endif
 #if LOOP == 5
 #include "loop/5_data_2way.hpp"
+#endif
+#if LOOP == 6
+#include "loop/6_floating_pin.hpp"
 #endif
 
 void setup() {
