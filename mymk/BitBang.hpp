@@ -3,12 +3,16 @@
 
 #include <cmath>
 #include <functional>
+#include <ratio>
+#include <vector>
 
 class BitBang {
-  unsigned int _pin;
-  bool _active_state;
-  unsigned int _tick;
-  int value;
+  unsigned int pin;
+  bool pinWriteMode;
+  bool active_state;
+  unsigned int tick_us;
+  unsigned int ticks_per_frame;
+  bool is_host;
 
   // Singleton
   BitBang() {}
@@ -22,199 +26,165 @@ class BitBang {
     return instance;
   }
 
-  inline void wait_until(unsigned long time) const {
+  inline void wait_for(unsigned long tick_count) const {
+    unsigned long time = micros() + tick_us * tick_count;
     while (micros() < time) {
     }
   }
 
-  inline void openChannel() const {
-    setLed(3, 4);
-    digitalWrite(_pin, !_active_state);
-    pinMode(_pin, INPUT_PULLUP);
+  inline void reset_pin() {
+    if (pinWriteMode) {
+      pinMode(pin, INPUT_PULLUP);
+      pinWriteMode = false;
+    }
   }
 
-  inline void closeChannel() const {
-    pinMode(_pin, OUTPUT);
-    digitalWrite(_pin, _active_state);
-    setLed(3, 0);
+  inline void set_pin(bool state, unsigned long tick_count) {
+    if (!pinWriteMode) {
+      pinMode(pin, OUTPUT);
+      pinWriteMode = true;
+    }
+    unsigned long time = micros() + tick_us * tick_count;
+    digitalWrite(pin, state ? active_state : !active_state);
+    while (micros() < time) {
+    }
+    digitalWrite(pin, !active_state);
   }
 
-  inline bool isChannelOpened() const {
-    bool quiet = false;
-    openChannel();
-    while (!quiet) {
-      while (!quiet) {
-        quiet = digitalRead(_pin) != _active_state;
+  inline bool get_pin() {
+    int low_count = 0;
+    int high_count = 0;
+    int samples = 3;
+
+    if (pinWriteMode) {
+      pinMode(pin, INPUT_PULLUP);
+      pinWriteMode = false;
+    }
+    while (low_count < samples && high_count < samples) {
+      if (digitalRead(pin)) {
+        ++high_count;
+        low_count = 0;
+      } else {
+        ++low_count;
+        high_count = 0;
       }
-      unsigned long timeout = micros() + _tick * 8;
-      while (quiet && micros() < timeout) {
-        quiet = digitalRead(_pin) != _active_state;
-      }
     }
-    closeChannel();
-    return quiet;
+    // DEBUG_INFO("Signal: %d (low: %d, high: %d)",
+    //            (high_count > low_count) == active_state, low_count,
+    //            high_count);
+    return (high_count > low_count) == active_state;
   }
 
-  inline void sendBit(const bool &bit) const {
-    unsigned long time;
-    time = micros() + (_tick * (bit ? 3 : 1));
-    digitalWrite(_pin, _active_state);
-    wait_until(time);
-    time = micros() + (_tick * (bit ? 1 : 3));
-    digitalWrite(_pin, !_active_state);
-    wait_until(time);
+  inline bool channel_is_opened() {
+    /*
+    Makes sure that the channel is opened by checking that the
+    pin is an inactive state for longer than a frame.
+    */
+    bool opened = true;
+    unsigned long timeout = micros() + tick_us * (ticks_per_frame + 1);
+    while (micros() < timeout && opened) {
+      opened = !get_pin();
+    }
+    return opened;
   }
 
-  inline unsigned int receivePulse(unsigned int wait_us) const {
-    // A return value of 0 means the communication failed.
-    unsigned int begin = 0;
-    unsigned int end = 0;
-    unsigned timeout = micros() + wait_us;
+  bool handshake(unsigned int timeout_ms) {
+    bool success = false;
+    unsigned long timeout = micros() + timeout_ms * 1E3;
+    unsigned long ack_duration = 1;
+    unsigned long ack_timeout_duration =
+        ack_duration * 4 * tick_us * ticks_per_frame;
+    unsigned long ack_timeout;
+    if (is_host) {
+      //
+      // HOST
+      //
+      while (!success && micros() < timeout) {
+        while (!channel_is_opened() && micros() < timeout) {
+        }
 
-    // Wait for REST state
-    while (digitalRead(_pin) == _active_state) {
-    }
+        // DEBUG_INFO("Wait for SIG");
+        while (!success && micros() < timeout) {
+          success = get_pin();
+        }
+        while (success && get_pin()) {
+          // Wait line to go back to inactive.
+        }
 
-    // Wait for ACTIVE state marking the pulse start
-    while (digitalRead(_pin) != _active_state && begin < timeout) {
-      begin = micros();
-    }
-
-    // Wait for REST state marking the pulse end
-    while (digitalRead(_pin) == _active_state) {
-      end = micros();
-    }
-
-    if (end != 0) {
-      return end - begin;
-    }
-    return 0;
-  }
-
-  int decodePulses(std::vector<unsigned int> &pulses) {
-    static unsigned int threshold = _tick * 2;
-    unsigned int index = 0;
-
-    // static unsigned int min = 1000;
-    // static unsigned int max = 0;
-
-    // DEBUG_INFO("Pulses: ");
-    for (int pulse : pulses) {
-      if (pulse == 0) {
-        return false;
+        if (success) {
+          // DEBUG_INFO("Send ACK");
+          unsigned long time = micros() + 200;
+          while (micros() < time) {
+          }
+          set_pin(true, ack_duration);
+          reset_pin();
+        }
       }
-      if (pulse > threshold) {
-        bitSet(value, index);
-      }
-      index++;
-      // Serial.print(pulse);
-      // Serial.print(", ");
-      // if (pulse > 0) {
-      //   if (pulse < min) {
-      //     min = pulse;
-      //   }
-      //   if (pulse > max) {
-      //     max = pulse;
-      //   }
-      // }
-    }
-    // DEBUG_INFO(" (%d, %d)", min, max);
+    } else {
+      //
+      // DEVICE
+      //
+      while (!success && micros() < timeout) {
+        while (!channel_is_opened() && micros() < timeout) {
+        }
 
-    return true;
+        // DEBUG_INFO("Send SIG");
+        ack_timeout = micros() + ack_timeout_duration;
+        set_pin(true, ack_duration);
+        reset_pin();
+
+        // DEBUG_INFO("Wait for ACK");
+        while (!success && micros() < ack_timeout) {
+          success = get_pin();
+        }
+      }
+    }
+    return success;
   }
 
 public:
   static void initialize(const unsigned int pin, const unsigned int frequency,
                          const bool isUsbConnected) {
     BitBang &instance = getInstance();
-    instance._pin = pin;
-    instance._active_state = LOW;
-    instance.closeChannel();
+    instance.pin = pin;
+    instance.ticks_per_frame = 4;
+    instance.active_state = LOW;
+    instance.reset_pin();
+    instance.is_host = isLeft;
+    instance.tick_us = 1E6 / frequency / instance.ticks_per_frame;
+    if (instance.tick_us < 2) {
+      DEBUG_INFO("Tick is bad");
+      instance.tick_us = 2;
+    }
 
-    instance._tick = 1E6 / frequency / 4;
+    DEBUG_INFO("LOW: %d    HIGH: %d    ACTIVE: %d", LOW, HIGH,
+               instance.active_state);
+    DEBUG_INFO("BitBang tick (usec): %d    Frequency (Hz): %d",
+               instance.tick_us,
+               int(1E6 / (instance.tick_us * instance.ticks_per_frame)));
 
-    Serial.print("LOW: ");
-    Serial.print(LOW);
-    Serial.print("    HIGH: ");
-    Serial.print(HIGH);
-    Serial.print("    ACTIVE: ");
-    Serial.println(instance._active_state);
-
-    Serial.print("BitBang tick (usec): ");
-    Serial.print(instance._tick);
-    Serial.print("    Frequency (Hz): ");
-    Serial.println(int(1E6 / (instance._tick * 4)));
+    unsigned long timeout = micros() + 500 * 1E3;
+    while (!instance.channel_is_opened() && micros() < timeout) {
+    }
   }
 
-  static bool send(const unsigned int &value, const unsigned int &length,
-                   unsigned int timeout_ms) {
-    static const BitBang &instance = getInstance();
-    // DEBUG_INFO("Send value: %d",value);
+  static bool Handshake(unsigned int timeout_ms = 5) {
+    BitBang &instance = getInstance();
+    bool success = false;
 
-    // Send GO
-    // unsigned int begin = micros();
-    unsigned int begin = micros() + timeout_ms * 1E3;
     noInterrupts();
-    while (!instance.isChannelOpened()) {
-      if (micros() > timeout_ms) {
-        DEBUG_INFO("Channel did not opened");
-        interrupts();
-        return false;
-      }
-    }
-    instance.sendBit(1);
-
-    // Send bits, LSB first.
-    for (int i = 0; i < length; ++i) {
-      instance.sendBit(bitRead(value, i));
-    }
+    success = instance.handshake(timeout_ms);
     interrupts();
-    // DEBUG_INFO("Time: %d",(micros() - begin) / 1000.0);
 
-    // DEBUG_INFO("Sent bits: ");
-    // Serial.println(value, BIN);
-    return true;
-  }
-
-  static bool receive(const unsigned int &length, unsigned int timeout_ms) {
-    static BitBang &instance = getInstance();
-    std::vector<unsigned int> pulses;
-    pulses.reserve(length);
-    instance.value = 0;
-
-    // Wait for GO
-    noInterrupts();
-    instance.openChannel();
-    // unsigned int begin = micros();
-    if (instance.receivePulse(timeout_ms * 1E3) < instance._tick * 2) {
-      DEBUG_INFO("GO not received");
-      interrupts();
-      return false;
+    // Timeout
+    if (success) {
+      // while (!instance.channel_is_opened() && micros() < timeout) {
+      // }
+    } else {
+      DEBUG_INFO("Timeout: No %s detected",
+                 instance.is_host ? "device" : "host");
     }
-
-    // Read bits
-    // unsigned int end = micros();
-    for (int i = length; i > 0; --i) {
-      pulses.push_back(instance.receivePulse(instance._tick * 4));
-    }
-    instance.closeChannel();
-    interrupts();
-    // DEBUG_INFO("Wait Time (ms): %d", (end - begin) / 1000.0);
-    // DEBUG_INFO("Transmission Time (ms): %d", (micros() - begin) / 1000.0);
-
-    // Decode pulse
-    return instance.decodePulses(pulses);
-
-    // if (value > 0) {
-    //   DEBUG_INFO("Received bits: ");
-    //   Serial.println(value, BIN);
-    //   DEBUG_INFO("Received value: %d",value);
-    // }
-  }
-
-  static int GetValue() {
-    static const BitBang &instance = getInstance();
-    return instance.value;
+    return success;
   }
 };
 #endif

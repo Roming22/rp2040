@@ -6,7 +6,7 @@
 #define PIXELS_COUNT 4
 #define VUSB_PIN 19
 
-#define LOOP 6
+#define LOOP 4
 
 bool isLeft = 0;
 bool isUsbConnected = true;
@@ -23,7 +23,7 @@ bool isUsbConnected = true;
 #include "loop/3_sync.hpp"
 #endif
 #if LOOP == 4
-#include "loop/4_data_1way.hpp"
+#include "loop/4_bb_handshake.hpp"
 #endif
 #if LOOP == 5
 #include "loop/5_data_2way.hpp"
@@ -55,6 +55,7 @@ void setup() {
   set_board();
   set_pixels(isLeft);
   BitBang::initialize(DATA_PIN, DATA_FREQ, isUsbConnected);
+  delay(2000 * isLeft);
 
   Serial.println("");
   Serial.println("# Looping");
